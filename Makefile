@@ -145,11 +145,13 @@ $(DASH)/%/robot_report.html: $(DASH)/%/dashboard.yml
 	@./util/create_report_html.py \
 	 $(dir $@)/robot_report.tsv "ROBOT Report - $(lastword $(subst /, , $(dir $@)))" dependencies/obo_context.jsonld $@ || true
 
+# HTML output of IRI report
 .PRECIOUS: $(DASH)/%/fp3.html
 $(DASH)/%/fp3.html: $(DASH)/%/dashboard.yml
 	@./util/create_report_html.py \
 	 $(dir $@)/fp3.tsv "IRI Report - $(lastword $(subst /, , $(dir $@)))" dependencies/obo_context.jsonld $@ || true
 
+# HTML output of Relations report
 .PRECIOUS: $(DASH)/%/fp7.html
 $(DASH)/%/fp7.html: $(DASH)/%/dashboard.yml
 	@./util/create_report_html.py \

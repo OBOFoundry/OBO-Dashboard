@@ -179,18 +179,23 @@ def big_check_principles(file, ns, data):
     """Given an ontology ID and the corresponding data from the YAML,
     run the automated principle validation. Return a map of results.
     """
-    print('Running ROBOT report on {0}...'.format(ns), flush=True)
-    report_obj = report_utils.BigReport(robot_gateway, ns, file)
-    report = report_obj.get_report()
-    good_format = report_obj.get_good_format()
+    report = None
+    good_format = None
+    if ns != 'gaz':
+        # Report currently takes TOO LONG for GAZ
+        print('Running ROBOT report on {0}...'.format(ns), flush=True)
+        report_obj = report_utils.BigReport(robot_gateway, ns, file)
+        report = report_obj.get_report()
+        good_format = report_obj.get_good_format()
 
     # run each principle check
     check_map = run_checks(
         robot_gateway, ns, None, file, report, data, good_format)
 
     # remove from memory
-    del report_obj
-    del report
+    if ns != 'gaz':
+        del report_obj
+        del report
 
     return check_map
 

@@ -56,6 +56,7 @@ def main(args):
     html.append('<div class="row" style="padding-top:30px;">')
     html.append('<div class="col-md-12">')
     html.append('<h1>{0}</h1>'.format(title))
+    html.append('<p class="lead"><a href="{0}.tsv">Download TSV</a></p>'.format(report_file.split('/').pop().split('.')[0]))
     html.append('<p><center><small>Click on the Rule Name for details on how \
         to fix.<br>Click on any term to direct to the term page\
         </small></center></p>')

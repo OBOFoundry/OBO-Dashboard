@@ -54,7 +54,8 @@ def main(args):
 "http://obofoundry.org/ontology/{0}.html">{0}</a></h1>\n'.format(namespace))
         f.write('<p class="lead"><b>Version</b>: {0}<br>\n'.format(
             version_iri))
-        f.write('<b>Date ran</b>: {0}</p>\n'.format(date))
+        f.write('<b>Date ran</b>: {0}<br>'.format(date))
+        f.write('<a href="dashboard.yml">View YAML</a></p>\n')
 
         f.write('<p><center><small>Click on each link under "Check" to find \
             out more about the check and how to fix issues.<br>')
@@ -158,6 +159,7 @@ def main(args):
         f.write('</body>')
 
 
+# Icons for each level
 icon_map = {
     'PASS': 'check',
     'INFO': 'info',

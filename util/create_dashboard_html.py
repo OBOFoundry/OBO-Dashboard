@@ -9,6 +9,8 @@ from argparse import ArgumentParser
 
 
 def main(args):
+    """
+    """
     parser = ArgumentParser(description='Create a dashboard HTML page')
     parser.add_argument('dashboard_dir',
                         type=str,
@@ -73,7 +75,8 @@ def main(args):
     lines.append('    text-align: left')
     lines.append('}')
     lines.append('')
-    lines.append('thead.fixedHeader a, thead.fixedHeader a:link, thead.fixedHeader a:visited {')
+    lines.append('thead.fixedHeader a, thead.fixedHeader a:link, \
+        thead.fixedHeader a:visited {')
     lines.append('    display: block;')
     lines.append('    text-decoration: none;')
     lines.append('    width: 100%')
@@ -154,7 +157,8 @@ def main(args):
             <b><a href="{0}">{1}</a></b></div></th>'.format(
                 link, principle))
     lines.append('        <th><div class="rotate">\
-        <b><a href="">ROBOT Report</a></b></div></th>')
+        <b><a href="http://robot.obolibrary.org/report">ROBOT Report</a>\
+        </b></div></th>')
     lines.append('        <th><div class="rotate"><b>Summary</b></div></th>')
     lines.append('      </tr>')
     lines.append('      </thead>')
@@ -261,6 +265,8 @@ def main(args):
 
 
 def get_ontology_order(data):
+    """
+    """
     order = []
     for item in data:
         ont_id = item['id']
