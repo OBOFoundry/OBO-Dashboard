@@ -97,7 +97,8 @@ def get_resource_value(line):
     Return:
         rdf:resource string value (an IRI)
     """
-    resource = line.split('=')[1].replace('"', '').replace('/>', '').rstrip()
+    resource = line.split('=')[1].replace(
+        '"', '').replace('/>', '').replace('>', '').rstrip()
     if '&obo;' in resource:
         # normalize XML with prefixes
         return resource.replace('&obo;', obo)

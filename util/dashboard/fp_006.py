@@ -25,7 +25,8 @@ def has_valid_definitions(report):
         report (Report): ROBOT report object
     """
     if report is None:
-        return {'status': 'INFO', 'comment': 'Report could not be generated'}
+        return {'status': 'INFO',
+                'comment': 'ROBOT Report could not be generated'}
 
     # error level violations
     duplicates = report.getViolationCount('duplicate_definition')

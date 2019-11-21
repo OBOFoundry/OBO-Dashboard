@@ -49,8 +49,8 @@ def has_documentation(data):
         request = requests.get(home)
     except Exception as e:
         return {'status': 'ERROR',
-                'comment': 'homepage URL (%s) does not resolve'.format(home)}
+                'comment': 'homepage URL ({0}) does not resolve'.format(home)}
     if request.status_code > 400:
         return {'status': 'ERROR',
-                'comment': 'homepage URL (%s) does not resolve'.format(home)}
+                'comment': 'homepage URL ({0}) does not resolve'.format(home)}
     return {'status': 'PASS'}

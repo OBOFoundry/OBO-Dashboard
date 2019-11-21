@@ -47,7 +47,7 @@ def main(args):
         f.write('</head>\n')
         f.write('<body>\n')
         f.write('<div class="container">')
-        f.write('<div class="row">')
+        f.write('<div class="row" style="padding-top:30px;">')
         f.write('<div class="col-md-2"></div>')
         f.write('<div class="col-md-8">')
         f.write('<h1>Dashboard Report - <a href=\
@@ -58,7 +58,7 @@ def main(args):
 
         f.write('<p><center><small>Click on each link under "Check" to find \
             out more about the check and how to fix issues.<br>')
-        f.write('Click on "View Report" under "Resources"for specific issues.\
+        f.write('Click on "View Report" under "Resources" for specific issues.\
             </small></center></p>')
 
         summary_status = summary['status']
@@ -124,6 +124,11 @@ def main(args):
             else:
                 td_class = 'active'
 
+            icon = None
+            if status in icon_map:
+                icon = '<img src="../assets/{0}.svg" height="15px">'.format(
+                    icon_map[status])
+
             # Get the link to the check documentation
             if fp:
                 url = principle_map[fp]
@@ -133,7 +138,14 @@ def main(args):
 
             # Write lines
             f.write('    <td><a href="{0}">{1}</a></td>\n'.format(url, check))
-            f.write('    <td class="{0}">{1}</td>'.format(td_class, status))
+
+            if icon:
+                f.write('    <td class="{0}" style="text-align:center;">\
+                    {1}</td>'.format(td_class, icon))
+            else:
+                f.write('    <td class="{0}">{1}</td>'.format(
+                    td_class, status))
+
             f.write('    <td>{0}</td>'.format(comment))
             if file:
                 f.write('    <td><a href="{0}">View Report</a></td>'.format(
@@ -145,6 +157,13 @@ def main(args):
         f.write('</div></div></div>')
         f.write('</body>')
 
+
+icon_map = {
+    'PASS': 'check',
+    'INFO': 'info',
+    'WARN': 'warning',
+    'ERROR': 'x'
+}
 
 # CSS classes for each level
 class_map = {

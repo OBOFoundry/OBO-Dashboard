@@ -59,7 +59,7 @@ def big_is_maintained(file):
     """
     # may return empty string if version IRI is missing
     # or None if ontology cannot be parsed
-    version_iri = dash_utils.get_version_iri(file)
+    version_iri = dash_utils.get_big_version_iri(file)
 
     if version_iri and version_iri != '':
         return check_version_iri(version_iri)

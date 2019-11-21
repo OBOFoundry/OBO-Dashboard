@@ -53,9 +53,8 @@ def main(args):
     html.append('</head>')
     html.append('<body>')
     html.append('<div class="container">')
-    html.append('<div class="row">')
-    html.append('<div class="col-md-1"></div>')
-    html.append('<div class="col-md-10">')
+    html.append('<div class="row" style="padding-top:30px;">')
+    html.append('<div class="col-md-12">')
     html.append('<h1>{0}</h1>'.format(title))
     html.append('<p><center><small>Click on the Rule Name for details on how \
         to fix.<br>Click on any term to direct to the term page\
@@ -91,7 +90,6 @@ def main(args):
     html.append('</table>')
     html.append('</div>')
     html.append('</div>')
-    html.append('</div>')
 
     with open(outfile, 'w+') as f:
         f.write('\n'.join(html))
@@ -108,25 +106,24 @@ def load_context(context_file):
 def maybe_get_link(cell, context):
     """
     """
-    s = re.search(r'^.+ \[(.+)\]$', cell)
-    iri = None
-    if s:
-        curie_or_iri = s.group(1)
-        curie = re.search(r'([A-Za-z0-9]+):([A-Za-z0-9-]+)', curie_or_iri)
-        if curie:
-            # This is a CURIE
-            prefix = curie.group(1)
-            local_id = curie.group(2)
-            if prefix in context:
-                namespace = context[prefix]
-                iri = namespace + local_id
-        else:
-            s = re.search(r'^(http|https|ftp)://.*$', curie_or_iri)
-            if s:
-                # This is a link
-                iri = curie_or_iri
+    url = None
+    curie = re.search(r'([A-Za-z0-9]+):([A-Za-z0-9-]+)', cell)
+    if curie:
+        # This is a CURIE
+        prefix = curie.group(1)
+        local_id = curie.group(2)
+        if prefix in context:
+            namespace = context[prefix]
+            url = namespace + local_id
+        elif prefix in other_prefixes:
+            namespace = other_prefixes[prefix]
+            url = namespace + local_id
+    # IRIs might be in angle brackets
+    iri = re.search(r'((http|https|ftp)://[^ <>]+)', cell)
     if iri:
-        return '<a href="{0}" target="_blank">{1}</a>'.format(iri, cell)
+        url = iri.group(1)
+    if url:
+        return '<a href="{0}" target="_blank">{1}</a>'.format(url, cell)
     return cell
 
 
@@ -138,6 +135,15 @@ class_map = {
     'ERROR': 'table-danger'
 }
 
+other_prefixes = {
+    'dc': 'http://purl.org/dc/terms/',
+    'dcterms': 'http://purl.org/dc/terms/',
+    'dc11': 'http://purl.org/dc/elements/1.1/',
+    'oboInOwl': 'http://www.geneontology.org/formats/oboInOwl#',
+    'owl': 'http://www.w3.org/2002/07/owl#',
+    'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
+    'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+}
 
 report_doc_map = {
     'annotation_whitespace':
