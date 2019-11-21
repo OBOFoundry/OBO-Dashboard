@@ -9,7 +9,9 @@ DASH := build/dashboard
 ROBOT := java -jar build/robot.jar
 
 # Report files
+YAML_REPORTS := $(foreach O, $(shell cat dependencies/ontologies.txt), $(DASH)/$(O)/dashboard.yml)
 HTML_REPORTS := $(foreach O, $(shell cat dependencies/ontologies.txt), $(DASH)/$(O)/dashboard.html)
+ROBOT_REPORTS := $(foreach O, $(shell cat dependencies/ontologies.txt), $(DASH)/$(O)/robot_report.html)
 
 # Assets contains SVGs for icons
 # These will be included in the ZIP
@@ -26,6 +28,7 @@ $(DASH)/assets/x.svg \
 all:
 	make dependencies/ontologies.txt
 	make dependencies/ro-merged.owl
+	make dependencies/obo_context.jsonld
 	make dashboard
 
 # Make the ZIP (everything)
@@ -60,6 +63,10 @@ $(DASH)/assets: $(DASH)
 dependencies/ontologies.yml:
 	curl -Lk -o $@ \
 	https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml
+
+dependencies/obo_context.jsonld:
+	curl -Lk -o $@ \
+	https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/obo_context.jsonld
 
 # Just the ontology IDs
 dependencies/ontologies.txt: dependencies/ontologies.yml
@@ -116,19 +123,37 @@ $(DASH) build/robot-foreign.jar dependencies/license.json dependencies/contact.j
 	$(eval O := $(lastword $(subst /, , $(dir $@))))
 	@mkdir -p $(dir $@)
 	@make reboot
-	@./util/dashboard/dashboard.py $(O) dependencies/ontologies.yml dependencies/ro-merged.owl $(dir $@)
+	@./util/dashboard/dashboard.py \
+	 $(O) dependencies/ontologies.yml dependencies/ro-merged.owl $(dir $@)
 
 # Convert dashboard YAML to HTML page
+# Also generates ROBOT report HTML
 .PRECIOUS: $(DASH)/%/dashboard.html
-$(DASH)/%/dashboard.html: $(DASH)/%/dashboard.yml
+$(DASH)/%/dashboard.html: $(DASH)/%/robot_report.html $(DASH)/%/fp3.html $(DASH)/%/fp7.html
 	@./util/create_ontology_html.py $(dir $@) $@
 	@echo "Created $@"
 
 # Combined summary for all OBO foundry ontologies
 # Rebuild whenever an HTML page changes
 .PRECIOUS: $(DASH)/dashboard.html
-$(DASH)/dashboard.html: $(HTML_REPORTS) $(DASH)/assets/svg
+$(DASH)/dashboard.html: $(HTML_REPORTS) $(ROBOT_REPORTS) $(DASH)/assets/svg
 	./util/create_dashboard_html.py $(DASH) dependencies/ontologies.yml $@
+
+# HTML output of ROBOT report
+.PRECIOUS: $(DASH)/%/robot_report.html
+$(DASH)/%/robot_report.html: $(DASH)/%/dashboard.yml
+	@./util/create_report_html.py \
+	 $(dir $@)/robot_report.tsv "ROBOT Report - $(lastword $(subst /, , $(dir $@)))" dependencies/obo_context.jsonld $@ || true
+
+.PRECIOUS: $(DASH)/%/fp3.html
+$(DASH)/%/fp3.html: $(DASH)/%/dashboard.yml
+	@./util/create_report_html.py \
+	 $(dir $@)/fp3.tsv "IRI Report - $(lastword $(subst /, , $(dir $@)))" dependencies/obo_context.jsonld $@ || true
+
+.PRECIOUS: $(DASH)/%/fp7.html
+$(DASH)/%/fp7.html: $(DASH)/%/dashboard.yml
+	@./util/create_report_html.py \
+	 $(dir $@)/fp7.tsv "Relations Report - $(lastword $(subst /, , $(dir $@)))" dependencies/obo_context.jsonld $@ || true
 
 # ------------- #
 ### PACKAGING ###

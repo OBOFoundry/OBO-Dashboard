@@ -22,12 +22,11 @@ def main(args):
     input_dir = args.input_dir
     output_html = args.output
     dashboard_file = '{0}/dashboard.yml'.format(input_dir)
-    robot_file = '{0}/robot_report.tsv'.format(input_dir)
 
     # Collect any FP reports
     fp_reports = []
     for f in os.listdir(input_dir):
-        if f.startswith('fp'):
+        if f.endswith('tsv'):
             fp_reports.append(f)
 
     # get the data from the dashboard
@@ -104,13 +103,14 @@ def main(args):
                 check = check.split(' ', 1)[1]
             else:
                 fp = None
-                file = 'robot_report.tsv'
+                if 'robot_report.tsv' in fp_reports:
+                    file = 'robot_report.html'
 
             # These checks might also have report files
             if fp == 'FP3' and 'fp3.tsv' in fp_reports:
-                file = 'fp3.tsv'
+                file = 'fp3.html'
             elif fp == 'FP7' and 'fp7.tsv' in fp_reports:
-                file = 'fp7.tsv'
+                file = 'fp7.html'
 
             status = details['status']
             if 'comment' in details:
