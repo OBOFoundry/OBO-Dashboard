@@ -60,11 +60,11 @@ $(DASH)/assets: $(DASH)
 # ------------------------- #
 
 # Registry YAML
-dependencies/ontologies.yml:
+dependencies/ontologies.yml: | dependencies
 	curl -Lk -o $@ \
 	https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml
 
-dependencies/obo_context.jsonld:
+dependencies/obo_context.jsonld: | dependencies
 	curl -Lk -o $@ \
 	https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/obo_context.jsonld
 
@@ -73,11 +73,11 @@ dependencies/ontologies.txt: dependencies/ontologies.yml
 	cat $< | sed -n 's/  id: \([A-Za-z0-9_]*\)/\1/p' | sed '/^. / d' > $@
 
 # Schemas
-dependencies/license.json:
+dependencies/license.json: | dependencies
 	curl -Lk -o $@ \
 	https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/util/schema/license.json
 
-dependencies/contact.json:
+dependencies/contact.json: | dependencies
 	curl -Lk -o $@ \
 	https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/util/schema/contact.json
 
@@ -86,7 +86,7 @@ $(DASH)/assets/%.svg: | $(DASH)/assets
 	curl -Lk -o $@ https://raw.githubusercontent.com/iconic/open-iconic/master/svg/$(notdir $@)
 
 # RO is used to compare properties
-dependencies/ro-merged.owl: | build/robot.jar
+dependencies/ro-merged.owl: | dependencies build/robot.jar
 	$(ROBOT) merge --input-iri http://purl.obolibrary.org/obo/ro.owl --output $@
 
 # -------------- #
@@ -136,7 +136,7 @@ $(DASH)/%/dashboard.html: $(DASH)/%/robot_report.html $(DASH)/%/fp3.html $(DASH)
 # Combined summary for all OBO foundry ontologies
 # Rebuild whenever an HTML page changes
 .PRECIOUS: $(DASH)/dashboard.html
-$(DASH)/dashboard.html: $(HTML_REPORTS) $(ROBOT_REPORTS) $(DASH)/assets/svg
+$(DASH)/dashboard.html: $(HTML_REPORTS) $(ROBOT_REPORTS) $(DASH)/assets
 	./util/create_dashboard_html.py $(DASH) dependencies/ontologies.yml $@
 
 # HTML output of ROBOT report
