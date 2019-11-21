@@ -334,7 +334,7 @@ def process_results(registry_license,
 
     # loadable = None for big ontologies
     if loadable is False:
-        level = 'INFO'
+        level = 'ERROR'
         issues.append(load_err)
 
     # is_open = None if missing registry license

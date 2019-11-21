@@ -43,7 +43,7 @@ def has_valid_uris(robot_gateway, namespace, ontology):
         otherwise.
     """
     if not ontology:
-        return {'status': 'INFO', 'comment': 'Unable to load ontology'}
+        return {'status': 'ERROR', 'comment': 'Unable to load ontology'}
 
     entities = robot_gateway.OntologyHelper.getEntities(ontology)
     error = []
@@ -110,7 +110,7 @@ def big_has_valid_uris(namespace, file):
             if 'Ontology' and 'about' in line:
                 if not owl and not rdf:
                     # did not find OWL and RDF - end now
-                    return {'status': 'INFO',
+                    return {'status': 'ERROR',
                             'comment': 'Unable to parse ontology'}
 
                 # end prefixes
@@ -147,7 +147,7 @@ def big_has_valid_uris(namespace, file):
 
     if not valid:
         # not valid ontology
-        return {'status': 'INFO',
+        return {'status': 'ERROR',
                 'comment': 'Unable to parse ontology'}
 
     return save_invalid_uris(namespace, error, warn)

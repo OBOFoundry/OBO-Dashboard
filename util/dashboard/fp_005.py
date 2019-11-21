@@ -32,18 +32,18 @@ def has_scope(data, domain_map):
     else:
         return {'status': 'ERROR', 'comment': 'Missing domain (scope)'}
 
+    # This check is excluded for now
     # exclude this NS from check (it will match itself)
-    updated_domain_map = domain_map
-    updated_domain_map.pop(ns)
-
-    if domain in updated_domain_map.values():
-        same_domain = []
-        for ont_id, other_domain in domain_map.items():
-            if domain == other_domain:
-                same_domain.append(ont_id)
-        same_domain_str = ', '.join(same_domain)
-        return {'status': 'INFO',
-                'comment': info_msg.format(
-                    domain, len(same_domain), same_domain_str)}
+    # updated_domain_map = domain_map
+    # updated_domain_map.pop(ns)
+    # if domain in updated_domain_map.values():
+    # same_domain = []
+    # for ont_id, other_domain in domain_map.items():
+    # if domain == other_domain:
+    # same_domain.append(ont_id)
+    # same_domain_str = ', '.join(same_domain)
+    # return {'status': 'INFO',
+    # 'comment': info_msg.format(
+    # domain, len(same_domain), same_domain_str)}
 
     return {'status': 'PASS'}

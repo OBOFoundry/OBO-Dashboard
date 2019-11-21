@@ -37,7 +37,7 @@ def big_is_common_format(good_format):
         PASS if good_format, ERROR otherwise.
     """
     if good_format is None:
-        return {'status': 'INFO',
+        return {'status': 'ERROR',
                 'comment': 'Unable to load ontology (may be too large)'}
     elif good_format is False:
         return {'status': 'ERROR',

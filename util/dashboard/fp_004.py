@@ -36,7 +36,7 @@ def has_versioning(ontology):
         PASS, INFO, WARN, or ERROR with optional message
     """
     if ontology is None:
-        return {'status': 'INFO', 'comment': 'Unable to load ontology'}
+        return {'status': 'ERROR', 'comment': 'Unable to load ontology'}
 
     # retrieve version IRI or None from ontology
     version_iri = dash_utils.get_version_iri(ontology)
@@ -82,4 +82,4 @@ def big_has_versioning(file):
     elif version_iri == '':
         return {'status': 'ERROR', 'comment': missing_version}
     else:
-        return {'status': 'INFO', 'comment': 'Unable to parse ontology'}
+        return {'status': 'ERROR', 'comment': 'Unable to parse ontology'}

@@ -33,7 +33,7 @@ def is_maintained(ontology):
         PASS, INFO, WARN, or ERROR with optional help message
     """
     if ontology is None:
-        return {'status': 'INFO', 'comment': 'Unable to load ontology'}
+        return {'status': 'ERROR', 'comment': 'Unable to load ontology'}
 
     version_iri = ontology.getOntologyID().getVersionIRI().orNull()
 
@@ -41,7 +41,7 @@ def is_maintained(ontology):
         return check_version_iri(version_iri.toString())
 
     # no version IRI (is Null)
-    return {'status': 'INFO', 'comment': 'Missing version IRI to check date'}
+    return {'status': 'ERROR', 'comment': 'Missing version IRI to check date'}
 
 
 def big_is_maintained(file):

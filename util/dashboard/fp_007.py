@@ -41,7 +41,7 @@ def has_valid_relations(namespace, ontology, ro_props):
         PASS or violation level with optional help message
     """
     if ontology is None:
-        return {'status': 'INFO', 'comment': 'unable to load ontology'}
+        return {'status': 'ERROR', 'comment': 'Unable to load ontology'}
 
     # ignore RO
     if namespace == 'ro':
@@ -134,7 +134,7 @@ def big_has_valid_relations(namespace, file, ro_props):
         PASS or violation level with optional help message
     """
     if not os.path.isfile(file):
-        return {'status': 'INFO', 'comment': 'Unable to find ontology file'}
+        return {'status': 'ERROR', 'comment': 'Unable to find ontology file'}
 
     # ignore RO
     if namespace == 'ro':
