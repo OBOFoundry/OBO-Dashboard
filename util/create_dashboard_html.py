@@ -1,62 +1,11 @@
 #!/usr/bin/env python3
 
+import datetime
 import os
 import sys
 import yaml
 
 from argparse import ArgumentParser
-
-jquery = 'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js'
-bootstrap_css = 'https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'
-bootstrap_js = 'https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js'
-
-icon_pat = '<img src="assets/{0}.svg"\
- height="15px"\
- data-toggle="tooltip"\
- data-html="true"\
- data-placement="right"\
- title="{1}">'
-
-# Map of principle names to links for Dashboard
-host = 'http://obofoundry.org/'
-principle_map = {"Open":
-                 "{0}/principles/fp-001-open.html".format(host),
-                 "Format":
-                 "{0}/principles/fp-002-format.html".format(host),
-                 "URIs":
-                 "{0}/principles/fp-003-uris.html".format(host),
-                 "Versioning":
-                 "{0}/principles/fp-004-versioning.html".format(host),
-                 "Scope":
-                 "{0}/principles/fp-005-delineated-content.html".format(host),
-                 "Definitions":
-                 "{0}/principles/fp-006-textual-definitions.html".format(host),
-                 "Relations":
-                 "{0}/principles/fp-007-relations.html".format(host),
-                 "Documentation":
-                 "{0}/principles/fp-008-documented.html".format(host),
-                 "Users":
-                 "{0}/principles/fp-009-users.html".format(host),
-                 "Authority":
-                 "{0}/principles/fp-011-locus-of-authority.html".format(host),
-                 "Naming":
-                 "{0}/principles/fp-012-naming-conventions.html".format(host),
-                 "Maintenance":
-                 "{0}/principles/fp-016-maintenance.html".format(host)}
-
-check_order = ['FP1 Open',
-               'FP2 Common Format',
-               'FP3 URIs',
-               'FP4 Versioning',
-               'FP5 Scope',
-               'FP6 Textual Definitions',
-               'FP7 Relations',
-               'FP8 Documented',
-               'FP9 Plurality of Users',
-               'FP11 Locus of Authority',
-               'FP12 Naming Conventions',
-               'FP16 Maintenance',
-               'ROBOT Report']
 
 
 def main(args):
@@ -101,10 +50,19 @@ def main(args):
     lines.append('<div class="row" style="padding-top: 20px;">')
     lines.append('\t<div class="col-md-1"></div>')
     lines.append('\t<div class="col-md-10">')
+
+    # Page Headers
+    date = datetime.datetime.today()
+    lines.append('\t<h1>OBO Foundry Dashboard</h1>')
+    lines.append('\t<p class="lead">{0}</p>'.format(date.strftime('%Y-%m-%d')))
+    lines.append('\t<p><center><small>Click on each ontology ID for a \
+        detailed report.<br>')
+    lines.append('\tClick on a table header to find out more details about \
+        the check.</small></center></p>')
     lines.append('\t\t<table class="table table-bordered">')
     lines.append('\t\t\t<tr>')
 
-    # Headers
+    # Table Headers
     lines.append('\t\t\t\t<th><b>ID</b></th>')
     for principle, link in principle_map.items():
         lines.append(
@@ -219,6 +177,60 @@ def get_ontology_order(data):
         order.append(ont_id)
     return order
 
+
+# HTML style/JS links
+jquery = 'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js'
+bootstrap_css = 'https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'
+bootstrap_js = 'https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js'
+
+# Pattern for icons with messages
+icon_pat = '<img src="assets/{0}.svg"\
+ height="15px"\
+ data-toggle="tooltip"\
+ data-html="true"\
+ data-placement="right"\
+ title="{1}">'
+
+# Map of principle names to links for Dashboard
+host = 'http://obofoundry.org/'
+principle_map = {"Open":
+                 "{0}/principles/fp-001-open.html".format(host),
+                 "Format":
+                 "{0}/principles/fp-002-format.html".format(host),
+                 "URIs":
+                 "{0}/principles/fp-003-uris.html".format(host),
+                 "Versioning":
+                 "{0}/principles/fp-004-versioning.html".format(host),
+                 "Scope":
+                 "{0}/principles/fp-005-delineated-content.html".format(host),
+                 "Definitions":
+                 "{0}/principles/fp-006-textual-definitions.html".format(host),
+                 "Relations":
+                 "{0}/principles/fp-007-relations.html".format(host),
+                 "Documentation":
+                 "{0}/principles/fp-008-documented.html".format(host),
+                 "Users":
+                 "{0}/principles/fp-009-users.html".format(host),
+                 "Authority":
+                 "{0}/principles/fp-011-locus-of-authority.html".format(host),
+                 "Naming":
+                 "{0}/principles/fp-012-naming-conventions.html".format(host),
+                 "Maintenance":
+                 "{0}/principles/fp-016-maintenance.html".format(host)}
+
+check_order = ['FP1 Open',
+               'FP2 Common Format',
+               'FP3 URIs',
+               'FP4 Versioning',
+               'FP5 Scope',
+               'FP6 Textual Definitions',
+               'FP7 Relations',
+               'FP8 Documented',
+               'FP9 Plurality of Users',
+               'FP11 Locus of Authority',
+               'FP12 Naming Conventions',
+               'FP16 Maintenance',
+               'ROBOT Report']
 
 if __name__ == '__main__':
     main(sys.argv)

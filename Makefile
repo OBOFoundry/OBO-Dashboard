@@ -36,6 +36,8 @@ clean:
 	make all
 	rm -rf build
 
+svgs: $(SVGS)
+
 # ------------------- #
 ### DIRECTORY SETUP ###
 # ------------------- #
