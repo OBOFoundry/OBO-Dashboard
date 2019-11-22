@@ -6,6 +6,7 @@ import re
 import sys
 
 from argparse import ArgumentParser
+from jinja2 import Template
 
 
 def main(args):
@@ -38,62 +39,27 @@ def main(args):
     context = load_context(context_file)
 
     headers = []
-    lines = []
+    rows = []
     with open(report_file, 'r') as f:
         headers = next(f).split('\t')
         for s in f:
-            line = s.split('\t')
-            lines.append(line)
+            row = s.split('\t')
+            rows.append(row)
 
-    html = []
+    contents = {'headers': headers, 'rows': rows}
 
-    html.append('<head>')
-    html.append('  <link rel="stylesheet" href=\
-"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">')
-    html.append('</head>')
-    html.append('<body>')
-    html.append('<div class="container">')
-    html.append('<div class="row" style="padding-top:30px;">')
-    html.append('<div class="col-md-12">')
-    html.append('<h1>{0}</h1>'.format(title))
-    html.append('<p class="lead"><a href="{0}.tsv">Download TSV</a></p>'.format(report_file.split('/').pop().split('.')[0]))
-    html.append('<p><center><small>Click on the Rule Name for details on how \
-        to fix.<br>Click on any term to direct to the term page\
-        </small></center></p>')
+    # Load Jinja2 template
+    template = Template(open('util/templates/report.html.jinja2').read())
 
-    # Table headers
-    html.append('<table class="table">')
-    html.append('  <tr>')
-    html.append('    <th><b>Row</b></th>')
-    for h in headers:
-        html.append('    <th><b>{0}</b></th>'.format(h))
-    html.append('  </tr>')
-
-    # Table contents
-    line_num = 0
-    for line in lines:
-        line_num += 1
-        status = line[0]
-        if status in class_map:
-            td_class = class_map[status]
-        else:
-            td_class = 'table-active'
-        html.append('  <tr class="{0}">'.format(td_class))
-        html.append('    <td>{0}</td>'.format(line_num))
-        for cell in line:
-            if cell in report_doc_map:
-                link = report_doc_map[cell]
-                cell = '<a href="{0}" target="_blank">{1}</a>'.format(
-                    link, cell)
-            html.append('    <td>{0}</td>'.format(
-                maybe_get_link(cell, context)))
-        html.append('  </tr>')
-    html.append('</table>')
-    html.append('</div>')
-    html.append('</div>')
+    # Generate the HTML output
+    res = template.render(contents=contents,
+                          maybe_get_link=maybe_get_link,
+                          context=context,
+                          title=title,
+                          file=report_file.split('/')[-1:][0])
 
     with open(outfile, 'w+') as f:
-        f.write('\n'.join(html))
+        f.write(res)
 
 
 def load_context(context_file):
@@ -124,7 +90,7 @@ def maybe_get_link(cell, context):
     if iri:
         url = iri.group(1)
     if url:
-        return '<a href="{0}" target="_blank">{1}</a>'.format(url, cell)
+        return '<a href="{0}">{1}</a>'.format(url, cell)
     return cell
 
 

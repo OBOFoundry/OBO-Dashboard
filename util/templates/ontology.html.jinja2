@@ -1,0 +1,80 @@
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <title>{{ o.namespace }} Dashboard Report</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row" style="padding-top:30px;">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <h1>Dashboard Report - <a href="http://obofoundry.org/ontology/{{ namespace }}.html">{{ o.namespace }}</a></h1>
+                <p class="lead"><b>Version</b>: {{ o.version }}</p>
+                <p class="lead" style="margin-top:-15px;"><b>Date ran</b>: {{ o.date }}</p>
+                <p class="lead" style="margin-top:-15px;"><a href="dashboard.yml">View YAML</a></p>
+                <p style="text-align:center;">
+                    <small>Click on each link under "Check" to find out more about the check and how to fix issues.</small>
+                </p>
+                <p style="text-align:center; margin-top:-15px;">
+                    <small>Click on "View Report" under "Resources" for specific issues.</small>
+                </p>
+                {% set summary = o.summary %}
+                {% if 'comment' in summary %}
+                    {% if summary.status == 'ERROR' %}
+                        {% set divclass = 'danger' %}
+                    {% elif summary.status == 'WARN' %}
+                        {% set divclass = 'warning' %}
+                    {% else %}
+                        {% set divclass = 'info' %}
+                    {% endif %}
+                    <div class="alert alert-{{ divclass }}">
+                        <center><h3>{{ summary.status }} - {{ summary.comment }}</h3></center>
+                    </div>
+                {% endif %}
+                <table class="table">
+                    <tr>
+                        <th>Check</th>
+                        <th>Status</th>
+                        <th>Comment</th>
+                        <th>Resources</th>
+                    </tr>
+                    {% set res = o.results %}
+                    {% for c in checkorder %}
+                        {% set r = res[c] %}
+                        {% set checkid = c.strip().split(' ')[0] %}
+                        {% set checkname = c.strip().split(' ', 1)[1] %}
+                        <tr>
+                            <td><a href="{{ checklinks[checkid] }}">{{ checkname }}</a></td>
+                            {% if r.status == 'ERROR' %}
+                                {% set tableclass = 'danger' %}
+                                {% set icon = 'x' %}
+                            {% elif r.status == 'WARN' %}
+                                {% set tableclass = 'warning' %}
+                                {% set icon = 'warning' %}
+                            {% elif r.status == 'INFO' %}
+                                {% set tableclass = 'info' %}
+                                {% set icon = 'info' %}
+                            {% else %}
+                                {% set tableclass = 'success' %}
+                                {% set icon = 'check' %}
+                            {% endif %}
+                            <td class="table-{{ tableclass }}" style="text-align:center;">
+                                <img src="../assets/{{ icon }}.svg" height="15px">
+                            </td>
+                            {% if 'comment' in r %}
+                                <td>{{ r.comment }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                            {% if 'file' in r %}
+                                <td><a href="{{ r.file }}.html">View Report</a></td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>

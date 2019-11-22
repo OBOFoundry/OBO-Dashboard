@@ -199,12 +199,15 @@ def save_invalid_uris(ns, error, warn):
 
     if len(error) > 0 and len(warn) > 0:
         return {'status': 'ERROR',
+                'file': 'fp3',
                 'comment': ' '.join([error_msg.format(len(error)),
                                      warn_msg.format(len(warn))])}
     elif len(error) > 0:
         return {'status': 'ERROR',
+                'file': 'fp3',
                 'comment': error_msg.format(len(error))}
     elif len(warn) > 0:
         return {'status': 'ERROR',
+                'file': 'fp3',
                 'comment': warn_msg.format(len(warn))}
     return {'status': 'PASS'}

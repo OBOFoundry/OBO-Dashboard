@@ -141,15 +141,18 @@ def process_report(robot_gateway, ns, report):
 
     if errs > 0:
         return {'status': 'ERROR',
+                'file': 'robot_report',
                 'comment': ' '.join(['{0} errors,'.format(errs),
                                      '{0} warnings,'.format(warns),
                                      '{0} info messages.'.format(info)])}
     elif warns > 0:
         return {'status': 'WARN',
+                'file': 'robot_report',
                 'comment': ' '.join(['{0} warnings,'.format(warns),
                                      '{0} info messages.'.format(info)])}
     elif info > 0:
         return {'status': 'INFO',
+                'file': 'robot_report',
                 'comment': '{0} info messages.'}
     else:
         return {'status': 'PASS'}

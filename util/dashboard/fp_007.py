@@ -245,13 +245,16 @@ def check_properties(namespace, props, ro_props):
     # return the results
     if len(same_label) > 0 and len(not_ro) > 0:
         return {'status': 'ERROR',
+                'file': 'fp7',
                 'comment': ' '.join([ro_match.format(len(same_label)),
                                      non_ro.format(len(not_ro))])}
     elif len(same_label) > 0 and len(not_ro) == 0:
         return {'status': 'ERROR',
+                'file': 'fp7',
                 'comment': ro_match.format(len(same_label))}
     elif len(not_ro) > 0 and len(same_label) == 0:
         return {'status': 'INFO',
+                'file': 'fp7',
                 'comment': non_ro.format(len(not_ro))}
     else:
         return {'status': 'PASS'}

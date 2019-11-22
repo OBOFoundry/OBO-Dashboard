@@ -1,0 +1,224 @@
+<head>
+    <title>OBO Foundry Dashboard [ALPHA]</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <style>
+        .tooltip-inner {
+          max-width: 280px;
+        }
+
+        .check {
+          text-align: center;
+        }
+
+        div.tableContainer {
+            clear: both;
+            height: 800px;
+            overflow: auto;
+        }
+
+        html>body div.tableContainer {
+            overflow: hidden;
+        }
+
+        div.tableContainer table {
+            float: left;
+        }
+
+        thead.fixedHeader tr {
+            position: relative;
+        }
+
+        html>body thead.fixedHeader tr {
+            display: block;
+        }
+
+        thead.fixedHeader th {
+            padding: 4px 3px;
+            text-align: left
+        }
+
+        thead.fixedHeader a, thead.fixedHeader a:link, thead.fixedHeader a:visited {
+            display: block;
+            text-decoration: none;
+            width: 100%
+        }
+
+        html>body tbody.scrollContent {
+            display: block;
+            height: 640px;
+            overflow: auto;
+            width: 100%
+        }
+
+        html>body thead.fixedHeader th {
+            height: 85px !important;
+            max-width: 91px !important;
+            min-width: 91px !important;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        html>body tbody.scrollContent td {
+            max-width: 91px !important;
+            min-width: 91px !important;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .rotate {
+            transform: rotate(-45deg);
+            position: relative;
+            top: -30px;
+            left: -5px;
+            width: 100px !important;
+        }
+    </style>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="row" style="padding-top: 20px;">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <h1>OBO Foundry Dashboard [ALPHA]</h1>
+        <p class="lead">{{ date }}</p>
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">The OBO Dashboard is a new feature under active development.</h4>
+            <p>Our goal is to provide a set of automated tests that establish a minimum level of compliance with OBO Principles and best practises. Keep in mind that automated checks often cannot capture the full intent of a given principle -- we do our best while keeping the automated checks as fast and cheap as possible.</p>
+            <p>For each ontology, two aspects are checked: the OBO Registry entry, and the latest release of the project's main OWL file. For each check we provide links to the rule text and implementation.</p>
+            <p class="mb-0">Please give us your feedback! For general comments, please reply to issue <a href="https://github.com/OBOFoundry/OBOFoundry.github.io/issues/1076"><u>#1076</u></a>. For specific problems or bugs, please <a href="https://github.com/OBOFoundry/OBOFoundry.github.io/issues/new/choose"><u>create a new issue.</u></a></p>
+        </div>
+        <p style="text-align:center;">
+            <small>Click on each ontology ID for a detailed report.</small>
+        </p>
+        <p style="text-align:center; margin-top:-15px;">
+            <small>Click on a table header to find out more details about the check.</small>
+        </p>
+        <table class="table table-bordered">
+            <thead class="fixedHeader">
+                <tr>
+                    <th style="padding-bottom:30px;">
+                        <b>ID</b>
+                    </th>
+                    <th><div class="rotate">
+                        <b><a href="http://obofoundry.org//principles/fp-001-open.html">Open</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b><a href="http://obofoundry.org//principles/fp-002-format.html">Format</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b><a href="http://obofoundry.org//principles/fp-003-uris.html">URIs</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b><a href="http://obofoundry.org//principles/fp-004-versioning.html">Versioning</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b><a href="http://obofoundry.org//principles/fp-005-delineated-content.html">Scope</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b><a href="http://obofoundry.org//principles/fp-006-textual-definitions.html">Definitions</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b><a href="http://obofoundry.org//principles/fp-007-relations.html">Relations</a></b>
+                    </div></th>
+                    <th><div class="rotate"><b>
+                        <a href="http://obofoundry.org//principles/fp-008-documented.html">Docu-mented</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b><a href="http://obofoundry.org//principles/fp-009-users.html">Users</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b><a href="http://obofoundry.org//principles/fp-011-locus-of-authority.html">Authority</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b><a href="http://obofoundry.org//principles/fp-012-naming-conventions.html">Naming</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b><a href="http://obofoundry.org//principles/fp-016-maintenance.html">Maintained</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b><a href="http://robot.obolibrary.org/report">ROBOT Report</a></b>
+                    </div></th>
+                    <th><div class="rotate">
+                        <b>Summary</b>
+                    </div></th>
+                </tr>
+            </thead>
+            <tbody class="scrollContent">
+            {% for o in ontologies %}
+                <tr>
+                    <td><b><a href="{{ o.namespace }}/dashboard.html">{{ o.namespace }}</a></b></td>
+                    {% set res = o.results %}
+                    {% for c in checkorder %}
+                        {% set r = res[c] %}
+                        {% if 'comment' in r %}
+                            {% if r.status == 'ERROR' %}
+                                {% set tdclass = 'danger' %}
+                                {% set icon = 'x' %}
+                            {% elif r.status == 'WARN' %}
+                                {% set tdclass = 'warning' %}
+                                {% set icon = 'warning' %}
+                            {% elif r.status == 'INFO' %}
+                                {% set tdclass = 'info' %}
+                                {% set icon = 'info' %}
+                            {% else %}
+                                {% set tdclass = 'success' %}
+                                {% set icon = 'check' %}
+                            {% endif %}
+                            <td class="check {{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px" data-toggle="tooltip" data-html="true" data-placement="right" title="{{ r.comment }}"></td>
+                        {% else %}
+                            {% if r.status == 'ERROR' %}
+                                {% set tdclass = 'danger' %}
+                                {% set icon = 'x' %}
+                            {% elif r.status == 'WARN' %}
+                                {% set tdclass = 'warning' %}
+                                {% set icon = 'warning' %}
+                            {% elif r.status == 'INFO' %}
+                                {% set tdclass = 'info' %}
+                                {% set icon = 'info' %}
+                            {% else %}
+                                {% set tdclass = 'success' %}
+                                {% set icon = 'check' %}
+                            {% endif %}
+                            <td class="check {{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px"></td>
+                        {% endif %}
+                    {% endfor %}
+                    {% set r = o.summary %}
+                    {% if 'comment' in r %}
+                        {% if r.status == 'ERROR' %}
+                            {% set tdclass = 'danger' %}
+                            {% set icon = 'x' %}
+                        {% elif r.status == 'WARN' %}
+                            {% set tdclass = 'warning' %}
+                            {% set icon = 'warning' %}
+                        {% elif r.status == 'INFO' %}
+                            {% set tdclass = 'info' %}
+                            {% set icon = 'info' %}
+                        {% else %}
+                            {% set tdclass = 'success' %}
+                            {% set icon = 'check' %}
+                        {% endif %}
+                        <td class="check {{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px" data-toggle="tooltip" data-html="true" data-placement="right" title="{{ r.comment }}"></td>
+                    {% else %}
+                        {% if r.status == 'ERROR' %}
+                            {% set tdclass = 'danger' %}
+                            {% set icon = 'x' %}
+                        {% elif r.status == 'WARN' %}
+                            {% set tdclass = 'warning' %}
+                            {% set icon = 'warning' %}
+                        {% elif r.status == 'INFO' %}
+                            {% set tdclass = 'info' %}
+                            {% set icon = 'info' %}
+                        {% else %}
+                            {% set tdclass = 'success' %}
+                            {% set icon = 'check' %}
+                        {% endif %}
+                        <td class="check {{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px"></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>

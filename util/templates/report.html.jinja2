@@ -1,0 +1,56 @@
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <title>{{ title }}</title>
+</head>
+<body>
+<div class="container">
+  <div class="row" style="padding-top:30px;">
+    <div class="col-md-12">
+      <h1>{{ title }}</h1>
+      <p class="lead"><a href="{{ file }}">Download TSV</a></p>
+      {% if file == 'robot_report.tsv' %}
+        <p style="text-align:center;">
+          <small>Click on the Rule Name for details on how to fix.</small>
+        </p>
+      {% endif %}
+      <p style="text-align:center; margin-top:-15px;">
+        <small>Click on any term to direct to the term page.</small>
+      </p>
+      <table class="table">
+        <tr>
+          <th><b>Row</b></th>
+          {% for h in contents.headers %}
+            <th><b>{{ h }}</b></th>
+          {% endfor %}
+        </tr>
+        {% set counter = 1 %}
+        {% for row in contents.rows %}
+          {% set status = row[0] %}
+          {% if status == 'ERROR' %}
+            {% set tableclass = 'danger' %}
+          {% elif status == 'WARN' %}
+            {% set tableclass = 'warning' %}
+          {% elif status == 'INFO' %}
+            {% set tableclass = 'info' %}
+          {% else %}
+            {% set tableclass = 'active' %}
+          {% endif %}
+          <tr class="table-{{ tableclass }}">
+            <td>{{ counter }}</td>
+            {% for cell in row %}
+              <td>
+              {% if cell in docmap %}
+                <a href="{{ docmap[cell] }}">{{ cell }}</a>
+              {% else %}
+                {{ maybe_get_link(cell, context) }}
+              {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+          {% set counter = counter + 1 %}
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+</body>

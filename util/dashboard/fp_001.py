@@ -104,9 +104,9 @@ class OpenValidator():
         # search the annotations to find a license
         annotations = ontology.getAnnotations()
         license = dash_utils.get_ontology_annotation_value(annotations,
-                                                         license_prop)
-        bad_license = dash_utils.get_ontology_annotation_value(annotations,
-                                                             bad_license_prop)
+                                                           license_prop)
+        bad_license = dash_utils.get_ontology_annotation_value(
+            annotations, bad_license_prop)
 
         if license:
             self.ontology_license = license
