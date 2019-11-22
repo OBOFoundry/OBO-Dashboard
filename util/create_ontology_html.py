@@ -67,7 +67,7 @@ link_map = {
     'FP11': 'http://obofoundry.org/principles/checks/fp_011',
     'FP12': 'http://obofoundry.org/principles/checks/fp_012',
     'FP16': 'http://obofoundry.org/principles/checks/fp_016',
-    'ROBOT Report': ''
+    'ROBOT Report': 'http://robot.obolibrary.org/report'
 }
 
 if __name__ == '__main__':
