@@ -135,8 +135,8 @@ $(DASH)/%/dashboard.html: $(DASH)/%/robot_report.html $(DASH)/%/fp3.html $(DASH)
 
 # Combined summary for all OBO foundry ontologies
 # Rebuild whenever an HTML page changes
-.PRECIOUS: $(DASH)/dashboard.html
-$(DASH)/dashboard.html: $(HTML_REPORTS) $(ROBOT_REPORTS) $(DASH)/assets
+.PRECIOUS: $(DASH)/index.html
+$(DASH)/index.html: $(HTML_REPORTS) $(ROBOT_REPORTS) $(DASH)/assets
 	./util/create_dashboard_html.py $(DASH) dependencies/ontologies.yml $@
 
 # HTML output of ROBOT report
@@ -162,5 +162,5 @@ $(DASH)/%/fp7.html: $(DASH)/%/dashboard.yml
 # ------------- #
 
 # Create ZIP for archive
-build/dashboard.zip: $(DASH)/dashboard.html | $(SVGS)
-	zip $@ $(DASH)
+build/dashboard.zip: $(DASH)/index.html | $(SVGS)
+	zip -r $@ $(DASH)/*
