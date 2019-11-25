@@ -2,6 +2,8 @@
 
 ## ## [Locus of Authority](http://obofoundry.org/principles/fp-011-locus-of-authority.html) Automated Check
 ##
+## Discussion on this check can be [found here](https://github.com/OBOFoundry/OBOFoundry.github.io/issues/1007).
+##
 ## ### Requirements
 ## 1. The ontology **must** have a single contact person
 ##

@@ -2,6 +2,8 @@
 
 ## ## [Versioning](http://obofoundry.org/principles/fp-004-versioning.html) Automated Check
 ##
+## Discussion on this check can be [found here](https://github.com/OBOFoundry/OBOFoundry.github.io/issues/1016).
+##
 ## ### Requirements
 ## 1. The released ontology **must** have a version IRI.
 ## 2. The version IRI *should* follow a dated format (`NS/YYYY-MM-DD/ontology.owl`)

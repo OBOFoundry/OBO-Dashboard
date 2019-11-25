@@ -2,6 +2,8 @@
 
 ## ## [Maintenance](http://obofoundry.org/principles/fp-016-maintenance.html) Automated Check
 ##
+## Discussion on this check can be [found here](https://github.com/OBOFoundry/OBOFoundry.github.io/issues/1020).
+##
 ## ### Requirements
 ## 1. The ontology *should* be regularly updated.
 ##

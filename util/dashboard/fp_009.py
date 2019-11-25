@@ -2,6 +2,8 @@
 
 ## ## [Documented Plurality of Users](http://obofoundry.org/principles/fp-009-users.html) Automated Check
 ##
+## Discussion on this check can be [found here](https://github.com/OBOFoundry/OBOFoundry.github.io/issues/1008).
+##
 ## ### Requirements
 ## 1. The ontology **must** have a tracker.
 ## 2. The ontology **must** have usages.

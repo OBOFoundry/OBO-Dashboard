@@ -2,6 +2,8 @@
 
 ## ## [Scope](http://obofoundry.org/principles/fp-005-delineated-content.html) Automated Check
 ##
+## Discussion on this check can be [found here](https://github.com/OBOFoundry/OBOFoundry.github.io/issues/1015).
+##
 ## ### Requirements
 ## 1. A scope ('domain') **must** be declared in the registry data
 ##

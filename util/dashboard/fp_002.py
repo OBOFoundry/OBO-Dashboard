@@ -2,6 +2,8 @@
 
 ## ## [Common Format](http://obofoundry.org/principles/fp-002-format.html) Automated Check
 ##
+## Discussion on this check can be [found here](https://github.com/OBOFoundry/OBOFoundry.github.io/issues/1018).
+##
 ## ### Requirements
 ## 1. Released ontology **must** be in RDF/XML format
 ##
