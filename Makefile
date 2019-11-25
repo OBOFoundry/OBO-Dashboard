@@ -109,10 +109,6 @@ build/robot-foreign.jar: | build
 ### DASHBOARD FUNCTIONALITY ###
 # --------------------------- #
 
-# Reboot the JVM for Py4J
-reboot:
-	@bash util/reboot.sh
-
 # TODO - only update whenever the ontology changes
 # Some sort of rebuild script which deletes the YAML file
 # We don't want this to depend on dependencies/ontologies.yml
@@ -122,7 +118,6 @@ $(DASH)/%/dashboard.yml: dependencies/ro-merged.owl | \
 $(DASH) build/robot-foreign.jar dependencies/license.json dependencies/contact.json
 	$(eval O := $(lastword $(subst /, , $(dir $@))))
 	@mkdir -p $(dir $@)
-	@make reboot
 	@./util/dashboard/dashboard.py \
 	 $(O) dependencies/ontologies.yml dependencies/ro-merged.owl $(dir $@)
 

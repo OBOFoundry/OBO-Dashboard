@@ -5,6 +5,7 @@ import gc
 import json
 import os
 import pprint
+import subprocess
 import sys
 import yaml
 
@@ -47,11 +48,11 @@ principle_map = {
 
 
 def main(args):
-    """Usage: ./dashboard.py <ontologies_yml> <output_csv> [--big <bool>]
+    """Usage: ./dashboard.py <namespace> <registry> <relations> <outdir>
 
-    Create a dashboard CSV over the ontologies in the registry data. If --big,
-    only do the "big" ontologies (which need different processing). Otherwise,
-    ignore "big" ontologies.
+    Create a result YAML file for the ontology at given namespace.
+    Check the registry data and the ontology file.
+    Place dashboard.yml and any reports in the provided outdir.
     """
     global domain_map, gateway, io_helper, robot_gateway, ro_props, version_iri
 
@@ -60,18 +61,43 @@ def main(args):
     parser.add_argument('namespace',
                         type=str,
                         help='Ontology namespace to run dashboard on')
-    parser.add_argument('registry_yaml',
+    parser.add_argument('registry',
                         type=str,
                         help='Ontology registry data')
-    parser.add_argument('ro',
+    parser.add_argument('relations',
                         type=str,
                         help='Path to RO ontology file')
-    parser.add_argument('out_dir',
+    parser.add_argument('outdir',
                         type=str,
                         help='Dashboard output directory')
     args = parser.parse_args()
 
-    # activate gateway to JVM
+    # First check if anything is running and kill it
+    out = subprocess.Popen(
+        ['lsof', '-t', '-i:25333'], stdout=subprocess.PIPE).communicate()[0]
+    pid = (out.decode('utf-8'))
+    while pid != '':
+        cmd = 'kill {0}'.format(pid)
+        os.system(cmd)
+        out = subprocess.Popen(
+            ['lsof', '-t', '-i:25333'],
+            stdout=subprocess.PIPE).communicate()[0]
+        pid = (out.decode('utf-8'))
+
+    # Then start the server fresh
+    cmd = 'java -jar build/robot.jar python &'
+    os.system(cmd)
+    out = subprocess.Popen(
+        ['lsof', '-t', '-i:25333'], stdout=subprocess.PIPE).communicate()[0]
+    pid = (out.decode('utf-8'))
+    while pid == '':
+        out = subprocess.Popen(
+            ['lsof', '-t', '-i:25333'],
+            stdout=subprocess.PIPE).communicate()[0]
+        pid = (out.decode('utf-8'))
+    print('JVM started on 25333 with PID {0}'.format(pid), flush=True)
+
+    # Activate gateway to JVM
     try:
         gateway = JavaGateway()
         robot_gateway = gateway.jvm.org.obolibrary.robot
@@ -88,9 +114,11 @@ def main(args):
 
     # IO files
     namespace = args.namespace
-    yaml_infile = args.registry_yaml
-    out_dir = args.out_dir
-    outfile = '{0}/dashboard.yml'.format(out_dir)
+    yaml_infile = args.registry
+    out_dir = args.outdir
+    if not out_dir.endswith('/'):
+        out_dir = out_dir + '/'
+    outfile = '{0}dashboard.yml'.format(out_dir)
 
     # Maybe run special "big" checks
     big = False
@@ -105,7 +133,7 @@ def main(args):
     domain_map = get_domains(all_data)
 
     # RO properties for relations check
-    ro = load_ontology_from_file(args.ro)
+    ro = load_ontology_from_file(args.relations)
     ro_props = fp_007.get_properties('ro', ro)
 
     # Remove RO from memory
@@ -115,13 +143,14 @@ def main(args):
     res = exec_checks(namespace, data, big)
     save_results(namespace, res, outfile)
 
-    # clean up
+    # Clean up
     gc.collect()
     sys.exit(0)
 
 
 def exec_checks(ns, data, big):
-    """
+    """Given a namespace, the registry data, and a boolean if "big",
+    run all dashboard checks for the ontology at the namespace.
     """
     global version_iri
 
@@ -134,7 +163,7 @@ def exec_checks(ns, data, big):
         gc.collect()
         sys.exit(0)
     try:
-        print('\n-----------------\nChecking ' + ns, flush=True)
+        print('-----------------\nChecking ' + ns, flush=True)
         if big:
             file = download_ontology(ns)
             if file:
@@ -337,7 +366,8 @@ def run_checks(robot_gateway, ns, ont, file, report, data, good_format):
 
 
 def save_results(namespace, check_map, outfile):
-    """
+    """Given a namespace, a check map, and an output file,
+    save the results from the check map to the output file.
     """
     global version_iri
 
