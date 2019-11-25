@@ -1,11 +1,27 @@
 #!/usr/bin/env python
 
-## ## "Open" Automated Check
+#### "Open" Automated Check
 ##
-## ### Requirements
+##### Requirements
 ## 1. The ontology **must** have a license both in the registry data and in the ontology file.
 ## 2. The licenese **must** be the same in both files.
 ## 3. The license *should* be one of the CC0 or CC-BY licenses.
+##
+## ### Fixes
+##
+## #### Choosing a license
+## See [Open Recommendations](http://obofoundry.org/principles/fp-001-open.html#recommendations) for appropriate licenses.
+##
+## #### Adding a license to the registry data
+## First, read the [FAQ](http://obofoundry.github.io/faq/how-do-i-edit-metadata.html) on how to edit the metadata for your ontology. Then, add the following to your [metadata file](https://github.com/OBOFoundry/OBOFoundry.github.io/tree/master/ontology) (replacing with the correct license and license label):
+## ```
+## license:
+##  url: http://creativecommons.org/licenses/by/4.0/
+##  label: CC-BY 4.0
+## ```
+##
+## #### Adding a license to the ontology file
+## See [Open Implemntation](http://obofoundry.org/principles/fp-001-open.html#implementation) for details on adding license to OWL and OBO files.
 ##
 ## ### Implementation
 ## The registry data entry is validated with JSON schema using the [license schema](https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/util/schema/license.json). The license schema ensures that a license entry is present and that the entry has a `url` and `label`. The license schema also checks that the license is one of the CC0 or CC-BY licenses. OWL API is then used to check the ontology as an `OWLOntology` object. Annotations on the ontology are retrieved and the `dcterms:license` property is found. The python script ensures that the correct `dcterms:license` property is used. The script compares this license to the registry license to ensure that they are the same.
