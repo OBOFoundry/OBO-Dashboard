@@ -1,11 +1,24 @@
 #!/usr/bin/env python3
 
-## ## "Textual Definitions" Automated Check
+## ## [Textual Definitions](http://obofoundry.org/principles/fp-006-textual-definitions.html) Automated Check
 ##
 ## ### Requirements
 ## 1. Each definition **must** be unique.
 ## 2. Each entity **must** not have more than one textual definition.
-## 3. Each entity *should* have a textual definition using [IAO:0000115 (definition)](http://purl.obolibrary.org/obo/IAO_0000115).
+## 3. Each entity *should* have a textual definition using [`IAO:0000115` (definition)](http://purl.obolibrary.org/obo/IAO_0000115).
+##
+## ### Fixes
+##
+## #### Uniqueness
+## Update each duplicate definition to have some detail that differentiates one term from another.
+##
+## #### Multiples
+## If a term has more than one defintion, combine the two definitions. Alternatively, change one definition to an `rdfs:comment` if it just contains further details.
+##
+## #### Missing Definitions
+## Add an [`IAO:0000115` (definition)](http://purl.obolibrary.org/obo/IAO_0000115) annotation to each term that is missing a definition. For help writing good definitions, see [Textual Definitions Recommendations](http://obofoundry.org/principles/fp-006-textual-definitions.html#recommendation).
+##
+## For adding defintions in bulk, check out [ROBOT template](http://robot.obolibrary.org/template).
 ##
 ## ### Implementation
 ## [ROBOT report](http://robot.obolibrary.org/report) is run over the ontology. A count of violations for each of the following checks is retrieved from the report object: [duplicate definition](http://robot.obolibrary.org/report_queries/duplicate_definition), [multiple definitions](http://robot.obolibrary.org/report_queries/multiple_definitions), and [missing definition](http://robot.obolibrary.org/report_queries/missing_definition). If there are any duplicate or multiple defintions, it is an error. If there are missing definitions, it is a warning.

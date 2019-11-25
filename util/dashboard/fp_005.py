@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
-## ## "Scope" Automated Check
+## ## [Scope](http://obofoundry.org/principles/fp-005-delineated-content.html) Automated Check
 ##
 ## ### Requirements
 ## 1. A scope ('domain') **must** be declared in the registry data
-## 2. Registry ontologies *should* cover non-overlapping domains
+##
+## ### Fixes
+## First, read the [FAQ](http://obofoundry.github.io/faq/how-do-i-edit-metadata.html) on how to edit the metadata for your ontology. Then, add the following to your [metadata file](https://github.com/OBOFoundry/OBOFoundry.github.io/tree/master/ontology) (replacing with your domain):
+## ```
+## domain: experiments
+## ```
 ##
 ## ### Implementation
 ## First, the registry data is checked for a 'domain' tag. If missing, that is an error. If it is present, the domain is compared to all other ontology domains. If the ontology shares a domain with one or more other ontologies, we return a list of those ontologies in an info message.

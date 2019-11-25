@@ -1,10 +1,23 @@
 #!/usr/bin/env python3
 
-## ## "URIs" Automated Check
+## ## [URI](http://obofoundry.org/principles/fp-003-uris.html) Automated Check
 ##
 ## ### Requirements
 ## 1. All entities in the ontology namespace **must** use an underscore to separate the namespace and local ID.
 ## 2. The local ID *should* not be semantically significant, and *should* be numeric.
+##
+## ### Fixes
+## Edit problematic IRIs to resolve the problems. [Click here](https://ontology101tutorial.readthedocs.io/en/latest/EntitiesTab.html#renaming-an-entity) for details on editing an IRI in Protégé.
+##
+## The full OBO Foundry ID Policy can be found [here](http://www.obofoundry.org/id-policy). In short, all IRIs should begin with your unique OBO Foundry namespace (e.g., `http://purl.obolibrary.org/obo/OBI_`). The local ID, which comes after the unique namespace, should be numeric (e.g., `http://purl.obolibrary.org/obo/OBI_0000001`). We recommend using seven digits.
+##
+## #### Updating an IRI
+## 1. Add an `owl:deprecated` annotation with a boolean value of `true` to the problematic term
+## 2. Add `obsolete` to the beginning of the term's label to prevent duplicating labels
+## 3. Create a new term with a valid IRI to replace this old term
+## 4. Copy the old annotations (label, definition, etc., excluding the `owl:deprecated`) over to the new term
+## 5. Add a [`IAO:0100001` (term replaced by)](http://purl.obolibrary.org/obo/IAO_0100001) annotation to the old term with a value of the new term's IRI
+##    * Make sure this is an IRI annotation by selecting "IRI Editor" when adding the annotation in Protégé
 ##
 ## ### Implementation
 ## All entity IRIs are retrieved from the ontology, excluding annotation properties. Annotation properties may use hashtags and words due to legacy OBO conversions for subset properties. All other IRIs are checked if they are in the ontology's namespace. If the IRI begins with the ontology namespace, the next character must be an underscore. If not, this is an error. The IRI is also compared to a regex pattern to check if the local ID after the underscore is numeric. If not, this is a warning.

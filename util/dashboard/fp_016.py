@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
-## ## "Maintenance" Automated Check
+## ## [Maintenance](http://obofoundry.org/principles/fp-016-maintenance.html) Automated Check
 ##
 ## ### Requirements
 ## 1. The ontology *should* be regularly updated.
+##
+## ### Fixes
+## Make sure all content in your ontology is up-to-date with scientific literature. If you make regular changes, make sure to have regular releases.
 ##
 ## ### Implementation
 ## A version IRI is retrieved from the ontology, either using OWL API or parsing RDF/XML for large ontologies. This version IRI is checked against a regex pattern to determine if it is in date format. If so, the date is retrieved. If the last version IRI date is older than three years, this is an error. If it is older than two years, this is a warning. If it is older than one year, this will be an info message.

@@ -1,10 +1,33 @@
 #!/usr/bin/env python3
 
-## ## "Plurality of Users" Automated Check
+## ## [Documented Plurality of Users](http://obofoundry.org/principles/fp-009-users.html) Automated Check
 ##
 ## ### Requirements
 ## 1. The ontology **must** have a tracker.
 ## 2. The ontology **must** have usages.
+##
+## ### Fixes
+## First, read the [FAQ](http://obofoundry.github.io/faq/how-do-i-edit-metadata.html) on how to edit the metadata for your ontology.
+##
+## #### Adding a Tracker
+## If you do not already have a version control repository that has an [Issues Tracker](https://help.github.com/en/github/managing-your-work-on-github/about-issues), create one. We recommend creating a [GitHub Repository](https://help.github.com/en/github/getting-started-with-github/create-a-repo). To do this, you will need to [create a GitHub account](https://github.com/join) if you do not already have one.
+##
+## Once you have a version control repository, add the following to your [metadata file](https://github.com/OBOFoundry/OBOFoundry.github.io/tree/master/ontology) (replacing with the link to your repository's issue tracker):
+## ```
+## tracker: https://github.com/DiseaseOntology/HumanDiseaseOntology/issues
+## ```
+##
+## #### Adding Usages
+## Determine what other groups are using your ontology and how they are using it. Then, add the following to your [metadata file](https://github.com/OBOFoundry/OBOFoundry.github.io/tree/master/ontology) (replacing with the correct group name, link, and description):
+## ```
+## usages:
+## - user: http://www.informatics.jax.org/disease (link to group)
+##   description: MGI disease model annotations use DO (description of group)
+##   examples:
+##    - url: http://www.informatics.jax.org/disease/DOID:4123 (link to specific example)
+##      description: Human genes and mouse homology associated with nail diseases (description of specific example)
+## ```
+## You may have multiple exampels for each user, and mulitple users under the `usages` tag.
 ##
 ## ### Implementation
 ## The registry data is checked for 'tracker' and 'usage' entries. If either is missing, this is an error.

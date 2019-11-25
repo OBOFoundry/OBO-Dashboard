@@ -1,9 +1,20 @@
 #!/usr/bin/env python3
 
-## ## "Locus of Authority" Automated Check
+## ## [Locus of Authority](http://obofoundry.org/principles/fp-011-locus-of-authority.html) Automated Check
 ##
 ## ### Requirements
 ## 1. The ontology **must** have a single contact person
+##
+## ### Fixes
+## First, read the [FAQ](http://obofoundry.github.io/faq/how-do-i-edit-metadata.html) on how to edit the metadata for your ontology.
+##
+## Next, determine who the point person for your ontology project is. This *must not* be a mailing list. If this person does not already have a GitHub account, we request that they [create one](https://github.com/join). Then, add the following to your [metadata file](https://github.com/OBOFoundry/OBOFoundry.github.io/tree/master/ontology) (replacing with the correct email, name, and GitHub username):
+## ```
+## contact:
+##  email: foo@bar.com
+##  label: John Smith
+##  github: jsmith123
+## ```
 ##
 ## ### Implementation
 ## The registry data entry is validated with JSON schema using the [contact schema](https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/util/schema/contact.json). The contact schema ensures that a contact entry is present and that the entry has a name and email address.
