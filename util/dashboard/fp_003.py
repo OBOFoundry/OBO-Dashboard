@@ -205,7 +205,7 @@ def save_invalid_uris(ns, error, warn):
         ERROR or WARN with detailed message, or PASS if no errors or warnings.
     """
     if len(error) > 0 or len(warn) > 0:
-        file = 'build/dashboard/{0}/fp3.tsv'.format(ns)
+        file = 'dashboard/{0}/fp3.tsv'.format(ns)
         with open(file, 'w+') as f:
             for e in error:
                 f.write('ERROR\t{0}\n'.format(e))

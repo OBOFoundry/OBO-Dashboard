@@ -5,7 +5,6 @@ import gc
 import json
 import os
 import py4j
-import pprint
 import subprocess
 import sys
 import yaml

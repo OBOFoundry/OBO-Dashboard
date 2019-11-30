@@ -126,7 +126,7 @@ def process_report(robot_gateway, ns, report):
     if report is None:
         return {'status': 'INFO',
                 'comment': 'ROBOT Report could not be generated.'}
-    outfile = 'build/dashboard/{0}/robot_report.tsv'.format(ns)
+    outfile = 'dashboard/{0}/robot_report.tsv'.format(ns)
 
     # print summary to terminal and save to report file
     report_options = robot_gateway.ReportOperation.getDefaultOptions()

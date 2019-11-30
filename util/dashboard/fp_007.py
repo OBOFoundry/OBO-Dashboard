@@ -283,7 +283,7 @@ def save_invalid_relations(namespace, ro_props, same_label, not_ro):
         not_ro (dict): map of property label to IRI that does not have an RO
                        IRI
     """
-    file = 'build/dashboard/{0}/fp7.tsv'.format(namespace)
+    file = 'dashboard/{0}/fp7.tsv'.format(namespace)
     with open(file, 'w+') as f:
         f.write('IRI\tLabel\tIssue\n')
         for iri, label in same_label.items():
