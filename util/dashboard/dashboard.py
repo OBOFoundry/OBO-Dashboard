@@ -4,6 +4,7 @@ import datetime
 import gc
 import json
 import os
+import py4j
 import pprint
 import subprocess
 import sys
@@ -27,24 +28,6 @@ import report_utils
 from argparse import ArgumentParser
 from py4j.java_gateway import JavaGateway
 from py4j.protocol import Py4JNetworkError
-
-big_onts = ['chebi', 'bto', 'uberon', 'ncbitaxon', 'pr', 'ncit', 'gaz']
-obo = 'http://purl.obolibrary.org/obo'
-
-principle_map = {
-    1: 'FP1 Open',
-    2: 'FP2 Common Format',
-    3: 'FP3 URIs',
-    4: 'FP4 Versioning',
-    5: 'FP5 Scope',
-    6: 'FP6 Textual Definitions',
-    7: 'FP7 Relations',
-    8: 'FP8 Documented',
-    9: 'FP9 Plurality of Users',
-    11: 'FP11 Locus of Authority',
-    12: 'FP12 Naming Conventions',
-    16: 'FP16 Maintenance'
-}
 
 
 def main(args):
@@ -72,42 +55,24 @@ def main(args):
                         help='Dashboard output directory')
     args = parser.parse_args()
 
-    # First check if anything is running and kill it
-    out = subprocess.Popen(
-        ['lsof', '-t', '-i:25333'], stdout=subprocess.PIPE).communicate()[0]
-    pid = (out.decode('utf-8'))
-    while pid != '':
-        cmd = 'kill {0}'.format(pid)
-        os.system(cmd)
-        out = subprocess.Popen(
-            ['lsof', '-t', '-i:25333'],
-            stdout=subprocess.PIPE).communicate()[0]
-        pid = (out.decode('utf-8'))
+    # Launch the JVM using the robot JAR
+    py4j.java_gateway.launch_gateway(
+        jarpath='../robot/bin/robot.jar',
+        classpath='org.obolibrary.robot.PythonOperation',
+        die_on_exit=True,
+        port=25333)
 
-    # Then start the server fresh
-    cmd = 'java -jar build/robot.jar python &'
-    os.system(cmd)
-    out = subprocess.Popen(
-        ['lsof', '-t', '-i:25333'], stdout=subprocess.PIPE).communicate()[0]
-    pid = (out.decode('utf-8'))
-    while pid == '':
-        out = subprocess.Popen(
-            ['lsof', '-t', '-i:25333'],
-            stdout=subprocess.PIPE).communicate()[0]
-        pid = (out.decode('utf-8'))
-    print('JVM started on 25333 with PID {0}'.format(pid), flush=True)
+    # Wait until the JVM has a process ID
+    # That way we know it's active
+    res = ''
+    while res == '':
+        pid = subprocess.Popen(['lsof', '-t', '-i:25333'],
+                               stdout=subprocess.PIPE).communicate()[0]
+        res = pid.decode('utf-8')
 
     # Activate gateway to JVM
-    try:
-        gateway = JavaGateway()
-        robot_gateway = gateway.jvm.org.obolibrary.robot
-    except Py4JNetworkError:
-        print('ERROR: No JVM listening on port 25333', flush=True)
-        sys.exit(1)
-    except Exception as e:
-        print('ERROR: problem with JVM on port 25333\n{0}'.format(str(e)),
-              flush=True)
-        sys.exit(1)
+    gateway = JavaGateway()
+    robot_gateway = gateway.jvm.org.obolibrary.robot
 
     # IOHelper for working with ontologies
     io_helper = robot_gateway.IOHelper()
@@ -495,7 +460,7 @@ def fetch_base_ontology(ns):
     output = 'build/ontologies/{0}.owl'.format(ns.lower())
 
     # easier to do this via command line
-    cmd = '''java -jar build/robot-foreign.jar merge --input-iri {0} \
+    cmd = '''java -jar build/robot.jar merge --input-iri {0} \
              remove --base-iri {1} --axioms external \
              -p false --output {2}'''.format(purl, base, output)
     os.system(cmd)
@@ -545,6 +510,27 @@ def download_ontology(ns):
         print('ERROR: Unable to download {0}'.format(ns), flush=True)
         return None
     return file
+
+
+# --- GLOBALS ---
+
+big_onts = ['bto', 'chebi', 'dron', 'gaz', 'ncbitaxon', 'ncit', 'pr', 'uberon']
+obo = 'http://purl.obolibrary.org/obo'
+
+principle_map = {
+    1: 'FP1 Open',
+    2: 'FP2 Common Format',
+    3: 'FP3 URIs',
+    4: 'FP4 Versioning',
+    5: 'FP5 Scope',
+    6: 'FP6 Textual Definitions',
+    7: 'FP7 Relations',
+    8: 'FP8 Documented',
+    9: 'FP9 Plurality of Users',
+    11: 'FP11 Locus of Authority',
+    12: 'FP12 Naming Conventions',
+    16: 'FP16 Maintenance'
+}
 
 
 if __name__ == '__main__':
