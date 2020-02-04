@@ -9,11 +9,12 @@ DASH := dashboard
 ROBOT := java -jar build/robot.jar
 
 # Report files
-YAML_REPORTS := $(foreach O, $(shell cat dependencies/ontologies.txt), $(DASH)/$(O)/dashboard.yml)
-HTML_REPORTS := $(foreach O, $(shell cat dependencies/ontologies.txt), $(DASH)/$(O)/dashboard.html)
-ROBOT_REPORTS := $(foreach O, $(shell cat dependencies/ontologies.txt), $(DASH)/$(O)/robot_report.html)
-FP3_REPORTS := $(foreach O, $(shell cat dependencies/ontologies.txt), $(DASH)/$(O)/fp3.html)
-FP7_REPORTS := $(foreach O, $(shell cat dependencies/ontologies.txt), $(DASH)/$(O)/fp7.html)
+ONTS := $(or ${ONTS},${ONTS}, $(shell cat dependencies/ontologies.txt))
+YAML_REPORTS := $(foreach O, $(ONTS), $(DASH)/$(O)/dashboard.yml)
+HTML_REPORTS := $(foreach O, $(ONTS), $(DASH)/$(O)/dashboard.html)
+ROBOT_REPORTS := $(foreach O, $(ONTS), $(DASH)/$(O)/robot_report.html)
+FP3_REPORTS := $(foreach O, $(ONTS), $(DASH)/$(O)/fp3.html)
+FP7_REPORTS := $(foreach O, $(ONTS), $(DASH)/$(O)/fp7.html)
 
 # Assets contains SVGs for icons
 # These will be included in the ZIP
@@ -111,7 +112,7 @@ build/robot.jar: | build
 # TODO - only update whenever the ontology changes
 # Some sort of rebuild script which deletes the YAML file?
 .PRECIOUS: $(DASH)/%/dashboard.yml
-$(DASH)/%/dashboard.yml:
+$(DASH)/%/dashboard.yml: | build/robot.jar
 	$(eval O := $(lastword $(subst /, , $(dir $@))))
 	@mkdir -p $(dir $@)
 	@./util/dashboard/dashboard.py $(O) dependencies/ontologies.yml dependencies/ro-merged.owl $(dir $@)

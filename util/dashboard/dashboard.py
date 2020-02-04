@@ -457,6 +457,10 @@ def fetch_base_ontology(ns):
     purl = '{0}/{1}.owl'.format(obo, ns.lower())
     base = '{0}/{1}_'.format(obo, ns)
     output = 'build/ontologies/{0}.owl'.format(ns.lower())
+    if os.path.exists(output):
+        # Do not overwrite if it exists
+        print('Using existing {0} file!'.format(output))
+        return output
 
     # easier to do this via command line
     cmd = '''java -jar build/robot.jar merge --input-iri {0} \
@@ -464,7 +468,7 @@ def fetch_base_ontology(ns):
              -p false --output {2}'''.format(purl, base, output)
     os.system(cmd)
 
-    if not os.path.isfile(output):
+    if not os.path.exists(output):
         print('ERROR: Unable to retrieve {0}'.format(ns), flush=True)
         return None
     return output
