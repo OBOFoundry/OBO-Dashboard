@@ -3,3 +3,4 @@ requests
 py4j
 pyyaml
 jinja2
+markdown

@@ -34,12 +34,13 @@ all:
 	make dashboard
 
 # Make the ZIP (everything)
-dashboard: build/dashboard.zip
+dashboard: dashboard.zip
 
 # Make all and then remove build directory
 clean:
 	make all
 	rm -rf build
+	rm -rf $(DASH)
 
 svgs: $(SVGS)
 
@@ -152,13 +153,17 @@ $(DASH)/%/fp7.html: $(DASH)/%/dashboard.yml
 # Combined summary for all OBO foundry ontologies
 # Rebuild whenever an HTML page changes
 .PRECIOUS: $(DASH)/index.html
-$(DASH)/index.html: $(HTML_REPORTS) $(ROBOT_REPORTS) $(FP3_REPORTS) $(FP7_REPORTS) $(DASH)/assets
+$(DASH)/index.html: $(HTML_REPORTS) $(ROBOT_REPORTS) $(FP3_REPORTS) $(FP7_REPORTS)
 	./util/create_dashboard_html.py $(DASH) dependencies/ontologies.yml $@
+
+.PRECIOUS: $(DASH)/about.html
+$(DASH)/about.html: docs/about.md util/templates/about.html.jinja2
+	./util/md_to_html.py $< -t $(word 2,$^) -o $@
 
 # ------------- #
 ### PACKAGING ###
 # ------------- #
 
-# Create ZIP for archive
-build/dashboard.zip: $(DASH)/index.html | $(SVGS)
+# Create ZIP for archive and remove dashboard folder
+dashboard.zip: $(DASH)/index.html $(DASH)/about.html | $(SVGS)
 	zip -r $@ $(DASH)/*
