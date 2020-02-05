@@ -1,3 +1,6 @@
-dependencies
-build
-util/dashboard/__pycache__
+dashboard/
+dependencies/
+build/
+__pycache__/
+_venv/
+shell.nix
