@@ -74,21 +74,26 @@ def maybe_get_link(cell, context):
     """
     """
     url = None
-    curie = re.search(r'([A-Za-z0-9]+):([A-Za-z0-9-]+)', cell)
-    if curie:
-        # This is a CURIE
-        prefix = curie.group(1)
-        local_id = curie.group(2)
-        if prefix in context:
-            namespace = context[prefix]
-            url = namespace + local_id
-        elif prefix in other_prefixes:
-            namespace = other_prefixes[prefix]
-            url = namespace + local_id
-    # IRIs might be in angle brackets
-    iri = re.search(r'((http|https|ftp)://[^ <>]+)', cell)
-    if iri:
-        url = iri.group(1)
+    if cell in report_doc_map.keys():
+        # First check if it is a ROBOT report link
+        url = report_doc_map[cell]
+    else:
+        # Otherwise try to parse as CURIE or IRI
+        curie = re.search(r'([A-Za-z0-9]+):([A-Za-z0-9-]+)', cell)
+        if curie:
+            # This is a CURIE
+            prefix = curie.group(1)
+            local_id = curie.group(2)
+            if prefix in context:
+                namespace = context[prefix]
+                url = namespace + local_id
+            elif prefix in other_prefixes:
+                namespace = other_prefixes[prefix]
+                url = namespace + local_id
+        # IRIs might be in angle brackets
+        iri = re.search(r'((http|https|ftp)://[^ <>]+)', cell)
+        if iri:
+            url = iri.group(1)
     if url:
         return '<a href="{0}">{1}</a>'.format(url, cell)
     return cell

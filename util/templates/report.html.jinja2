@@ -23,7 +23,6 @@
             <th><b>{{ h }}</b></th>
           {% endfor %}
         </tr>
-        {% set counter = 1 %}
         {% for row in contents.rows %}
           {% set status = row[0] %}
           {% if status == 'ERROR' %}
@@ -36,7 +35,7 @@
             {% set tableclass = 'active' %}
           {% endif %}
           <tr class="table-{{ tableclass }}">
-            <td>{{ counter }}</td>
+            <td>{{ loop.index }}</td>
             {% for cell in row %}
               <td>
               {% if cell in docmap %}
@@ -47,7 +46,6 @@
               </td>
             {% endfor %}
           </tr>
-          {% set counter = counter + 1 %}
         {% endfor %}
       </table>
     </div>
