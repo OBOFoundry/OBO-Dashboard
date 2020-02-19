@@ -55,18 +55,18 @@ check_order = ['FP1 Open',
                'ROBOT Report']
 
 link_map = {
-    'FP1': 'http://obofoundry.org/principles/checks/fp_001',
-    'FP2': 'http://obofoundry.org/principles/checks/fp_002',
-    'FP3': 'http://obofoundry.org/principles/checks/fp_003',
-    'FP4': 'http://obofoundry.org/principles/checks/fp_004',
-    'FP5': 'http://obofoundry.org/principles/checks/fp_005',
-    'FP6': 'http://obofoundry.org/principles/checks/fp_006',
-    'FP7': 'http://obofoundry.org/principles/checks/fp_007',
-    'FP8': 'http://obofoundry.org/principles/checks/fp_008',
-    'FP9': 'http://obofoundry.org/principles/checks/fp_009',
-    'FP11': 'http://obofoundry.org/principles/checks/fp_011',
-    'FP12': 'http://obofoundry.org/principles/checks/fp_012',
-    'FP16': 'http://obofoundry.org/principles/checks/fp_016',
+    'FP1': 'http://obofoundry.org/principles/fp-001-open.html',
+    'FP2': 'http://obofoundry.org/principles/fp-002-format.html',
+    'FP3': 'http://obofoundry.org/principles/fp-003-uris.html',
+    'FP4': 'http://obofoundry.org/principles/fp-004-versioning.html',
+    'FP5': 'http://obofoundry.org/principles/fp-005-delineated-content.html',
+    'FP6': 'http://obofoundry.org/principles/fp-006-textual-definitions.html',
+    'FP7': 'http://obofoundry.org/principles/fp-007-relations.html',
+    'FP8': 'http://obofoundry.org/principles/fp-008-documented.html',
+    'FP9': 'http://obofoundry.org/principles/fp-009-users.html',
+    'FP11': 'http://obofoundry.org/principles/fp-011-locus-of-authority.html',
+    'FP12': 'http://obofoundry.org/principles/fp-012-naming-conventions.html',
+    'FP16': 'http://obofoundry.org/principles/fp-016-maintenance.html',
     'ROBOT Report': 'http://robot.obolibrary.org/report'
 }
 

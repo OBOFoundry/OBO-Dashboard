@@ -11,12 +11,6 @@
                 <p class="lead"><b>Version</b>: {{ o.version }}</p>
                 <p class="lead" style="margin-top:-15px;"><b>Date run</b>: {{ o.date }}</p>
                 <p class="lead" style="margin-top:-15px;"><a href="dashboard.yml">View YAML</a></p>
-                <p style="text-align:center;">
-                    <small>Click on each link under "Check" to find out more about the check and how to fix issues.</small>
-                </p>
-                <p style="text-align:center; margin-top:-15px;">
-                    <small>Click on "View Report" under "Resources" for specific issues.</small>
-                </p>
                 {% set summary = o.summary %}
                 {% if 'comment' in summary %}
                     {% if summary.status == 'ERROR' %}
