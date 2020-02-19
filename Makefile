@@ -113,48 +113,50 @@ build/robot.jar: | build
 # TODO - only update whenever the ontology changes
 # Some sort of rebuild script which deletes the YAML file?
 .PRECIOUS: $(DASH)/%/dashboard.yml
-$(DASH)/%/dashboard.yml: | build/robot.jar
+$(DASH)/%/dashboard.yml: util/dashboard/dashboard.py | build/robot.jar
 	$(eval O := $(lastword $(subst /, , $(dir $@))))
 	@mkdir -p $(dir $@)
-	@./util/dashboard/dashboard.py $(O) dependencies/ontologies.yml dependencies/ro-merged.owl $(dir $@)
+	@./$< $(O) dependencies/ontologies.yml dependencies/ro-merged.owl $(dir $@)
 
 # Convert dashboard YAML to HTML page
 # Rebuild whenever YAML changes
 # Also prompts the builds of the HTML reports
 .PRECIOUS: $(DASH)/%/dashboard.html
-$(DASH)/%/dashboard.html: $(DASH)/%/dashboard.yml
-	@./util/create_ontology_html.py $(dir $@) $@
+$(DASH)/%/dashboard.html: util/create_ontology_html.py $(DASH)/%/dashboard.yml | \
+util/templates/ontology.html.jinja2
+	@ ./$< $(dir $@) $@
 	@echo "Created $@"
 
 # HTML output of ROBOT report
 .PRECIOUS: $(DASH)/%/robot_report.html
-$(DASH)/%/robot_report.html: $(DASH)/%/dashboard.yml
-	@./util/create_report_html.py \
-	 $(dir $@)/robot_report.tsv \
+$(DASH)/%/robot_report.html: util/create_report_html.py $(DASH)/%/dashboard.yml | \
+util/templates/report.html.jinja2
+	@ ./$< $(dir $@)/robot_report.tsv \
 	 "ROBOT Report - $(lastword $(subst /, , $(dir $@)))" \
 	 dependencies/obo_context.jsonld $@ || true
 
 # HTML output of IRI report
 .PRECIOUS: $(DASH)/%/fp3.html
-$(DASH)/%/fp3.html: $(DASH)/%/dashboard.yml
-	@./util/create_report_html.py \
-	 $(dir $@)/fp3.tsv \
+$(DASH)/%/fp3.html: util/create_report_html.py $(DASH)/%/dashboard.yml | \
+util/templates/report.html.jinja2
+	@ ./$< $(dir $@)/fp3.tsv \
 	 "IRI Report - $(lastword $(subst /, , $(dir $@)))" \
 	 dependencies/obo_context.jsonld $@ || true
 
 # HTML output of Relations report
 .PRECIOUS: $(DASH)/%/fp7.html
-$(DASH)/%/fp7.html: $(DASH)/%/dashboard.yml
-	@./util/create_report_html.py \
-	 $(dir $@)/fp7.tsv \
+$(DASH)/%/fp7.html: util/create_report_html.py $(DASH)/%/dashboard.yml | \
+util/templates/report.html.jinja2
+	@ ./$< $(dir $@)/fp7.tsv \
 	 "Relations Report - $(lastword $(subst /, , $(dir $@)))" \
 	 dependencies/obo_context.jsonld $@ || true
 
 # Combined summary for all OBO foundry ontologies
 # Rebuild whenever an HTML page changes
 .PRECIOUS: $(DASH)/index.html
-$(DASH)/index.html: $(HTML_REPORTS) $(ROBOT_REPORTS) $(FP3_REPORTS) $(FP7_REPORTS)
-	./util/create_dashboard_html.py $(DASH) dependencies/ontologies.yml $@
+$(DASH)/index.html: util/create_dashboard_html.py | \
+$(HTML_REPORTS) $(ROBOT_REPORTS) $(FP3_REPORTS) $(FP7_REPORTS) util/templates/index.html.jinja2
+	./$< $(DASH) dependencies/ontologies.yml $@
 
 .PRECIOUS: $(DASH)/about.html
 $(DASH)/about.html: docs/about.md util/templates/about.html.jinja2
