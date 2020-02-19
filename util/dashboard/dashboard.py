@@ -56,7 +56,7 @@ def main(args):
 
     # Launch the JVM using the robot JAR
     py4j.java_gateway.launch_gateway(
-        jarpath='../robot/bin/robot.jar',
+        jarpath='build/robot.jar',
         classpath='org.obolibrary.robot.PythonOperation',
         die_on_exit=True,
         port=25333)

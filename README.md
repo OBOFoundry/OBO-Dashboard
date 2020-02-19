@@ -27,26 +27,34 @@ The results of all the checks are summarized by taking the worst result of all t
 
 ## Developers
 
-This code is written for a Unix (Linux/macOS) environment, and depends on standard Unix utilities, Python 3, and Java. See `requirements.txt` for the specific Python library dependencies, and the `Makefile` for all the details.
+This code is written for a Unix (Linux/macOS) environment, and depends on standard Unix utilities, Python 3, and Java. See `requirements.txt` for the specific Python library dependencies, and the `Makefile` for all the details. You can install all Python libraries with:
+```
+python3 -m pip install -r requirements.txt
+```
 
 Once dependencies are installed, the first step is to fetch data from the [OBO Registry](https://github.com/OBOFoundry/OBOFoundry.github.io):
 
 ```
-make dependencies
+make prepare
 ```
 
 The second step is to build the dashboard. This will fetch the OWL file for every OBO ontology, some of which are around 1GB in size, and run reports over them, some of which can take a long time. Expect a full build to take something like 6-7 hours.
 
 ```
-make dashboard
+make db
 ```
 
-The results are put in the `build/dashboard/` directory. Consider running `make clean` to remove all generated files before starting a fresh build.
+The results are put in the `build/dashboard/` directory. Consider running `make clean` to remove all generated files before starting a fresh build, as the index file will contain everything in the dashboard directory.
+
+Once the dashboard is complete, you can compress the build into `dashboard.zip`. Note that this will compress *everything* in the dashboard directory, even if you ran the dashboard on a select set of projects (see below).
+```
+make dashboard.zip
+```
 
 You can run the dashboard on a select list of OBO projects by setting the `ONTS` environment variable:
 
 ```
-ONTS="obi go" make dashboard
+ONTS="obi go" make db
 ```
 
 By manually placing OWL files in the appropriate places, you can run the dashboard on a development version of your ontology rather than the published version. For example, you could place the development version of OBI in `build/dashboard/obi/obi.owl`.
