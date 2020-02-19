@@ -61,14 +61,6 @@ def main(args):
         die_on_exit=True,
         port=25333)
 
-    # Wait until the JVM has a process ID
-    # That way we know it's active
-    res = ''
-    while res == '':
-        pid = subprocess.Popen(['lsof', '-t', '-i:25333'],
-                               stdout=subprocess.PIPE).communicate()[0]
-        res = pid.decode('utf-8')
-
     # Activate gateway to JVM
     gateway = JavaGateway()
     robot_gateway = gateway.jvm.org.obolibrary.robot
