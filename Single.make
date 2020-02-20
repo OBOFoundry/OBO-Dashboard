@@ -66,17 +66,18 @@ dashboard/assets/%.svg: | dashboard/assets
 ### DASHBOARD FILES ###
 # ------------------- #
 
+# Either SOURCE or ONT must be specified
+SOURCE := $(or ${SOURCE}, ${SOURCE}, build/ontologies/$(ONT).owl)
+
+ONT := $(or ${ONT}, ${ONT}, $(SOURCE))
+
 # Namespaces may be mixed case
 # Retrieve from obo_context so that we get the correct ones
 BASE_NS := $(shell python3 util/get_base_ns.py $(ONT) dependencies/obo_context.jsonld)
 
-# Retrieve the ontology file if it doesn't exist
-$(ONT).owl:
-	curl -Lk -o $@ http://purl.obolibrary.org/obo/$@
-
-# Create the base ontology file
-build/ontologies/$(ONT).owl: $(ONT).owl | build/ontologies build/robot.jar
-	$(ROBOT) merge --input $< \
+# Create the base ontology file if it's not present
+$(SOURCE): | build/ontologies build/robot.jar
+	$(ROBOT) merge --input-iri http://purl.obolibrary.org/obo/$(ONT).owl \
 	 remove --base-iri $(BASE_NS) --axioms external -p false --output $@
 
 # TODO - only update whenever the ontology changes
