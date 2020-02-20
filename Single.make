@@ -6,7 +6,7 @@ all: dashboard/$(ONT)/dashboard.html dashboard/$(ONT)/robot_report.html dashboar
 # ------------------- #
 
 # Create needed directories
-dependencies build dashboard:
+build dashboard:
 	mkdir -p $@
 
 dashboard/assets: dashboard
@@ -29,31 +29,6 @@ build/robot.jar: | build
 ### EXTERNAL DEPENDENCIES ###
 # ------------------------- #
 
-prepare: dependencies/obo_context.jsonld dependencies/license.json dependencies/contact.json dependencies/ro-merged.owl
-
-# Registry YAML
-dependencies/ontologies.yml: | dependencies
-	curl -Lk -o $@ \
-	https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml
-
-# OBO Prefixes
-dependencies/obo_context.jsonld: | dependencies
-	curl -Lk -o $@ \
-	https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/obo_context.jsonld
-
-# Schemas
-dependencies/license.json: | dependencies
-	curl -Lk -o $@ \
-	https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/util/schema/license.json
-
-dependencies/contact.json: | dependencies
-	curl -Lk -o $@ \
-	https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/util/schema/contact.json
-
-# RO is used to compare properties
-dependencies/ro-merged.owl: | dependencies build/robot.jar
-	$(ROBOT) merge --input-iri http://purl.obolibrary.org/obo/ro.owl --output $@
-
 # Assets contains SVGs for icons
 # These will be included in the ZIP
 SVGS := dashboard/assets/check.svg dashboard/assets/info.svg dashboard/assets/warning.svg dashboard/assets/x.svg
@@ -68,8 +43,6 @@ dashboard/assets/%.svg: | dashboard/assets
 
 # Either SOURCE or ONT must be specified
 SOURCE := $(or ${SOURCE}, ${SOURCE}, build/ontologies/$(ONT).owl)
-
-ONT := $(or ${ONT}, ${ONT}, $(SOURCE))
 
 # Namespaces may be mixed case
 # Retrieve from obo_context so that we get the correct ones
