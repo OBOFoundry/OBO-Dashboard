@@ -63,12 +63,14 @@ By manually placing OWL files in the appropriate places, you can run the dashboa
 
 ### Running Over Single Ontologies
 
+As with running over all ontologies, you must first run `make prepare` to retrieve the required dependencies.
+
 You can also run over a single ontology without creating an index file using the `Single.make` file. You *must* specify the `ONT` variable to use this.
 ```
 ONT=obi make -f Single.make all
 ```
 
-If `obi.owl` exists in the working directory, that file will be used. Otherwise, the file will be downloaded.
-
-This will create all the dashboard files in `dashboard/obi/`. Please note that this also requires running `make prepare` first.
-
+This will retrieve OBI and create a base version of it in `build/ontologies`. If you wish to use an existing ontology, you can also specify a `SOURCE`.
+```
+ONT=obi SOURCE=obi.owl make -f Single.make all
+```
