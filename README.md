@@ -38,6 +38,8 @@ Once dependencies are installed, the first step is to fetch data from the [OBO R
 make prepare
 ```
 
+### Running Over Multiple Ontologies 
+
 The second step is to build the dashboard. This will fetch the OWL file for every OBO ontology, some of which are around 1GB in size, and run reports over them, some of which can take a long time. Expect a full build to take something like 6-7 hours.
 
 ```
@@ -57,4 +59,16 @@ You can run the dashboard on a select list of OBO projects by setting the `ONTS`
 ONTS="obi go" make db
 ```
 
-By manually placing OWL files in the appropriate places, you can run the dashboard on a development version of your ontology rather than the published version. For example, you could place the development version of OBI in `build/dashboard/obi/obi.owl`.
+By manually placing OWL files in the appropriate places, you can run the dashboard on a development version of your ontology rather than the published version. For example, you could place the development version of OBI in `build/ontologies/obi.owl`.
+
+### Running Over Single Ontologies
+
+You can also run over a single ontology without creating an index file using the `Single.make` file. You *must* specify the `ONT` variable to use this.
+```
+ONT=obi make -f Single.make all
+```
+
+If `obi.owl` exists in the working directory, that file will be used. Otherwise, the file will be downloaded.
+
+This will create all the dashboard files in `dashboard/obi/`. Please note that this also requires running `make prepare` first.
+

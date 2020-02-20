@@ -25,7 +25,6 @@ import os
 import unicodedata
 
 import dash_utils
-from dash_utils import format_msg
 
 owl_deprecated = 'http://www.w3.org/2002/07/owl#deprecated'
 
@@ -34,7 +33,7 @@ ro_match = '{0} labels match RO labels.'
 non_ro = '{0} non-RO properties used.'
 
 
-def has_valid_relations(namespace, ontology, ro_props):
+def has_valid_relations(namespace, ontology, ro_props, ontology_dir):
     """Check fp 7 - relations.
 
     Retrieve all non-obsolete properties from the ontology. Compare their
@@ -48,6 +47,7 @@ def has_valid_relations(namespace, ontology, ro_props):
         namespace (str): ontology ID
         ontology (OWLOntology): ontology object
         ro_props (dict): map of RO property label to IRI
+        ontology_dir (str):
 
     Return:
         PASS or violation level with optional help message
@@ -59,17 +59,16 @@ def has_valid_relations(namespace, ontology, ro_props):
     if namespace == 'ro':
         return {'status': 'PASS'}
 
-    props = get_properties(namespace, ontology)
+    props = get_properties(ontology)
 
     # get results (PASS, INFO, or ERROR)
-    return check_properties(namespace, props, ro_props)
+    return check_properties(props, ro_props, ontology_dir)
 
 
-def get_properties(namespace, ontology):
+def get_properties(ontology):
     """Create a map of normalized property label to property IRI.
 
     Args:
-        namespace (str): ontology ID
         ontology (OWLOntology): ontology object
 
     Return:
@@ -105,7 +104,8 @@ def get_properties(namespace, ontology):
     for dp in ontology.getDataPropertiesInSignature():
         dp_iri = dp.getIRI()
         obsolete = False
-        for ann in ontology.getAnnotationAssertionAxioms(op_iri):
+        normal = None
+        for ann in ontology.getAnnotationAssertionAxioms(dp_iri):
             ann_prop = ann.getProperty()
             if ann_prop.isLabel():
                 # find the label
@@ -127,7 +127,7 @@ def get_properties(namespace, ontology):
     return props
 
 
-def big_has_valid_relations(namespace, file, ro_props):
+def big_has_valid_relations(namespace, file, ro_props, ontology_dir):
     """Check fp 7 - relations - on large ontologies.
 
     Retrieve all non-obsolete properties from the ontology. Compare their
@@ -141,6 +141,7 @@ def big_has_valid_relations(namespace, file, ro_props):
         namespace (str): ontology ID
         file (str): path to ontology file
         ro_props (dict): map of RO property label to IRI
+        ontology_dir (str):
 
     Return:
         PASS or violation level with optional help message
@@ -152,18 +153,17 @@ def big_has_valid_relations(namespace, file, ro_props):
     if namespace == 'ro':
         return {'status': 'PASS'}
 
-    props = big_get_properties(namespace, file)
+    props = big_get_properties(file)
 
     # get results (PASS, INFO, or ERROR)
-    return check_properties(namespace, props, ro_props)
+    return check_properties(props, ro_props, ontology_dir)
 
 
-def big_get_properties(namespace, file):
+def big_get_properties(file):
     """Create a map of normalized property label to property IRI for large
     ontologies by parsing RDF/XML.
 
     Args:
-        namespace (str): ontology ID
         file (str): path to ontology file
 
     Return:
@@ -171,23 +171,20 @@ def big_get_properties(namespace, file):
     """
     # TODO: handle different prefixes
     props = {}
-    label = None
-    prefixes = True
     with open(file, 'r') as f:
         p_iri = None
         for line in f:
             if 'owl:ObjectProperty rdf:about' in line:
                 try:
                     p_iri = dash_utils.get_resource_value(line)
-                except Exception as e:
+                except Exception:
                     print('Unable to get IRI from line: ' + line)
             elif p_iri and 'rdfs:label' in line:
-                label = None
                 try:
                     label = dash_utils.get_literal_value(line)
                     normal = normalize_label(label)
                     props[normal] = p_iri
-                except Exception as e:
+                except Exception:
                     # continue on to the next line
                     # might be a line break between (like RNAO)
                     print('Unable to get label from line: ' + line)
@@ -212,13 +209,13 @@ def normalize_label(s):
     return unicodedata.normalize('NFC', clean)
 
 
-def check_properties(namespace, props, ro_props):
+def check_properties(props, ro_props, ontology_dir):
     """Compare the properties from an ontology to the RO properties.
 
     Args:
-        namespace (str): ontology ID
         props (dict): map of ontology property label to IRI
         ro_props (dict): map of RO property label to IRI
+        ontology_dir (str):
 
     Return:
         PASS or violation level with optional help message
@@ -252,7 +249,7 @@ def check_properties(namespace, props, ro_props):
 
     # maybe save a report file
     if len(same_label) > 0 or len(not_ro) > 0:
-        save_invalid_relations(namespace, ro_props, same_label, not_ro)
+        save_invalid_relations(ro_props, same_label, not_ro, ontology_dir)
 
     # return the results
     if len(same_label) > 0 and len(not_ro) > 0:
@@ -272,18 +269,18 @@ def check_properties(namespace, props, ro_props):
         return {'status': 'PASS'}
 
 
-def save_invalid_relations(namespace, ro_props, same_label, not_ro):
+def save_invalid_relations(ro_props, same_label, not_ro, ontology_dir):
     """Save any violations to a TSV file in the reports directory.
 
     Args:
-        namespace (str): ontology ID
         ro_props (dict): map of RO property label to IRI
         same_label (dict): map of property label to IRI that matches RO
                            property label with a different IRI
         not_ro (dict): map of property label to IRI that does not have an RO
                        IRI
+        ontology_dir (str):
     """
-    file = 'dashboard/{0}/fp7.tsv'.format(namespace)
+    file = '{0}/fp7.tsv'.format(ontology_dir)
     with open(file, 'w+') as f:
         f.write('IRI\tLabel\tIssue\n')
         for iri, label in same_label.items():

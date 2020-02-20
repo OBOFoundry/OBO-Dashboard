@@ -25,10 +25,7 @@
 ## All entity IRIs are retrieved from the ontology, excluding annotation properties. Annotation properties may use hashtags and words due to legacy OBO conversions for subset properties. All other IRIs are checked if they are in the ontology's namespace. If the IRI begins with the ontology namespace, the next character must be an underscore. If not, this is an error. The IRI is also compared to a regex pattern to check if the local ID after the underscore is numeric. If not, this is a warning.
 
 import dash_utils
-import os
 import re
-
-from dash_utils import format_msg
 
 iri_pattern = r'http:\/\/purl\.obolibrary\.org\/obo\/%s_[0-9]{1,9}'
 owl_deprecated = 'http://www.w3.org/2002/07/owl#deprecated'
@@ -37,7 +34,7 @@ error_msg = '{0} invalid IRIs'
 warn_msg = '{0} warnings on IRIs'
 
 
-def has_valid_uris(robot_gateway, namespace, ontology):
+def has_valid_uris(robot_gateway, namespace, ontology, ontology_dir):
     """Check FP 3 - URIs.
 
     This check ensures that all ontology entities follow NS_LOCALID.
@@ -86,10 +83,10 @@ def has_valid_uris(robot_gateway, namespace, ontology):
         elif check == 'WARN':
             warn.append(iri)
 
-    return save_invalid_uris(namespace, error, warn)
+    return save_invalid_uris(error, warn, ontology_dir)
 
 
-def big_has_valid_uris(namespace, file):
+def big_has_valid_uris(namespace, file, ontology_dir):
     """Check FP 3 - URIs on a big ontology.
 
     This check ensures that all ontology entities follow NS_LOCALID.
@@ -103,6 +100,7 @@ def big_has_valid_uris(namespace, file):
     Args:
         namespace (str): ontology ID
         file (str): path to ontology file
+        ontology_dir (str):
 
     Return:
         INFO if ontology IRIs cannot be parsed. ERROR if any errors, WARN if
@@ -165,7 +163,7 @@ def big_has_valid_uris(namespace, file):
         return {'status': 'ERROR',
                 'comment': 'Unable to parse ontology'}
 
-    return save_invalid_uris(namespace, error, warn)
+    return save_invalid_uris(error, warn, ontology_dir)
 
 
 def check_uri(namespace, iri):
@@ -184,7 +182,7 @@ def check_uri(namespace, iri):
         return True
     if iri.startswith(namespace):
         # all NS IRIs must follow NS_
-        if not iri.startwith(namespace + '_'):
+        if not iri.startswith(namespace + '_'):
             return 'ERROR'
         # it is recommended to follow NS_NUMID
         elif not re.match(pattern, iri, re.IGNORECASE):
@@ -192,20 +190,19 @@ def check_uri(namespace, iri):
     return True
 
 
-def save_invalid_uris(ns, error, warn):
+def save_invalid_uris(error, warn, ontology_dir):
     """Save invalid (error or warning) IRIs to a report file
-    (reports/dashboard/*/fp3.tsv).
 
     Args:
-        ns (str): ontology ID
         error (list): list of ERROR IRIs
         warn (list): list of WARN IRIs
+        ontology_dir (str):
 
     Return:
         ERROR or WARN with detailed message, or PASS if no errors or warnings.
     """
     if len(error) > 0 or len(warn) > 0:
-        file = 'dashboard/{0}/fp3.tsv'.format(ns)
+        file = '{0}/fp3.tsv'.format(ontology_dir)
         with open(file, 'w+') as f:
             for e in error:
                 f.write('ERROR\t{0}\n'.format(e))

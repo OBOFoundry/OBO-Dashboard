@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
 
 import os
-import subprocess
-import time
-
-from dash_utils import format_msg
 from py4j.protocol import Py4JJavaError
 
 
-def run_report(robot_gateway, io_helper, ns, ontology):
+def run_report(robot_gateway, io_helper, ontology):
     """Run and return a ROBOT Report.
 
     Args:
         robot_gateway (Gateway): py4j gateway to ROBOT
         io_helper (IOHelper): ROBOT IOHelper
-        ns (str): ontology namespace
         ontology (OWLOntology): ontology object
 
     Return:
@@ -27,7 +22,6 @@ def run_report(robot_gateway, io_helper, ns, ontology):
     report_options['labels'] = 'true'
 
     # run the report
-    report = None
     try:
         report = robot_gateway.ReportOperation.getReport(
                 ontology, io_helper, report_options)
@@ -47,7 +41,9 @@ class BigReport:
         """Instantiate a new BigReport object by running a report over the
         ontology file.
         """
-        tdb_dir = 'build/ontologies/.{0}-tdb'.format(ns)
+        tdb_dir = '.tdb/.{0}-tdb'.format(ns)
+        if not os.path.exists('.tdb'):
+            os.mkdir('.tdb')
         report_options = robot_gateway.ReportOperation.getDefaultOptions()
         report_options['tdb-directory'] = tdb_dir
         report_options['limit'] = '1'
@@ -56,11 +52,8 @@ class BigReport:
 
         self.good_format = True
         try:
-            print(
-                'Loading triples to {0} and running report...'.format(tdb_dir),
-                flush=True)
-            report = robot_gateway.ReportOperation.getTDBReport(
-                file, report_options)
+            print('Loading triples to {0} and running report...'.format(tdb_dir), flush=True)
+            report = robot_gateway.ReportOperation.getTDBReport(file, report_options)
         except Py4JJavaError as err:
             msg = err.java_exception.getMessage()
             print('REPORT FAILED\n' + str(msg))
@@ -82,51 +75,20 @@ class BigReport:
         return self.get_good_format
 
 
-def run_big_report(robot_gateway, ns, file):
-    """Run a Report over a big ontology and return the Report object.
-    This is suited for big ontologies as the Report queries are run over a
-    dataset on disk instead of in memory.
-
-    Args:
-        robot_gateway (Gateway): py4j gateway to ROBOT
-        ns (str): ontology namespace
-        file (str): path to ontology file
-
-    Returns:
-        Report object
-    """
-    tdb_dir = 'build/ontologies/.{0}-tdb'.format(ns)
-    report_options = robot_gateway.ReportOperation.getDefaultOptions()
-    report_options['tdb-directory'] = tdb_dir
-    report_options['limit'] = '10000'
-    report_options['tdb'] = 'true'
-    report = None
-    try:
-        print('Loading triples to {0} and running report...'.format(tdb_dir))
-        report = robot_gateway.ReportOperation.getTDBReport(
-            file, report_options)
-    except Py4JJavaError as err:
-        msg = err.java_exception.getMessage()
-        print('REPORT FAILED\n' + str(msg))
-        return None
-    return report
-
-
-def process_report(robot_gateway, ns, report):
+def process_report(robot_gateway, report, ontology_dir):
     """Save the Report and return the status.
 
     Args:
         robot_gateway (Gateway): py4j gateway to ROBOT
-        ns (str): ontology namespace
         report (Report): completed Report object
+        ontology_dir (str):
 
     Return:
         ERROR, WARN, INFO, or PASS with optional help message
     """
     if report is None:
-        return {'status': 'INFO',
-                'comment': 'ROBOT Report could not be generated.'}
-    outfile = 'dashboard/{0}/robot_report.tsv'.format(ns)
+        return {'status': 'INFO', 'comment': 'ROBOT Report could not be generated.'}
+    outfile = '{0}/robot_report.tsv'.format(ontology_dir)
 
     # print summary to terminal and save to report file
     report_options = robot_gateway.ReportOperation.getDefaultOptions()
