@@ -5,7 +5,6 @@ import gc
 import json
 import os
 import py4j
-import subprocess
 import sys
 import yaml
 
@@ -24,42 +23,42 @@ import fp_012
 import fp_016
 import report_utils
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
+from io import TextIOWrapper
 from py4j.java_gateway import JavaGateway
-from py4j.protocol import Py4JNetworkError
 
 
-def main(args):
-    """Usage: ./dashboard.py <namespace> <registry> <relations> <outdir>
-
-    Create a result YAML file for the ontology at given namespace.
-    Check the registry data and the ontology file.
-    Place dashboard.yml and any reports in the provided outdir.
-    """
-    global domain_map, gateway, io_helper, robot_gateway, ro_props, version_iri
+def run():
+    # ---------------------------- #
+    # PREPARE INPUT
+    # ---------------------------- #
 
     # parse input args
-    parser = ArgumentParser(description='Create a dashboard file')
-    parser.add_argument('namespace',
-                        type=str,
-                        help='Ontology namespace to run dashboard on')
-    parser.add_argument('registry',
-                        type=str,
-                        help='Ontology registry data')
-    parser.add_argument('relations',
-                        type=str,
-                        help='Path to RO ontology file')
-    parser.add_argument('outdir',
-                        type=str,
-                        help='Dashboard output directory')
+    parser = ArgumentParser(description='Create dashboard files')
+    parser.add_argument('ontology', type=str, help='Input ontology file')
+    parser.add_argument('registry', type=FileType('r'), help='Registry YAML file')
+    parser.add_argument('license', type=FileType('r'), help='License JSON schema')
+    parser.add_argument('contact', type=FileType('r'), help='Contact JSON schema')
+    parser.add_argument('relations', type=FileType('r'), help='Table containing RO IRIs and labels')
+    parser.add_argument('outdir', type=str, help='Output directory')
     args = parser.parse_args()
+
+    owl = os.path.basename(args.ontology)
+    namespace = os.path.splitext(owl)[0]
+
+    ontology_file = args.ontology
+    registry = args.registry
+    license_schema = json.load(args.license)
+    contact_schema = json.load(args.contact)
+    ro_file = args.relations
+
+    # Create the build directory for this ontology
+    ontology_dir = args.outdir
+    os.makedirs(ontology_dir, exist_ok=True)
 
     # Launch the JVM using the robot JAR
     py4j.java_gateway.launch_gateway(
-        jarpath='build/robot.jar',
-        classpath='org.obolibrary.robot.PythonOperation',
-        die_on_exit=True,
-        port=25333)
+        jarpath='build/robot.jar', classpath='org.obolibrary.robot.PythonOperation', die_on_exit=True, port=25333)
 
     # Activate gateway to JVM
     gateway = JavaGateway()
@@ -68,278 +67,174 @@ def main(args):
     # IOHelper for working with ontologies
     io_helper = robot_gateway.IOHelper()
 
-    # IO files
-    namespace = args.namespace
-    yaml_infile = args.registry
-    out_dir = args.outdir
-    if not out_dir.endswith('/'):
-        out_dir = out_dir + '/'
-    outfile = '{0}dashboard.yml'.format(out_dir)
+    # Handle ontology file
+    big = namespace in BIG_ONTS
+    if not big:
+        # Load ontology as OWLOntology object
+        if not ontology_file:
+            ont_or_file = None
+        try:
+            ont_or_file = io_helper.loadOntology(ontology_file)
+        except Exception:
+            print('ERROR: Unable to load \'{0}\''.format(ontology_fil), flush=True)
+            ont_or_file = None
+        # Get the Verison IRI
+        version_iri = dash_utils.get_version_iri(ont_or_file)
+    else:
+        # Just provide path to file
+        ont_or_file = ontology_file
+        # Get the version IRI by text parsing
+        version_iri = dash_utils.get_big_version_iri(ont_or_file)
 
-    # Maybe run special "big" checks
-    big = False
-    if namespace in big_onts:
-        big = True
+    # Get the registry data
+    yaml_data = yaml.load(registry, Loader=yaml.SafeLoader)
+    yaml_data = yaml_data['ontologies']
+    data = dash_utils.get_data(namespace, yaml_data)
 
-    # Load the data
-    all_data = load_data(yaml_infile)
-    data = get_data(namespace, all_data)
-
-    # Get all other registry domains to compare to this ontology domain
-    domain_map = get_domains(all_data)
-
-    # RO properties for relations check
-    ro = load_ontology_from_file(args.relations)
-    ro_props = fp_007.get_properties('ro', ro)
-
-    # Remove RO from memory
-    del ro
-
-    # Run checks and save results
-    res = exec_checks(namespace, data, big)
-    save_results(namespace, res, outfile)
-
-    # Clean up
-    gc.collect()
-    sys.exit(0)
-
-
-def exec_checks(ns, data, big):
-    """Given a namespace, the registry data, and a boolean if "big",
-    run all dashboard checks for the ontology at the namespace.
-    """
-    global version_iri
-
-    version_iri = None
+    # Map of all ontologies to their domains
+    domain_map = dash_utils.get_domains(yaml_data)
+    # Map of RO labels to RO IRIs
+    ro_props = fp_007.get_ro_properties(ro_file)
 
     if 'is_obsolete' in data and data['is_obsolete'] is 'true':
         # do not run on obsolete ontologies
-        print('{0} is obsolete and will not be checked...'.format(ns),
-              flush=True)
-        gc.collect()
+        print('{0} is obsolete and will not be checked...'.format(namespace), flush=True)
         sys.exit(0)
-    try:
-        print('-----------------\nChecking ' + ns, flush=True)
-        if big:
-            file = download_ontology(ns)
-            if file:
-                version_iri = dash_utils.get_big_version_iri(file)
-            return big_check_principles(file, ns, data)
-        else:
-            ont_file = fetch_base_ontology(ns)
-            ont = load_ontology_from_file(ont_file)
-            if ont:
-                version_iri = dash_utils.get_version_iri(ont)
-            return check_principles(ont, ns, data)
-    except Exception as e:
-        # Could not complete, exit with status 1
-        print(
-            'ERROR: Unable to finish check on {0}\nCAUSE:\n{1}'.format(
-                ns, str(e)),
-            flush=True)
-        sys.exit(1)
 
+    # ---------------------------- #
+    # RUN CHECKS
+    # ---------------------------- #
 
-def check_principles(ont, ns, data):
-    """Given an ontology ID and the corresponding data from the YAML,
-    run the automated principle validation. Return a map of results.
-    """
-    if ont:
-        print('Running ROBOT report on {0}...'.format(ns), flush=True)
-        report = report_utils.run_report(robot_gateway, io_helper, ns, ont)
-    else:
-        report = None
+    print('-----------------\nChecking ' + namespace, flush=True)
 
-    # run each principle check
-    check_map = run_checks(robot_gateway, ns, ont, None, report, data, None)
-
-    # remove from memory
-    del report
-    del ont
-
-    return check_map
-
-
-def big_check_principles(file, ns, data):
-    """Given an ontology ID and the corresponding data from the YAML,
-    run the automated principle validation. Return a map of results.
-    """
+    # Get the report based on if it's big or not
     report = None
     good_format = None
-    if ns != 'gaz':
-        # Report currently takes TOO LONG for GAZ
-        print('Running ROBOT report on {0}...'.format(ns), flush=True)
-        report_obj = report_utils.BigReport(robot_gateway, ns, file)
-        report = report_obj.get_report()
-        good_format = report_obj.get_good_format()
+    if big:
+        if namespace != 'gaz':
+            # Report currently takes TOO LONG for GAZ
+            print('Running ROBOT report on {0}...'.format(namespace), flush=True)
+            report_obj = report_utils.BigReport(robot_gateway, namespace, ont_or_file)
+            report = report_obj.get_report()
+            good_format = report_obj.get_good_format()
+    else:
+        if ont_or_file:
+            # Ontology is not None
+            print('Running ROBOT report on {0}...'.format(namespace), flush=True)
+            report = report_utils.run_report(robot_gateway, io_helper, ont_or_file)
 
-    # run each principle check
-    check_map = run_checks(
-        robot_gateway, ns, None, file, report, data, good_format)
-
-    # remove from memory
-    if ns != 'gaz':
-        del report_obj
-        del report
-
-    return check_map
-
-
-def run_checks(robot_gateway, ns, ont, file, report, data, good_format):
-    """Given a robot gateway, an ontology namespace, an ontology object (or
-    None), a path to ontology (or None), a ROBOT report object, the
-    registry data, and a boolean indicating good formatting for large
-    ontologies (None for regular ontologies), run all the principle checks and
-    return a map with results.
-    """
+    # Execute the numbered checks
     check_map = {}
-
     try:
-        if file:
-            check_map[1] = fp_001.big_is_open(file, data)
+        if big:
+            check_map[1] = fp_001.big_is_open(ont_or_file, data, license_schema)
         else:
-            check_map[1] = fp_001.is_open(ont, data)
+            check_map[1] = fp_001.is_open(ont_or_file, data, license_schema)
     except Exception as e:
         check_map[1] = 'INFO|unable to run check 1'
-        print('ERROR: unable to run check 1 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 1 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
     try:
-        if file:
+        if big:
             check_map[2] = fp_002.big_is_common_format(good_format)
         else:
-            check_map[2] = fp_002.is_common_format(ont)
+            check_map[2] = fp_002.is_common_format(ont_or_file)
     except Exception as e:
         check_map[2] = 'INFO|unable to run check 2'
-        print('ERROR: unable to run check 2 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 2 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
     try:
-        if file:
-            check_map[3] = fp_003.big_has_valid_uris(ns, file)
+        if big:
+            check_map[3] = fp_003.big_has_valid_uris(namespace, ont_or_file, ontology_dir)
         else:
-            check_map[3] = fp_003.has_valid_uris(robot_gateway, ns, ont)
+            check_map[3] = fp_003.has_valid_uris(robot_gateway, namespace, ont_or_file, ontology_dir)
     except Exception as e:
         check_map[3] = 'INFO|unable to run check 3'
-        print('ERROR: unable to run check 3 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 3 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
     try:
-        if file:
-            check_map[4] = fp_004.big_has_versioning(file)
+        if big:
+            check_map[4] = fp_004.big_has_versioning(ont_or_file)
         else:
-            check_map[4] = fp_004.has_versioning(ont)
+            check_map[4] = fp_004.has_versioning(ont_or_file)
     except Exception as e:
         check_map[4] = 'INFO|unable to run check 4'
-        print('ERROR: unable to run check 4 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 4 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
     try:
         check_map[5] = fp_005.has_scope(data, domain_map)
     except Exception as e:
         check_map[5] = 'INFO|unable to run check 5'
-        print('ERROR: unable to run check 5 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 5 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
     try:
         check_map[6] = fp_006.has_valid_definitions(report)
     except Exception as e:
         check_map[6] = 'INFO|unable to run check 6'
-        print('ERROR: unable to run check 6 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 6 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
     try:
-        if file:
-            check_map[7] = fp_007.big_has_valid_relations(ns, file, ro_props)
+        if big:
+            check_map[7] = fp_007.big_has_valid_relations(namespace, ont_or_file, ro_props, ontology_dir)
         else:
-            check_map[7] = fp_007.has_valid_relations(ns, ont, ro_props)
+            check_map[7] = fp_007.has_valid_relations(namespace, ont_or_file, ro_props, ontology_dir)
     except Exception as e:
         check_map[7] = 'INFO|unable to run check 7'
-        print('ERROR: unable to run check 7 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 7 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
     try:
         check_map[8] = fp_008.has_documentation(data)
     except Exception as e:
         check_map[8] = 'INFO|unable to run check 8'
-        print('ERROR: unable to run check 8 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 8 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
     try:
         check_map[9] = fp_009.has_users(data)
     except Exception as e:
         check_map[9] = 'INFO|unable to run check 9'
-        print('ERROR: unable to run check 9 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 9 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
     try:
-        check_map[11] = fp_011.has_contact(data)
+        check_map[11] = fp_011.has_contact(data, contact_schema)
     except Exception as e:
         check_map[11] = 'INFO|unable to run check 11'
-        print('ERROR: unable to run check 11 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 11 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
     try:
         check_map[12] = fp_012.has_valid_labels(report)
     except Exception as e:
         check_map[12] = 'INFO|unable to run check 12'
-        print('ERROR: unable to run check 12 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 12 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
     try:
-        if file:
-            check_map[16] = fp_016.big_is_maintained(file)
+        if big:
+            check_map[16] = fp_016.big_is_maintained(ont_or_file)
         else:
-            check_map[16] = fp_016.is_maintained(ont)
+            check_map[16] = fp_016.is_maintained(ont_or_file)
     except Exception as e:
         check_map[16] = 'INFO|unable to run check 16'
-        print('ERROR: unable to run check 16 for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to run check 16 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
-    # finally, add the report results to the dashboard
+    # finally, add the report results to the dashboard and save the report
     try:
-        check_map['report'] = report_utils.process_report(
-            robot_gateway, ns, report)
+        check_map['report'] = report_utils.process_report(robot_gateway, report, ontology_dir)
     except Exception as e:
         check_map['report'] = 'INFO|unable to save report'
-        print('ERROR: unable to save ROBOT report for {0}\nCAUSE:\n{1}'.format(
-                  ns, str(e)),
-              flush=True)
+        print('ERROR: unable to save ROBOT report for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
-    return check_map
+    # ---------------------------- #
+    # SAVE RESULTS
+    # ---------------------------- #
 
-
-def save_results(namespace, check_map, outfile):
-    """Given a namespace, a check map, and an output file,
-    save the results from the check map to the output file.
-    """
-    global version_iri
-
-    lines = []
-
-    # Track overall status
+    # Parse results
     err = 0
     warn = 0
     info = 0
-
     all_checks = {}
 
     for check, result in check_map.items():
         if result is None or 'status' not in result:
-            print('Missing result for check {0}'.format(check),
-                  flush=True)
+            print('Missing result for check {0}'.format(check), flush=True)
             continue
 
         status = result['status']
@@ -351,13 +246,12 @@ def save_results(namespace, check_map, outfile):
         elif status == 'INFO':
             info += 1
         elif status != 'PASS':
-            print('Unknown status "{0}" for check {1}'.format(status, check),
-                  flush=True)
+            print('Unknown status "{0}" for check {1}'.format(status, check), flush=True)
             continue
 
         key = check
-        if check in principle_map:
-            key = principle_map[check]
+        if check in PRINCIPLE_MAP:
+            key = PRINCIPLE_MAP[check]
         elif check == 'report':
             key = 'ROBOT Report'
 
@@ -378,141 +272,22 @@ def save_results(namespace, check_map, outfile):
         summary_comment = ''
 
     date = datetime.datetime.today()
+    save_data = {'namespace': namespace, 'version': version_iri, 'date': date.strftime('%Y-%m-%d'),
+                 'summary': {'status': summary, 'comment': summary_comment}, 'results': all_checks}
 
-    data = {}
-    data['namespace'] = namespace
-    data['version'] = version_iri
-    data['date'] = date.strftime('%Y-%m-%d')
-    data['summary'] = {'status': summary, 'comment': summary_comment}
-    data['results'] = all_checks
-
+    # Save to YAML file
+    outfile = os.path.join(ontology_dir, 'dashboard.yml')
     print('Saving results to {0}'.format(outfile))
-
     with open(outfile, 'w+') as f:
-        yaml.dump(data, f)
+        yaml.dump(save_data, f)
+
+    sys.exit(0)
 
 
-def load_data(yaml_infile):
-    """Given the registry YAML file, load the data.
-    Return a map of ontology ID to data item.
-    """
-    with open(yaml_infile, 'r') as s:
-        data = yaml.load(s, Loader=yaml.SafeLoader)
-    return data['ontologies']
+BIG_ONTS = ['bto', 'chebi', 'dron', 'gaz', 'ncbitaxon', 'ncit', 'pr', 'uberon']
+OBO = 'http://purl.obolibrary.org/obo'
 
-
-def get_data(namespace, all_data):
-    """Given the ontology data from the registry YAML file,
-    and an ontology namespace, return the data for that namespace.
-    """
-    data_map = {}
-    for item in all_data:
-        ont_id = item['id']
-        if ont_id.lower() == namespace.lower():
-            return item
-    return None
-
-
-def get_domains(ont_data):
-    """Given the ontology data fro the registry YAML file,
-    map the ontology ID to the scope (domain).
-    """
-    domain_map = {}
-    for item in ont_data:
-        ont_id = item['id']
-        if 'domain' in item:
-            domain_map[ont_id] = item['domain']
-    return domain_map
-
-
-def fetch_base_ontology(ns):
-    """Given a namespace, use ROBOT to create a 'base' artefact that only
-    contains internal terms. Save this fiile in the build directory.
-    """
-    # NS with lowercase letters
-    if ns == 'ncbitaxon':
-        ns = 'NCBITaxon'
-    elif ns == 'fbdv':
-        ns = 'FBdv'
-    elif ns == 'mirnao':
-        ns = 'miRNAO'
-    elif ns == 'vario':
-        ns = 'VariO'
-    elif ns == 'wbbt':
-        ns = 'WBbt'
-    elif ns == 'wbphenotype':
-        ns = 'WBPhenotype'
-    else:
-        ns = ns.upper()
-
-    # option args
-    purl = '{0}/{1}.owl'.format(obo, ns.lower())
-    base = '{0}/{1}_'.format(obo, ns)
-    output = 'build/ontologies/{0}.owl'.format(ns.lower())
-    if os.path.exists(output):
-        # Do not overwrite if it exists
-        print('Using existing {0} file!'.format(output))
-        return output
-
-    # easier to do this via command line
-    cmd = '''java -jar build/robot.jar merge --input-iri {0} \
-             remove --base-iri {1} --axioms external \
-             -p false --output {2}'''.format(purl, base, output)
-    os.system(cmd)
-
-    if not os.path.exists(output):
-        print('ERROR: Unable to retrieve {0}'.format(ns), flush=True)
-        return None
-    return output
-
-
-def load_ontology_from_file(path):
-    """Given a path to an ontology file, load the file as an OWLOntology.
-    """
-    if not path:
-        return None
-    ont = None
-    try:
-        ont = io_helper.loadOntology(path)
-    except Exception as e:
-        print('ERROR: Unable to load \'{0}\''.format(path), flush=True)
-        return None
-    return ont
-
-
-def load_ontology_from_iri(purl):
-    """Given a PURL, return an OWLOntology object.
-    """
-    iri = gateway.jvm.org.semanticweb.owlapi.model.IRI.create(purl)
-    ont = None
-    try:
-        ont = io_helper.loadOntology(iri)
-    except Exception as e:
-        print('ERROR: Unable to load <{0}>'.format(purl), flush=True)
-        return None
-    return ont
-
-
-def download_ontology(ns):
-    """Given a PURL, download the ontology to a file in the build directory.
-    """
-    purl = '{0}/{1}.owl'.format(obo, ns.lower())
-    file = 'build/ontologies/{0}.owl'.format(ns)
-    if not os.path.isfile(file):
-        curl = 'curl -Lk {0} > {1}'.format(purl, file)
-        os.system(curl)
-    if not os.path.isfile(file):
-        print('ERROR: Unable to download {0}'.format(ns), flush=True)
-        return None
-    return file
-
-
-# --- GLOBALS ---
-
-big_onts = ['bto', 'chebi', 'dron', 'gaz', 'ncbitaxon', 'ncit', 'pr', 'uberon']
-obo = 'http://purl.obolibrary.org/obo'
-
-principle_map = {
+PRINCIPLE_MAP = {
     1: 'FP1 Open',
     2: 'FP2 Common Format',
     3: 'FP3 URIs',
@@ -529,4 +304,4 @@ principle_map = {
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    run()

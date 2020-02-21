@@ -32,16 +32,18 @@ This code is written for a Unix (Linux/macOS) environment, and depends on standa
 python3 -m pip install -r requirements.txt
 ```
 
-Once dependencies are installed, the first step is to fetch data from the [OBO Registry](https://github.com/OBOFoundry/OBOFoundry.github.io):
+We maintain a list of OBO ontologies in `ontologies.txt` from the [OBO Registry](https://github.com/OBOFoundry/OBOFoundry.github.io). This list can always be updated if a new ontology has been added:
 
 ```
-make prepare
+make refresh
 ```
+
+### Running Over Multiple Ontologies 
 
 The second step is to build the dashboard. This will fetch the OWL file for every OBO ontology, some of which are around 1GB in size, and run reports over them, some of which can take a long time. Expect a full build to take something like 6-7 hours.
 
 ```
-make db
+make all
 ```
 
 The results are put in the `build/dashboard/` directory. Consider running `make clean` to remove all generated files before starting a fresh build, as the index file will contain everything in the dashboard directory.
@@ -51,10 +53,18 @@ Once the dashboard is complete, you can compress the build into `dashboard.zip`.
 make dashboard.zip
 ```
 
-You can run the dashboard on a select list of OBO projects by setting the `ONTS` environment variable:
-
+You can also run the dashboard over a select set of ontologies by specifiying the `ONTS` variable. If you only wish to run it over one ontology, see below.
 ```
-ONTS="obi go" make db
+ONTS="obi go eco" make all
 ```
 
-By manually placing OWL files in the appropriate places, you can run the dashboard on a development version of your ontology rather than the published version. For example, you could place the development version of OBI in `build/dashboard/obi/obi.owl`.
+By manually placing OWL files in the appropriate places, you can run the dashboard on a development version of your ontology rather than the published version. For example, you could place the development version of OBI in `build/ontologies/obi.owl`.
+
+### Running Over Single Ontologies
+
+You can also run over a single ontology without creating an index file by referencing the ontology ID:
+```
+make obi
+```
+
+This will retrieve OBI and create a base version of it in `build/ontologies`. If you wish to use an existing ontology, you can place that in the `build/ontologies` directory (e.g., `build/ontologies/obi.owl`). This must have the same name as the ontology ID.
