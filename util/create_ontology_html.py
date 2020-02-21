@@ -4,7 +4,7 @@ import os
 import sys
 import yaml
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
 from jinja2 import Template
 
 
@@ -12,32 +12,29 @@ def main(args):
     """
     """
     parser = ArgumentParser(description='Create a HTML report page')
-    parser.add_argument('input_dir',
-                        type=str,
-                        help='Dashboard directory')
+    parser.add_argument('yaml',
+                        type=FileType('r'),
+                        help='Dashboard YAML file')
+    parser.add_argument('template',
+                        type=FileType('r'),
+                        help='Template file')
     parser.add_argument('output',
-                        type=str,
+                        type=FileType('w'),
                         help='Output HTML file')
     args = parser.parse_args()
 
-    input_dir = args.input_dir
-    output_html = args.output
-    dashboard_file = '{0}/dashboard.yml'.format(input_dir)
-
     # get the data from the dashboard
-    with open(dashboard_file, 'r') as f:
-        data = yaml.load(f, Loader=yaml.SafeLoader)
+    data = yaml.load(args.yaml, Loader=yaml.SafeLoader)
 
     # Load Jinja2 template
-    template = Template(open('util/templates/ontology.html.jinja2').read())
+    template = Template(args.template.read())
 
     # Generate the HTML output
     res = template.render(checkorder=check_order,
                           checklinks=link_map,
                           o=data)
 
-    with open(output_html, 'w+') as f:
-        f.write(res)
+    args.output.write(res)
 
 
 check_order = ['FP1 Open',

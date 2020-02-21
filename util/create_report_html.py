@@ -4,70 +4,57 @@ import json
 import os
 import re
 import sys
+import argparse
 
-from argparse import ArgumentParser
 from jinja2 import Template
 
 
 def main(args):
     """
     """
-    parser = ArgumentParser(description='Create a report HTML page')
+    parser = argparse.ArgumentParser(description='Create a report HTML page')
     parser.add_argument('report',
-                        type=str,
-                        help='TSV report to generate HTML')
+                        type=argparse.FileType('r'),
+                        help='TSV report to convert to HTML')
+    parser.add_argument('context',
+                        type=argparse.FileType('r'),
+                        help='Ontology prefixes')
+    parser.add_argument('template',
+                        type=argparse.FileType('r'),
+                        help='The template file to use')
     parser.add_argument('title',
                         type=str,
                         help='HTML page title')
-    parser.add_argument('context',
-                        type=str,
-                        help='Ontology prefixes')
     parser.add_argument('outfile',
-                        type=str,
+                        type=argparse.FileType('w'),
                         help='Output report HTML file')
     args = parser.parse_args()
 
-    report_file = args.report
-
-    if not os.path.exists(report_file):
-        sys.exit(1)
-
-    title = args.title
-    context_file = args.context
-    outfile = args.outfile
-
-    context = load_context(context_file)
+    context = json.load(args.context)['@context']
 
     headers = []
     rows = []
-    with open(report_file, 'r') as f:
-        headers = next(f).split('\t')
-        for s in f:
+    try:
+        headers = next(args.report).split('\t')
+        for s in args.report:
             row = s.split('\t')
             rows.append(row)
+    except:
+        pass
 
     contents = {'headers': headers, 'rows': rows}
 
     # Load Jinja2 template
-    template = Template(open('util/templates/report.html.jinja2').read())
+    template = Template(args.template.read())
 
     # Generate the HTML output
     res = template.render(contents=contents,
                           maybe_get_link=maybe_get_link,
                           context=context,
-                          title=title,
-                          file=report_file.split('/')[-1:][0])
+                          title=args.title,
+                          file=os.path.basename(args.report.name))
 
-    with open(outfile, 'w+') as f:
-        f.write(res)
-
-
-def load_context(context_file):
-    """
-    """
-    with open(context_file) as f:
-        data = json.load(f)
-    return data['@context']
+    args.outfile.write(res)
 
 
 def maybe_get_link(cell, context):

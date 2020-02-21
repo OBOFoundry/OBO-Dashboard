@@ -26,10 +26,7 @@ import jsonschema
 import dash_utils
 from dash_utils import format_msg
 
-contact_schema = dash_utils.load_schema('dependencies/contact.json')
-
-
-def has_contact(data):
+def has_contact(data, contact_schema):
     """Check fp 11 - locus of authority.
 
     Check if the registry data contains a valid contract entry.

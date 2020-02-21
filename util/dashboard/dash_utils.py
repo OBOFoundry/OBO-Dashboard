@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-
-import json
-
 obo = 'http://purl.obolibrary.org/obo/'
 
 
@@ -208,18 +205,3 @@ def is_obsolete(annotation):
 
     return False
 
-
-def load_schema(schema_file):
-    """Load and return a JSON object from JSON schema.
-
-    Args:
-        schema_file (str): path to JSON schem
-
-    Return:
-        schema JSON object
-    """
-    try:
-        with open(schema_file, 'r') as s:
-            return json.load(s)
-    except Exception as e:
-        print('Unable to load %s: %s' % (schema_file, str(e)))

@@ -247,9 +247,8 @@ def check_properties(props, ro_props, ontology_dir):
     # delete the property map to free up memory
     del props
 
-    # maybe save a report file
-    if len(same_label) > 0 or len(not_ro) > 0:
-        save_invalid_relations(ro_props, same_label, not_ro, ontology_dir)
+    # save a report file (maybe empty)
+    save_invalid_relations(ro_props, same_label, not_ro, ontology_dir)
 
     # return the results
     if len(same_label) > 0 and len(not_ro) > 0:

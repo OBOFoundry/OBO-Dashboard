@@ -32,7 +32,7 @@ import jsonschema
 import dash_utils
 
 
-def is_open(ontology, data):
+def is_open(ontology, data, schema):
     """Check FP 1 - Open.
 
     This method checks the following:
@@ -52,7 +52,7 @@ def is_open(ontology, data):
         ERROR, WARN, INFO, or PASS string with optional message.
     """
 
-    v = OpenValidator(ontology, data)
+    v = OpenValidator(ontology, data, schema)
 
     loadable = False
     if ontology:
@@ -80,7 +80,7 @@ class OpenValidator():
                                  license (None if missing)
     """
 
-    def __init__(self, ontology, data):
+    def __init__(self, ontology, data, schema):
         """Instantiate an OpenValidator.
 
         Args:
@@ -94,7 +94,7 @@ class OpenValidator():
 
         self.is_open = None
         if self.registry_license is not None:
-            self.is_open = check_registry_license(data)
+            self.is_open = check_registry_license(data, schema)
 
         self.ontology_license = None
         self.correct_property = None
@@ -134,7 +134,7 @@ class OpenValidator():
             self.correct_property = False
 
 
-def big_is_open(file, data):
+def big_is_open(file, data, schema):
     """Check FP 1 - Open.
 
     This method checks the following:
@@ -154,7 +154,7 @@ def big_is_open(file, data):
         ERROR, WARN, INFO, or PASS string with optional message.
     """
 
-    v = BigOpenValidator(file, data)
+    v = BigOpenValidator(file, data, schema)
     return process_results(v.registry_license,
                            v.ontology_license,
                            v.is_open,
@@ -177,7 +177,7 @@ class BigOpenValidator():
                                  license (None if missing)
     """
 
-    def __init__(self, file, data):
+    def __init__(self, file, data, schema):
         """Instantiate a BigOpenValidator.
 
         Args:
@@ -191,7 +191,7 @@ class BigOpenValidator():
 
         self.is_open = None
         if self.registry_license is not None:
-            self.is_open = check_registry_license(data)
+            self.is_open = check_registry_license(data, schema)
 
         self.ontology_license = None
         self.correct_property = None
@@ -265,7 +265,7 @@ class BigOpenValidator():
 # ---------- UTILITY METHODS ---------- #
 
 
-def check_registry_license(data):
+def check_registry_license(data, schema):
     """Use the JSON license schema to validate the registry data.
 
     This ensures that the license is present and one of the CC0 or CC-BY
@@ -279,7 +279,7 @@ def check_registry_license(data):
     """
 
     try:
-        jsonschema.validate(data, license_schema)
+        jsonschema.validate(data, schema)
         return True
     except jsonschema.exceptions.ValidationError as ve:
         return False
@@ -388,6 +388,3 @@ def process_results(registry_license,
 license_prop = 'http://purl.org/dc/terms/license'
 # incorrect dc license property namespace
 bad_license_prop = 'http://purl.org/dc/elements/1.1/license'
-
-# license JSON schema for registry validation
-license_schema = dash_utils.load_schema('dependencies/license.json')

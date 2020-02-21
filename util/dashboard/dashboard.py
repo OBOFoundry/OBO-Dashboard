@@ -2,6 +2,7 @@
 
 import datetime
 import gc
+import json
 import os
 import py4j
 import sys
@@ -28,27 +29,24 @@ from py4j.java_gateway import JavaGateway
 
 
 class Dashboard:
-    def __init__(self, ontology, namespace, yaml_file, relations, build_dir):
+    def __init__(self, namespace, ontology, registry, license, contact, relations, outdir):
         """
-        :param ontology:
         :param namespace:
-        :param TextIOWrapper yaml_file:
+        :param ontology:
+        :param TextIOWrapper registry:
+        :param JSON license:
+        :param JSON contact:
         :param relations:
         :param build_dir:
         """
         self.namespace = namespace
+        self.license = license
+        self.contact = contact
         self.version_iri = None
 
         # Make sure master build dir exists
-        if build_dir.endswith('/'):
-            build_dir = build_dir[:-1]
-        if not os.path.exists(build_dir):
-            os.mkdir(build_dir)
-
-        # Then add the NS onto the output directory
-        self.ontology_dir = '/'.join([build_dir, self.namespace])
-        if not os.path.exists(self.ontology_dir):
-            os.mkdir(self.ontology_dir)
+        self.ontology_dir = outdir
+        os.makedirs(self.ontology_dir, exist_ok=True)
 
         # Launch the JVM using the robot JAR
         py4j.java_gateway.launch_gateway(
@@ -73,13 +71,7 @@ class Dashboard:
             self.version_iri = dash_utils.get_big_version_iri(self.ont_or_file)
 
         # Get the registry data
-        try:
-            yaml_data = yaml.load(yaml_file, Loader=yaml.SafeLoader)
-        except IOError:
-            print('ERROR: Unable to read YAML file!')
-            sys.exit(1)
-        finally:
-            yaml_file.close()
+        yaml_data = yaml.load(registry, Loader=yaml.SafeLoader)
         yaml_data = yaml_data['ontologies']
         self.data = get_data(self.namespace, yaml_data)
 
@@ -126,9 +118,9 @@ class Dashboard:
         check_map = {}
         try:
             if self.big:
-                check_map[1] = fp_001.big_is_open(ont_or_file, self.data)
+                check_map[1] = fp_001.big_is_open(ont_or_file, self.data, self.license)
             else:
-                check_map[1] = fp_001.is_open(ont_or_file, self.data)
+                check_map[1] = fp_001.is_open(ont_or_file, self.data, self.license)
         except Exception as e:
             check_map[1] = 'INFO|unable to run check 1'
             print('ERROR: unable to run check 1 for {0}\nCAUSE:\n{1}'.format(self.namespace, str(e)), flush=True)
@@ -195,7 +187,7 @@ class Dashboard:
             print('ERROR: unable to run check 9 for {0}\nCAUSE:\n{1}'.format(self.namespace, str(e)), flush=True)
 
         try:
-            check_map[11] = fp_011.has_contact(self.data)
+            check_map[11] = fp_011.has_contact(self.data, self.contact)
         except Exception as e:
             check_map[11] = 'INFO|unable to run check 11'
             print('ERROR: unable to run check 11 for {0}\nCAUSE:\n{1}'.format(self.namespace, str(e)), flush=True)
@@ -412,23 +404,24 @@ PRINCIPLE_MAP = {
 
 if __name__ == '__main__':
     # parse input args
-    parser = ArgumentParser(description='Create a dashboard file')
-    parser.add_argument('-i', '--input', type=str, help='Path to input ontology', required=True)
-    parser.add_argument('-n', '--namespace', type=str, help='Ontology namespace to run dashboard on')
-    parser.add_argument('-y', '--yaml', type=FileType('r'), help='Path to registry YAML file', required=True)
-    parser.add_argument('-r', '--relations', type=str, help='Path to RO ontology file', required=True)
-    parser.add_argument('-o', '--outdir', type=str, help='Dashboard output directory')
+    parser = ArgumentParser(description='Create dashboard files')
+    parser.add_argument('ontology', type=str, help='Input ontology file')
+    parser.add_argument('registry', type=FileType('r'), help='Registry YAML file')
+    parser.add_argument('license', type=FileType('r'), help='License JSON schema')
+    parser.add_argument('contact', type=FileType('r'), help='Contact JSON schema')
+    parser.add_argument('relations', type=str, help='RO ontology file')
+    parser.add_argument('outdir', type=str, help='Output directory')
     args = parser.parse_args()
 
-    input_file = args.input
-    ns = args.namespace
-    if not ns:
-        # use input file name as namespace
-        ns = input_file.split('/')[-1].split('.')[0]
+    owl = os.path.basename(args.ontology)
+    ns = os.path.splitext(owl)[0]
 
-    outdir = args.outdir
-    if not outdir:
-        outdir = 'dashboard/'
-
-    db = Dashboard(input_file, ns, args.yaml, args.relations, outdir)
+    db = Dashboard(
+            ns,
+            args.ontology,
+            args.registry,
+            json.load(args.license),
+            json.load(args.contact),
+            args.relations,
+            args.outdir)
     db.run()

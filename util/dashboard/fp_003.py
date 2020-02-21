@@ -201,13 +201,13 @@ def save_invalid_uris(error, warn, ontology_dir):
     Return:
         ERROR or WARN with detailed message, or PASS if no errors or warnings.
     """
-    if len(error) > 0 or len(warn) > 0:
-        file = '{0}/fp3.tsv'.format(ontology_dir)
-        with open(file, 'w+') as f:
-            for e in error:
-                f.write('ERROR\t{0}\n'.format(e))
-            for w in warn:
-                f.write('WARN\t{0}\n'.format(w))
+    # write a report (maybe empty)
+    file = '{0}/fp3.tsv'.format(ontology_dir)
+    with open(file, 'w+') as f:
+        for e in error:
+            f.write('ERROR\t{0}\n'.format(e))
+        for w in warn:
+            f.write('WARN\t{0}\n'.format(w))
 
     if len(error) > 0 and len(warn) > 0:
         return {'status': 'ERROR',
