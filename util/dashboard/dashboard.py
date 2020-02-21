@@ -41,18 +41,6 @@ def load_ontology_from_file(io_helper, path):
     return ont
 
 
-def load_ontology_from_iri(io_helper, gateway, purl):
-    """Given a PURL, return an OWLOntology object.
-    """
-    iri = gateway.jvm.org.semanticweb.owlapi.model.IRI.create(purl)
-    try:
-        ont = io_helper.loadOntology(iri)
-    except Exception:
-        print('ERROR: Unable to load <{0}>'.format(purl), flush=True)
-        return None
-    return ont
-
-
 def run_checks(ont_or_file, ontology_details, params):
     big = ontology_details['big']
     data = ontology_details['data']
