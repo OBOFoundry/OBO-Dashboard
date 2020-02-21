@@ -116,7 +116,6 @@ ro_props = fp_007.get_ro_properties(ro_file)
 if 'is_obsolete' in data and data['is_obsolete'] is 'true':
     # do not run on obsolete ontologies
     print('{0} is obsolete and will not be checked...'.format(namespace), flush=True)
-    gc.collect()
     sys.exit(0)
 
 # ---------------------------- #
@@ -299,5 +298,4 @@ print('Saving results to {0}'.format(outfile))
 with open(outfile, 'w+') as f:
     yaml.dump(save_data, f)
 
-gc.collect()
 sys.exit(0)
