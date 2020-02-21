@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import yaml
 
 obo = 'http://purl.obolibrary.org/obo/'
 
@@ -73,11 +74,43 @@ def get_annotation_value(a):
     return val
 
 
+def load_data(yaml_infile):
+    """Given the registry YAML file, load the data.
+    Return a map of ontology ID to data item.
+    """
+    with open(yaml_infile, 'r') as s:
+        data = yaml.load(s, Loader=yaml.SafeLoader)
+    return data['ontologies']
+
+
+def get_data(namespace, all_data):
+    """Given the ontology data from the registry YAML file,
+    and an ontology namespace, return the data for that namespace.
+    """
+    for item in all_data:
+        ont_id = item['id']
+        if ont_id.lower() == namespace.lower():
+            return item
+    return None
+
+
+def get_domains(ont_data):
+    """Given the ontology data fro the registry YAML file,
+    map the ontology ID to the scope (domain).
+    """
+    domain_map = {}
+    for item in ont_data:
+        ont_id = item['id']
+        if 'domain' in item:
+            domain_map[ont_id] = item['domain']
+    return domain_map
+
+
 def get_prefix(line):
     """Get the prefix for a full namespace from a prefix line.
 
     Args:
-        lines (str): RDF/XML line with prefix defintion
+        line (str): RDF/XML line with prefix defintion
 
     Return:
         the string prefix in that line

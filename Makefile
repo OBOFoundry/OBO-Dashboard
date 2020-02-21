@@ -17,7 +17,7 @@ SHELL := bash
 
 # Main tasks
 all: db
-db: dashboard/index.html dashboard/about.html $(SVGS)
+db: dashboard/index.html dashboard/about.html
 
 # Update ontologies.txt
 refresh:
@@ -85,6 +85,17 @@ dependencies/ro-merged.owl: | dependencies build/robot.jar
 build/ro-properties.csv: dependencies/ro-merged.owl | build/robot.jar
 	$(ROBOT) query --input $< --query util/get_properties.rq $@
 
+# Assets contains SVGs for icons
+# These will be included in the ZIP
+SVGS := dashboard/assets/check.svg \
+dashboard/assets/info.svg \
+dashboard/assets/warning.svg \
+dashboard/assets/x.svg
+
+# Download SVGs from open iconic
+dashboard/assets/%.svg: | dashboard/assets
+	curl -Lk -o $@ https://raw.githubusercontent.com/iconic/open-iconic/master/svg/$(notdir $@)
+
 # ------------------- #
 ### DASHBOARD FILES ###
 # ------------------- #
@@ -124,7 +135,7 @@ dashboard/%/fp7.html: util/create_report_html.py dashboard/%/fp7.tsv dependencie
 	python3 $^ "Relations Report - $*" $@
 
 # Convert dashboard YAML to HTML page
-dashboard/%/dashboard.html: util/create_ontology_html.py dashboard/%/dashboard.yml util/templates/ontology.html.jinja2 dashboard/%/robot_report.html dashboard/%/fp3.html dashboard/%/fp7.html
+dashboard/%/dashboard.html: util/create_ontology_html.py dashboard/%/dashboard.yml util/templates/ontology.html.jinja2 dashboard/%/robot_report.html dashboard/%/fp3.html dashboard/%/fp7.html | $(SVGS)
 	python3 $(wordlist 1,3,$^) $@
 	@echo "Created $@"
 
@@ -132,20 +143,9 @@ dashboard/%/dashboard.html: util/create_ontology_html.py dashboard/%/dashboard.y
 ### MERGED DASHBOARD FILES ###
 # -------------------------- #
 
-# Assets contains SVGs for icons
-# These will be included in the ZIP
-SVGS := dashboard/assets/check.svg \
-dashboard/assets/info.svg \
-dashboard/assets/warning.svg \
-dashboard/assets/x.svg
-
-# Download SVGs from open iconic
-dashboard/assets/%.svg: | dashboard/assets
-	curl -Lk -o $@ https://raw.githubusercontent.com/iconic/open-iconic/master/svg/$(notdir $@)
-
 # Combined summary for all OBO foundry ontologies
 # Rebuild whenever an HTML page changes
-dashboard/index.html: util/create_dashboard_html.py $(ALL_REPORTS) util/templates/index.html.jinja2 | $(SVGS)
+dashboard/index.html: util/create_dashboard_html.py $(ONTS) util/templates/index.html.jinja2 | $(SVGS)
 	python3 $< dashboard dependencies/ontologies.yml $@
 
 # More details for users
