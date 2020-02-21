@@ -29,19 +29,19 @@ from py4j.java_gateway import JavaGateway
 
 
 class Dashboard:
-    def __init__(self, namespace, ontology, registry, license, contact, relations, outdir):
+    def __init__(self, namespace, ontology, registry, license_schema, contact_schema, ro_file, outdir):
         """
-        :param namespace:
-        :param ontology:
-        :param TextIOWrapper registry:
-        :param JSON license:
-        :param JSON contact:
-        :param relations:
-        :param build_dir:
+        :param str namespace: namespace of ontology to check
+        :param str ontology: path to ontology to check
+        :param TextIOWrapper registry: file containing all registry YAML data
+        :param JSON license_schema: JSON schema for license field
+        :param JSON contact_schema: JSON schema for contact field
+        :param TextIOWrapper ro_file: CSV file containing RO IRI and labels
+        :param str outdir: path to output directory
         """
         self.namespace = namespace
-        self.license = license
-        self.contact = contact
+        self.license = license_schema
+        self.contact = contact_schema
         self.version_iri = None
 
         # Make sure master build dir exists
@@ -79,11 +79,7 @@ class Dashboard:
         self.domain_map = get_domains(yaml_data)
 
         # RO properties for relations check
-        ro = self.load_ontology_from_file(relations)
-        self.ro_props = fp_007.get_properties(ro)
-
-        # Remove RO from memory
-        del ro
+        self.ro_props = fp_007.get_ro_properties(ro_file)
 
     def load_ontology_from_file(self, path):
         """Given a path to an ontology file, load the file as an OWLOntology.
@@ -409,7 +405,7 @@ if __name__ == '__main__':
     parser.add_argument('registry', type=FileType('r'), help='Registry YAML file')
     parser.add_argument('license', type=FileType('r'), help='License JSON schema')
     parser.add_argument('contact', type=FileType('r'), help='Contact JSON schema')
-    parser.add_argument('relations', type=str, help='RO ontology file')
+    parser.add_argument('relations', type=FileType('r'), help='Table containing RO IRIs and labels')
     parser.add_argument('outdir', type=str, help='Output directory')
     args = parser.parse_args()
 

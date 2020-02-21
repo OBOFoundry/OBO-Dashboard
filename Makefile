@@ -82,6 +82,9 @@ dependencies/contact.json: | dependencies
 dependencies/ro-merged.owl: | dependencies build/robot.jar
 	$(ROBOT) merge --input-iri http://purl.obolibrary.org/obo/ro.owl --output $@
 
+build/ro-properties.csv: dependencies/ro-merged.owl | build/robot.jar
+	$(ROBOT) query --input $< --query util/get_properties.rq $@
+
 # ------------------- #
 ### DASHBOARD FILES ###
 # ------------------- #
@@ -105,7 +108,7 @@ $(FULL_FILES): | build/ontologies
 	curl -Lk -o $@ http://purl.obolibrary.org/obo/$(notdir $@)
 
 # dashboard.py has several dependencies, and generates four files,
-dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv: util/dashboard/dashboard.py build/ontologies/%.owl dependencies/ontologies.yml dependencies/license.json dependencies/contact.json dependencies/ro-merged.owl | build/robot.jar
+dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv: util/dashboard/dashboard.py build/ontologies/%.owl dependencies/ontologies.yml dependencies/license.json dependencies/contact.json build/ro-properties.csv | build/robot.jar
 	python3 $^ $(dir $@)
 
 # HTML output of ROBOT report

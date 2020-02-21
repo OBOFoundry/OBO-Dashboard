@@ -21,10 +21,12 @@
 ## ### Implementation
 ## The object and data properties from the ontology are compared to existing RO properties. If any labels match existing RO properties, but do not use the correct RO IRI, this is an error. Any non-RO properties (no label match and do not use an RO IRI) will be listed as INFO messages.
 
+import csv
+import dash_utils
 import os
 import unicodedata
 
-import dash_utils
+from io import TextIOWrapper
 
 owl_deprecated = 'http://www.w3.org/2002/07/owl#deprecated'
 
@@ -63,6 +65,25 @@ def has_valid_relations(namespace, ontology, ro_props, ontology_dir):
 
     # get results (PASS, INFO, or ERROR)
     return check_properties(props, ro_props, ontology_dir)
+
+
+def get_ro_properties(ro_file):
+    """
+    :param TextIOWrapper ro_file: CSV file containing RO IRIs and labels
+    :return: dict of label to property IRI
+    """
+    ro_props = {}
+    try:
+        reader = csv.reader(ro_file, delimiter=',')
+        # Skip headers
+        next(reader)
+        for row in reader:
+            iri = row[0]
+            label = normalize_label(row[1])
+            ro_props[label] = iri
+    finally:
+        ro_file.close()
+    return ro_props
 
 
 def get_properties(ontology):
