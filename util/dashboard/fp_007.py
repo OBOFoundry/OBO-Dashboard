@@ -300,7 +300,7 @@ def save_invalid_relations(ro_props, same_label, not_ro, ontology_dir):
                        IRI
         ontology_dir (str):
     """
-    file = '{0}/fp7.tsv'.format(ontology_dir)
+    file = os.path.join(ontology_dir, 'fp7.tsv')
     with open(file, 'w+') as f:
         f.write('IRI\tLabel\tIssue\n')
         for iri, label in same_label.items():

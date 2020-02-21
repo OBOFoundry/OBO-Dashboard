@@ -25,6 +25,7 @@
 ## All entity IRIs are retrieved from the ontology, excluding annotation properties. Annotation properties may use hashtags and words due to legacy OBO conversions for subset properties. All other IRIs are checked if they are in the ontology's namespace. If the IRI begins with the ontology namespace, the next character must be an underscore. If not, this is an error. The IRI is also compared to a regex pattern to check if the local ID after the underscore is numeric. If not, this is a warning.
 
 import dash_utils
+import os
 import re
 
 iri_pattern = r'http:\/\/purl\.obolibrary\.org\/obo\/%s_[0-9]{1,9}'
@@ -202,7 +203,7 @@ def save_invalid_uris(error, warn, ontology_dir):
         ERROR or WARN with detailed message, or PASS if no errors or warnings.
     """
     # write a report (maybe empty)
-    file = '{0}/fp3.tsv'.format(ontology_dir)
+    file = os.path.join(ontology_dir, 'fp3.tsv')
     with open(file, 'w+') as f:
         for e in error:
             f.write('ERROR\t{0}\n'.format(e))

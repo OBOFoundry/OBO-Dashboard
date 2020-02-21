@@ -88,7 +88,7 @@ def process_report(robot_gateway, report, ontology_dir):
     """
     if report is None:
         return {'status': 'INFO', 'comment': 'ROBOT Report could not be generated.'}
-    outfile = '{0}/robot_report.tsv'.format(ontology_dir)
+    outfile = os.path.join(ontology_dir, 'robot_report.tsv')
 
     # print summary to terminal and save to report file
     report_options = robot_gateway.ReportOperation.getDefaultOptions()

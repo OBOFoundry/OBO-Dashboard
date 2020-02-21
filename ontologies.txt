@@ -159,6 +159,7 @@ zeco
 zfs
 zp
 cio
+fobi
 hp
 kisao
 mamo
