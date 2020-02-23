@@ -1,15 +1,3 @@
-### Configuration
-#
-# These are standard options to make Make sane:
-# <http://clarkgrubb.com/makefile-style-guide#toc2>
-MAKEFLAGS += --warn-undefined-variables
-SHELL := bash
-.SHELLFLAGS := -eu -o pipefail -c
-.DEFAULT_GOAL := all
-.DELETE_ON_ERROR:
-.SUFFIXES:
-.SECONDARY:
-
 
 # ----------------- #
 ### MAKE COMMANDS ###
@@ -61,22 +49,25 @@ build/robot.jar: | build
 ### EXTERNAL DEPENDENCIES ###
 # ------------------------- #
 
-GITHUB := https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master
+# OBOFoundry repository
+# We use this to get the date of the latest commit and some other dependency files
+dependencies/OBOFoundry.github.io: | build
+	cd dependencies && git clone https://github.com/OBOFoundry/OBOFoundry.github.io.git
 
 # Registry YAML
-dependencies/ontologies.yml: | dependencies
-	curl -Lk -o $@ $(GITHUB)/registry/ontologies.yml
+dependencies/ontologies.yml: dependencies/OBOFoundry.github.io
+	mv $</registry/ontologies.yml $@
 
 # OBO Prefixes
-dependencies/obo_context.jsonld: | dependencies
-	curl -Lk -o $@ $(GITHUB)/registry/obo_context.jsonld
+dependencies/obo_context.jsonld: dependencies/OBOFoundry.github.io
+	mv $</registry/obo_context.jsonld $@
 
 # Schemas
-dependencies/license.json: | dependencies
-	curl -Lk -o $@ $(GITHUB)/util/schema/license.json
+dependencies/license.json: dependencies/OBOFoundry.github.io
+	mv $</util/schema/license.json $@
 
-dependencies/contact.json: | dependencies
-	curl -Lk -o $@ $(GITHUB)/util/schema/contact.json
+dependencies/contact.json: dependencies/OBOFoundry.github.io
+	mv $</util/schema/contact.json $@
 
 # RO is used to compare properties
 dependencies/ro-merged.owl: | dependencies build/robot.jar
@@ -144,9 +135,10 @@ dashboard/%/dashboard.html: util/create_ontology_html.py dashboard/%/dashboard.y
 # -------------------------- #
 
 # Combined summary for all OBO foundry ontologies
-# Rebuild whenever an HTML page changes
-dashboard/index.html: util/create_dashboard_html.py $(ONTS) util/templates/index.html.jinja2 | $(SVGS)
-	python3 $< dashboard dependencies/ontologies.yml $@
+dashboard/index.html: util/create_dashboard_html.py $(ONTS) util/templates/index.html.jinja2 | dependencies/OBOFoundry.github.io $(SVGS)
+	$(eval ROBOT_VERSION := $(shell $(ROBOT) -version))
+	$(eval OBOMD_VERSION := $(shell cd dependencies/OBOFoundry.github.io && git log -1 --date=format:"%Y-%m-%d" --format="%ad"))
+	python3 $< dashboard dependencies/ontologies.yml "$(ROBOT_VERSION)" "$(OBOMD_VERSION)" $@
 
 # More details for users
 dashboard/about.html: docs/about.md util/templates/about.html.jinja2

@@ -19,6 +19,12 @@ def main(args):
     parser.add_argument('registry_yaml',
                         type=str,
                         help='Ontology registry data')
+    parser.add_argument('robot_version',
+                        type=str,
+                        help='Version of ROBOT used to build dashboard')
+    parser.add_argument('obomd_version',
+                        type=str,
+                        help='Version of OBO Metadata used to build dashboard')
     parser.add_argument('outfile',
                         type=str,
                         help='Output dashboard HTML file')
@@ -51,6 +57,8 @@ def main(args):
     date = datetime.datetime.today()
     res = template.render(checkorder=check_order,
                           date=date.strftime('%Y-%m-%d'),
+                          robot=args.robot_version,
+                          obomd=args.obomd_version,
                           ontologies=ontologies)
 
     with open(outfile, 'w+') as f:

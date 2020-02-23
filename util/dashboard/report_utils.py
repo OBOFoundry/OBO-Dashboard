@@ -86,9 +86,12 @@ def process_report(robot_gateway, report, ontology_dir):
     Return:
         ERROR, WARN, INFO, or PASS with optional help message
     """
-    if report is None:
-        return {'status': 'INFO', 'comment': 'ROBOT Report could not be generated.'}
     outfile = os.path.join(ontology_dir, 'robot_report.tsv')
+    if report is None:
+        with open(outfile, 'w') as f:
+            # Write empty file
+            f.write("")
+        return {'status': 'INFO', 'comment': 'ROBOT Report could not be generated.'}
 
     # print summary to terminal and save to report file
     report_options = robot_gateway.ReportOperation.getDefaultOptions()
