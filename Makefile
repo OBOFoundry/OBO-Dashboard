@@ -1,3 +1,4 @@
+MAKEFLAGS += --warn-undefined-variables
 
 # ----------------- #
 ### MAKE COMMANDS ###
@@ -99,6 +100,7 @@ SMALL_ONTS := $(filter-out $(BIG_ONTS), $(ONTS))
 
 # Regular size ontologies for which we can build base files
 BASE_FILES := $(foreach O, $(SMALL_ONTS), build/ontologies/$(O).owl)
+.PRECIOUS: $(BASE_FILES)
 $(BASE_FILES): | build/ontologies build/robot.jar
 	$(eval BASE_NS := $(shell python3 util/get_base_ns.py $(basename $(notdir $@)) dependencies/obo_context.jsonld))
 	$(ROBOT) merge --input-iri http://purl.obolibrary.org/obo/$(notdir $@) \
@@ -106,41 +108,48 @@ $(BASE_FILES): | build/ontologies build/robot.jar
 
 # Large ontologies that we cannot load into memory to build base file
 FULL_FILES := $(foreach O, $(filter-out $(SMALL_ONTS), $(ONTS)), build/ontologies/$(O).owl)
+.PRECIOUS: $(FULL_FILES)
 $(FULL_FILES): | build/ontologies
 	curl -Lk -o $@ http://purl.obolibrary.org/obo/$(notdir $@)
 
 # dashboard.py has several dependencies, and generates four files,
+.PRECIOUS: dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv
 dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv: util/dashboard/dashboard.py build/ontologies/%.owl dependencies/ontologies.yml dependencies/license.json dependencies/contact.json build/ro-properties.csv | build/robot.jar
 	python3 $^ $(dir $@)
 
 # HTML output of ROBOT report
+.PRECIOUS: dashboard/%/robot_report.html
 dashboard/%/robot_report.html: util/create_report_html.py dashboard/%/robot_report.tsv dependencies/obo_context.jsonld util/templates/report.html.jinja2
 	python3 $^ "ROBOT Report - $*" $@
 
 # HTML output of IRI report
+.PRECIOUS: dashboard/%/fp3.html
 dashboard/%/fp3.html: util/create_report_html.py dashboard/%/fp3.tsv dependencies/obo_context.jsonld util/templates/report.html.jinja2
 	python3 $^ "IRI Report - $*" $@
 
 # HTML output of Relations report
+.PRECIOUS: dashboard/%/fp7.html
 dashboard/%/fp7.html: util/create_report_html.py dashboard/%/fp7.tsv dependencies/obo_context.jsonld util/templates/report.html.jinja2
 	python3 $^ "Relations Report - $*" $@
 
 # Convert dashboard YAML to HTML page
+.PRECIOUS: dashboard/%/dashboard.html
 dashboard/%/dashboard.html: util/create_ontology_html.py dashboard/%/dashboard.yml util/templates/ontology.html.jinja2 dashboard/%/robot_report.html dashboard/%/fp3.html dashboard/%/fp7.html | $(SVGS)
 	python3 $(wordlist 1,3,$^) $@
-	@echo "Created $@"
 
 # -------------------------- #
 ### MERGED DASHBOARD FILES ###
 # -------------------------- #
 
 # Combined summary for all OBO foundry ontologies
+.PRECIOUS: dashboard/index.html
 dashboard/index.html: util/create_dashboard_html.py $(ONTS) util/templates/index.html.jinja2 | dependencies/OBOFoundry.github.io $(SVGS)
 	$(eval ROBOT_VERSION := $(shell $(ROBOT) -version))
 	$(eval OBOMD_VERSION := $(shell cd dependencies/OBOFoundry.github.io && git log -1 --date=format:"%Y-%m-%d" --format="%ad"))
 	python3 $< dashboard dependencies/ontologies.yml "$(ROBOT_VERSION)" "$(OBOMD_VERSION)" $@
 
 # More details for users
+.PRECIOUS: dashboard/about.html
 dashboard/about.html: docs/about.md util/templates/about.html.jinja2
 	python3 util/md_to_html.py $< -t $(word 2,$^) -o $@
 

@@ -59,6 +59,9 @@ def has_valid_relations(namespace, ontology, ro_props, ontology_dir):
 
     # ignore RO
     if namespace == 'ro':
+        file = os.path.join(ontology_dir, 'fp7.tsv')
+        with open(file, 'w+') as f:
+            f.write("")
         return {'status': 'PASS'}
 
     props = get_properties(ontology)
