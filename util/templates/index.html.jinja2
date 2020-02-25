@@ -14,20 +14,17 @@ body {
   text-align: center;
 }
 
-.fixedHeader {
+th {
+  max-width: 4em;
+  height: 5em;
   position: sticky;
   top: 0;
   background-color: white;
 }
 
-th {
-  max-width: 4em;
-  height: 5em;
-}
-
 th a {
   display: block;
-  transform: rotate(-45deg);
+  transform: rotate(-66deg);
   margin: 0.2em;
 }
   </style>
@@ -44,10 +41,10 @@ $(function () {
   <h1>OBO Dashboard ALPHA {{ date }}</h1>
   <h4>Under active development. <a href="about.html">Learn More!</a></h4>
   <p>Created with <a href="http://robot.obolibrary.org/">{{ robot }}</a> and <a href="https://github.com/OBOFoundry/OBOFoundry.github.io/tree/master/util/schema">OBO Metadata Schema {{ obomd }}</a></p>
-  <table class="table">
-    <thead class="fixedHeader">
+  <table class="table table-borderless">
+    <thead>
       <tr>
-        <th>Ontology</th>
+        <th>Ontology<br/>(click for details)</th>
         <th>
           <a href="http://obofoundry.org/principles/fp-001-open.html">Open</a>
         </th>
