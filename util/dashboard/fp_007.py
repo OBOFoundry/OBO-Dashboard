@@ -55,13 +55,12 @@ def has_valid_relations(namespace, ontology, ro_props, ontology_dir):
         PASS or violation level with optional help message
     """
     if ontology is None:
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
         return {'status': 'ERROR', 'comment': 'Unable to load ontology'}
 
     # ignore RO
     if namespace == 'ro':
-        file = os.path.join(ontology_dir, 'fp7.tsv')
-        with open(file, 'w+') as f:
-            f.write("")
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
         return {'status': 'PASS'}
 
     props = get_properties(ontology)
@@ -171,10 +170,12 @@ def big_has_valid_relations(namespace, file, ro_props, ontology_dir):
         PASS or violation level with optional help message
     """
     if not os.path.isfile(file):
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
         return {'status': 'ERROR', 'comment': 'Unable to find ontology file'}
 
     # ignore RO
     if namespace == 'ro':
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
         return {'status': 'PASS'}
 
     props = big_get_properties(file)

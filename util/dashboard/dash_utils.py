@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import re
 import yaml
 
@@ -249,3 +250,14 @@ def whitespace_only(file):
     """
     content = open(file, 'r').read()
     return re.search(r'^\s*$', content)
+
+
+def write_empty(file):
+    """Write an empty FP3 report.
+
+    Args:
+        ontology_dir (str):
+    """
+    file = os.path.join(file)
+    with open(file, 'w+') as f:
+        f.write('')
