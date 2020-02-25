@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import datetime
-import gc
 import json
 import os
 import py4j
@@ -24,7 +23,6 @@ import fp_016
 import report_utils
 
 from argparse import ArgumentParser, FileType
-from io import TextIOWrapper
 from py4j.java_gateway import JavaGateway
 
 
@@ -71,13 +69,16 @@ def run():
     big = namespace in BIG_ONTS
     if not big:
         # Load ontology as OWLOntology object
-        if not ontology_file:
+        if not ontology_file or not os.path.exists(ontology_file) or dash_utils.whitespace_only(ontology_file):
+            # If ontology_file is None, the file does not exist, or the file is empty
+            # Then the ontology is None
             ont_or_file = None
-        try:
-            ont_or_file = io_helper.loadOntology(ontology_file)
-        except Exception:
-            print('ERROR: Unable to load \'{0}\''.format(ontology_fil), flush=True)
-            ont_or_file = None
+        else:
+            try:
+                ont_or_file = io_helper.loadOntology(ontology_file)
+            except Exception:
+                print('ERROR: Unable to load \'{0}\''.format(ontology_file), flush=True)
+                ont_or_file = None
         # Get the Verison IRI
         version_iri = dash_utils.get_version_iri(ont_or_file)
     else:

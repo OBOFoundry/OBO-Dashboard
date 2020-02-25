@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import re
 import yaml
 
 obo = 'http://purl.obolibrary.org/obo/'
@@ -228,7 +229,7 @@ def is_obsolete(annotation):
         if val.isLiteral():
             val = val.getLiteral()
         elif val is not None:
-            val = normalize_label(val.toString())
+            val = val.toString()
         elif not val:
             # TODO - why is it 'None'?
             # if it uses the owl:deprecated property it is probably deprecated
@@ -238,3 +239,13 @@ def is_obsolete(annotation):
 
     return False
 
+
+def whitespace_only(file):
+    """
+    Given a path to a file, determine if the file contains only whitespace.
+
+    :param str file: path to file
+    :return: True if whitespace only
+    """
+    content = open(file, 'r').read()
+    return re.search(r'^\s*$', content)
