@@ -1,0 +1,15 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?iri ?label WHERE {
+	{ ?s a owl:ObjectProperty ;
+	     rdfs:label ?l .
+	  BIND(STR(?l) AS ?label) 
+	  BIND(STR(?s) AS ?iri)
+	} UNION { 
+	  ?s a owl:DataProperty ;
+	     rdfs:label ?l .
+	  BIND(STR(?l) AS ?label)
+	  BIND(STR(?s) AS ?iri)
+	}
+}

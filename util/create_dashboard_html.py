@@ -21,10 +21,10 @@ def main(args):
                         help='Ontology registry data')
     parser.add_argument('robot_version',
                         type=str,
-                        help='Version of ROBOT used to build dashboard')
+                        help='Version of ROBOT used to build dashboard (version number)')
     parser.add_argument('obomd_version',
                         type=str,
-                        help='Version of OBO Metadata used to build dashboard')
+                        help='Version of OBO Metadata used to build dashboard (URL)')
     parser.add_argument('outfile',
                         type=str,
                         help='Output dashboard HTML file')

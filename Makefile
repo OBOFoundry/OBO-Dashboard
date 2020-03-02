@@ -50,32 +50,27 @@ build/robot.jar: | build
 ### EXTERNAL DEPENDENCIES ###
 # ------------------------- #
 
-# OBOFoundry repository
-# We use this to get the date of the latest commit and some other dependency files
-dependencies/OBOFoundry.github.io: | build
-	cd dependencies && git clone https://github.com/OBOFoundry/OBOFoundry.github.io.git
-
 # Registry YAML
 dependencies/ontologies.yml: dependencies/OBOFoundry.github.io
-	mv $</registry/ontologies.yml $@
+	curl -Lk -o $@ https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml
 
 # OBO Prefixes
 dependencies/obo_context.jsonld: dependencies/OBOFoundry.github.io
-	mv $</registry/obo_context.jsonld $@
+	curl -Lk -o $@ https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/obo_context.jsonld
 
 # Schemas
 dependencies/license.json: dependencies/OBOFoundry.github.io
-	mv $</util/schema/license.json $@
+	curl -Lk -o $@ https://github.com/OBOFoundry/OBOFoundry.github.io/raw/master/util/schema/license.json
 
 dependencies/contact.json: dependencies/OBOFoundry.github.io
-	mv $</util/schema/contact.json $@
+	curl -Lk -o $@ https://github.com/OBOFoundry/OBOFoundry.github.io/raw/master/util/schema/contact.json
 
 # RO is used to compare properties
 dependencies/ro-merged.owl: | dependencies build/robot.jar
 	$(ROBOT) merge --input-iri http://purl.obolibrary.org/obo/ro.owl --output $@
 
-build/ro-properties.csv: dependencies/ro-merged.owl | build/robot.jar
-	$(ROBOT) query --input $< --query util/get_properties.rq $@
+build/ro-properties.csv: util/get_properties.rq dependencies/ro-merged.owl | build/robot.jar
+	$(ROBOT) query --input $(word 2,$^) --query $< $@
 
 # Assets contains SVGs for icons
 # These will be included in the ZIP
@@ -101,8 +96,8 @@ SMALL_ONTS := $(filter-out $(BIG_ONTS), $(ONTS))
 # Regular size ontologies for which we can build base files
 BASE_FILES := $(foreach O, $(SMALL_ONTS), build/ontologies/$(O).owl)
 .PRECIOUS: $(BASE_FILES)
-$(BASE_FILES): | build/ontologies build/robot.jar
-	$(eval BASE_NS := $(shell python3 util/get_base_ns.py $(basename $(notdir $@)) dependencies/obo_context.jsonld))
+$(BASE_FILES): util/get_base_ns.py dependencies/obo_context.jsonld | build/ontologies build/robot.jar
+	$(eval BASE_NS := $(shell python3 $^ $(basename $(notdir $@))))
 	$(ROBOT) merge --input-iri http://purl.obolibrary.org/obo/$(notdir $@) \
 	 remove --base-iri $(BASE_NS) --axioms external -p false --output $@
 
@@ -143,10 +138,10 @@ dashboard/%/dashboard.html: util/create_ontology_html.py dashboard/%/dashboard.y
 
 # Combined summary for all OBO foundry ontologies
 .PRECIOUS: dashboard/index.html
-dashboard/index.html: util/create_dashboard_html.py $(ONTS) util/templates/index.html.jinja2 | dependencies/OBOFoundry.github.io $(SVGS)
+dashboard/index.html: util/create_dashboard_html.py dependencies/ontologies.yml util/templates/index.html.jinja2 $(ONTS) | $(SVGS)
 	$(eval ROBOT_VERSION := $(shell $(ROBOT) -version))
-	$(eval OBOMD_VERSION := $(shell cd dependencies/OBOFoundry.github.io && git log -1 --date=format:"%Y-%m-%d" --format="%ad"))
-	python3 $< dashboard dependencies/ontologies.yml "$(ROBOT_VERSION)" "$(OBOMD_VERSION)" $@
+	$(eval OBOMD_VERSION := $(shell curl https://api.github.com/repos/OBOFoundry/OBO-Dashboard/commits | jq '.[0].html_url'))
+	python3 $< dashboard $(word 2,$^) "$(ROBOT_VERSION)" "$(OBOMD_VERSION)" $@
 
 # More details for users
 .PRECIOUS: dashboard/about.html

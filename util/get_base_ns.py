@@ -15,7 +15,7 @@ def main(namespace, context):
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Retrieve base namespace')
-    parser.add_argument('namespace', type=str, help='Ontology namespace')
     parser.add_argument('context', type=FileType('r'), help='Context file')
+    parser.add_argument('namespace', type=str, help='Ontology namespace')
     args = parser.parse_args()
     print(main(args.namespace, args.context))
