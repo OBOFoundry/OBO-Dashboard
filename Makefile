@@ -19,7 +19,7 @@ ontologies.txt: dependencies/ontologies.yml
 
 # List of all ontology IDs
 # Run `make refresh` to update
-ONTS = $(shell cat ontologies.txt)
+ONTS := $(or ${ONTS}, ${ONTS}, $(shell cat ontologies.txt))
 
 # Every ontology ID gets its own task
 $(ONTS):%: dashboard/%/dashboard.html
@@ -51,18 +51,18 @@ build/robot.jar: | build
 # ------------------------- #
 
 # Registry YAML
-dependencies/ontologies.yml: dependencies/OBOFoundry.github.io
+dependencies/ontologies.yml: dependencies
 	curl -Lk -o $@ https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml
 
 # OBO Prefixes
-dependencies/obo_context.jsonld: dependencies/OBOFoundry.github.io
+dependencies/obo_context.jsonld: dependencies
 	curl -Lk -o $@ https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/obo_context.jsonld
 
 # Schemas
-dependencies/license.json: dependencies/OBOFoundry.github.io
+dependencies/license.json: dependencies
 	curl -Lk -o $@ https://github.com/OBOFoundry/OBOFoundry.github.io/raw/master/util/schema/license.json
 
-dependencies/contact.json: dependencies/OBOFoundry.github.io
+dependencies/contact.json: dependencies
 	curl -Lk -o $@ https://github.com/OBOFoundry/OBOFoundry.github.io/raw/master/util/schema/contact.json
 
 # RO is used to compare properties
