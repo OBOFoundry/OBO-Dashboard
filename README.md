@@ -1,5 +1,7 @@
 # OBO Dashboard
 
+[![Build Status](https://travis-ci.org/OBOFoundry/OBO-Dashboard.svg?branch=master)](https://travis-ci.org/OBOFoundry/OBO-Dashboard)
+
 **The OBO Dashboard is a new feature under active development.**
 
 The OBO Dashboard is being developed by the OBO Operations Committee and members of the Technical Working Group. Our goal is to provide a set of automated tests that establish a minimum level of compliance with OBO Principles and best practises. Keep in mind that automated checks often cannot capture the full intent of a given principle -- we do our best while keeping the automated checks as fast and cheap as possible.
