@@ -2,6 +2,12 @@ from argparse import ArgumentParser, FileType
 
 
 def get_base_ns(namespace, context):
+    #print(context)
+
+    ## if the context comes in as a string, break it into a list
+    if type("") == type(context):
+        context = context.split("\n")
+        
     for line in context:
         if '{' in line or '}' in line:
             continue
