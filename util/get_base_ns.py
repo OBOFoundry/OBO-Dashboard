@@ -1,7 +1,7 @@
 from argparse import ArgumentParser, FileType
 
 
-def main(namespace, context):
+def get_base_ns(namespace, context):
     for line in context:
         if '{' in line or '}' in line:
             continue
@@ -18,4 +18,4 @@ if __name__ == '__main__':
     parser.add_argument('context', type=FileType('r'), help='Context file')
     parser.add_argument('namespace', type=str, help='Ontology namespace')
     args = parser.parse_args()
-    print(main(args.namespace, args.context))
+    print(get_base_ns(args.namespace, args.context))
