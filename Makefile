@@ -29,8 +29,9 @@ ONT_IDS := $(shell cat ontologies.txt)
 BIG_ONT_IDS := bto chebi dron gaz ncbitaxon ncit pr uberon
 SMALL_ONT_IDS := $(filter-out $(BIG_ONT_IDS), $(ONT_IDS))
 
-OBOMD_VERSION := "https://github.com/OBOFoundry/OBO-Dashboard/commit/06b7dfbe99a37766217b5ecc5dacb4498a964199"
-#OBOMD_VERSION := $(shell curl $(OBOMD_VERSION_URL) | jq '.[0].html_url'))
+
+OBOMD_VERSION := $(shell curl $(OBOMD_VERSION_URL) | jq '.[0].html_url'))
+#OBOMD_VERSION := "https://github.com/OBOFoundry/OBO-Dashboard/commit/06b7dfbe99a37766217b5ecc5dacb4498a964199"
 
 ## image files for reports
 SVGS := \
