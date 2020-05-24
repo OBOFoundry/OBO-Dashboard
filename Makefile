@@ -46,11 +46,17 @@ SVGS := \
 all: db
 	@make $(ONT_IDS)
 
+## create dashboard for 'big' ontologies
+## note the use of the '-e' flag when calling makenn
+## this is needed to for the changes to ONTS_IDS be present in the target
 all-big:
 	$(eval ONT_IDS := $(BIG_ONT_IDS))
 	@make -e db
 	@make -e $(ONT_IDS)
 
+## create dashboard for 'small' ontologies
+## note the use of the '-e' flag when calling makenn
+## this is needed to for the changes to ONTS_IDS be present in the target
 all-small:
 	$(eval ONT_IDS := $(SMALL_ONT_IDS))
 	@make -e db
