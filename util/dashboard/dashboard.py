@@ -39,6 +39,7 @@ def run():
     parser.add_argument('contact', type=FileType('r'), help='Contact JSON schema')
     parser.add_argument('relations', type=FileType('r'), help='Table containing RO IRIs and labels')
     parser.add_argument('outdir', type=str, help='Output directory')
+    parser.add_argument('robot_jar',type=str,help='Location of your local ROBOT jar', default='build/robot.jar')
     args = parser.parse_args()
 
     owl = os.path.basename(args.ontology)
@@ -48,6 +49,7 @@ def run():
     registry = args.registry
     license_schema = json.load(args.license)
     contact_schema = json.load(args.contact)
+    robot_jar = args.robot_jar
     ro_file = args.relations
 
     # Create the build directory for this ontology
@@ -56,7 +58,7 @@ def run():
 
     # Launch the JVM using the robot JAR
     py4j.java_gateway.launch_gateway(
-        jarpath='build/robot.jar', classpath='org.obolibrary.robot.PythonOperation', die_on_exit=True, port=25333)
+        jarpath=robot_jar, classpath='org.obolibrary.robot.PythonOperation', die_on_exit=True, port=25333)
 
     # Activate gateway to JVM
     gateway = JavaGateway()

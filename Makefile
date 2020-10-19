@@ -1,5 +1,5 @@
 MAKEFLAGS += --warn-undefined-variables
-
+ROBOT_JAR := build/robot.jar
 # ----------------- #
 ### MAKE COMMANDS ###
 # ----------------- #
@@ -110,7 +110,7 @@ $(FULL_FILES): | build/ontologies
 # dashboard.py has several dependencies, and generates four files,
 .PRECIOUS: dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv
 dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv: util/dashboard/dashboard.py build/ontologies/%.owl dependencies/ontologies.yml dependencies/license.json dependencies/contact.json build/ro-properties.csv | build/robot.jar
-	python3 $^ $(dir $@)
+	python3 $^ $(dir $@) $(ROBOT_JAR)
 
 # HTML output of ROBOT report
 .PRECIOUS: dashboard/%/robot_report.html
