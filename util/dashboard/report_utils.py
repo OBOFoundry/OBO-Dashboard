@@ -4,13 +4,15 @@ import os
 from py4j.protocol import Py4JJavaError
 
 
-def run_report(robot_gateway, io_helper, ontology):
+def run_report(robot_gateway, io_helper, ontology, profile=None):
     """Run and return a ROBOT Report.
 
     Args:
         robot_gateway (Gateway): py4j gateway to ROBOT
         io_helper (IOHelper): ROBOT IOHelper
         ontology (OWLOntology): ontology object
+        profile: path to profile.txt. Optional.
+
 
     Return:
         ROBOT Report object
@@ -21,10 +23,14 @@ def run_report(robot_gateway, io_helper, ontology):
     report_options = robot_gateway.ReportOperation.getDefaultOptions()
     report_options['labels'] = 'true'
 
+    if profile:
+        print(profile)
+        report_options['profile'] = profile
+
     # run the report
     try:
         report = robot_gateway.ReportOperation.getReport(
-                ontology, io_helper, report_options)
+            ontology, io_helper, report_options)
     except Py4JJavaError as err:
         msg = err.java_exception.getMessage()
         print('REPORT FAILED\n' + str(msg))
@@ -37,7 +43,8 @@ class BigReport:
     """Helper class to run a Report over a large ontology. Report queries are
     run over a dataset on disk instead of in memory.
     """
-    def __init__(self, robot_gateway, ns, file):
+
+    def __init__(self, robot_gateway, ns, file, profile=None):
         """Instantiate a new BigReport object by running a report over the
         ontology file.
         """
@@ -47,6 +54,8 @@ class BigReport:
         report_options = robot_gateway.ReportOperation.getDefaultOptions()
         report_options['tdb-directory'] = tdb_dir
         report_options['limit'] = '1'
+        if profile:
+            report_options['profile'] = profile
         report_options['tdb'] = 'true'
         report = None
 
