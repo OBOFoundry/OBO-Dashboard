@@ -173,4 +173,4 @@ dashboard/about.html: docs/about.md util/templates/about.html.jinja2
 #	 zip -r $@ dashboard/*
 
 
-# include debug.Makefile
+include custom.Makefile
