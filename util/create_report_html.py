@@ -28,22 +28,30 @@ def main(args):
     parser.add_argument('outfile',
                         type=argparse.FileType('w'),
                         help='Output report HTML file')
+    parser.add_argument('limitlines',
+                        type=int,
+                        help='Parameter to limit lines' , nargs='?', default=0)
     args = parser.parse_args()
 
     context = json.load(args.context)['@context']
 
     headers = []
     rows = []
+    limitlines = args.limitlines
+    i = 0
+
     try:
         headers = next(args.report).split('\t')
         for s in args.report:
             row = s.split('\t')
-            rows.append(row)
+            if (limitlines == 0) or (i < limitlines):
+                rows.append(row)
+                i = i+1
     except:
         pass
 
     contents = {'headers': headers, 'rows': rows}
-
+    
     # Load Jinja2 template
     template = Template(args.template.read())
 
