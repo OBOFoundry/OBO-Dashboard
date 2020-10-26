@@ -8,3 +8,8 @@ shell.nix
 .tdb
 .DS_Store
 .idea
+profile.txt
+ontologies.txt
+sparql
+test.sh
+debug.Makefile

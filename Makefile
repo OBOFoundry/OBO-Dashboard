@@ -1,5 +1,8 @@
 MAKEFLAGS += --warn-undefined-variables
 ROBOT_JAR := build/robot.jar
+REPORT_LENGTH_LIMIT := 200
+OBO_PROFILE_URL = "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources/report_profile.txt"
+
 # ----------------- #
 ### MAKE COMMANDS ###
 # ----------------- #
@@ -17,6 +20,9 @@ refresh:
 ontologies.txt: dependencies/ontologies.yml
 	cat $< | sed -n 's/  id: \([A-Za-z0-9_]*\)/\1/p' | sed '/^. / d' > $@
 
+profile.txt:
+	curl -o $@ -Lk $(OBO_PROFILE_URL)
+
 # List of all ontology IDs
 # Run `make refresh` to update
 ONTS := $(or ${ONTS}, ${ONTS}, $(shell cat ontologies.txt))
@@ -28,6 +34,16 @@ $(ONTS):%: dashboard/%/dashboard.html
 # WARNING: This will delete *ALL* dashboard files!
 clean:
 	rm -rf build dashboard dependencies
+
+# Truncate potentially huge robot reports
+REPORTS = $(foreach O, $(ONTS), dashboard/$(O)/robot_report.tsv)
+
+truncate_reports_for_github:
+	for REP in $(REPORTS); do \
+		cat $$REP | head -$(REPORT_LENGTH_LIMIT) > $$REP.tmp; \
+		mv $$REP.tmp $$REP; \
+	done
+	
 
 # ------------------- #
 ### DIRECTORY SETUP ###
@@ -109,13 +125,13 @@ $(FULL_FILES): | build/ontologies
 
 # dashboard.py has several dependencies, and generates four files,
 .PRECIOUS: dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv
-dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv: util/dashboard/dashboard.py build/ontologies/%.owl dependencies/ontologies.yml dependencies/license.json dependencies/contact.json build/ro-properties.csv | build/robot.jar
+dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv: util/dashboard/dashboard.py build/ontologies/%.owl dependencies/ontologies.yml dependencies/license.json dependencies/contact.json build/ro-properties.csv profile.txt | build/robot.jar
 	python3 $^ $(dir $@) $(ROBOT_JAR)
 
 # HTML output of ROBOT report
 .PRECIOUS: dashboard/%/robot_report.html
 dashboard/%/robot_report.html: util/create_report_html.py dashboard/%/robot_report.tsv dependencies/obo_context.jsonld util/templates/report.html.jinja2
-	python3 $^ "ROBOT Report - $*" $@
+	python3 $^ "ROBOT Report - $*" $@ $(REPORT_LENGTH_LIMIT)
 
 # HTML output of IRI report
 .PRECIOUS: dashboard/%/fp3.html
@@ -153,5 +169,8 @@ dashboard/about.html: docs/about.md util/templates/about.html.jinja2
 # ------------- #
 
 # Create ZIP for archive and remove dashboard folder
-dashboard.zip: dashboard/index.html dashboard/about.html
-	zip -r $@ dashboard/*
+# dashboard.zip: dashboard/index.html dashboard/about.html
+#	 zip -r $@ dashboard/*
+
+
+# include debug.Makefile
