@@ -20,8 +20,8 @@ refresh:
 ontologies.txt: dependencies/ontologies.yml
 	cat $< | sed -n 's/  id: \([A-Za-z0-9_]*\)/\1/p' | sed '/^. / d' > $@
 
-profile.txt:
-	curl -o $@ -Lk $(OBO_PROFILE_URL)
+profile:
+	curl -o $@.txt -Lk $(OBO_PROFILE_URL)
 
 # List of all ontology IDs
 # Run `make refresh` to update
