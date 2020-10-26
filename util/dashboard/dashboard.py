@@ -38,6 +38,7 @@ def run():
     parser.add_argument('license', type=FileType('r'), help='License JSON schema')
     parser.add_argument('contact', type=FileType('r'), help='Contact JSON schema')
     parser.add_argument('relations', type=FileType('r'), help='Table containing RO IRIs and labels')
+    parser.add_argument('profile', type=str, help='Optional location of profile.txt file.')
     parser.add_argument('outdir', type=str, help='Output directory')
     parser.add_argument('robot_jar',type=str,help='Location of your local ROBOT jar', default='build/robot.jar')
     args = parser.parse_args()
@@ -51,6 +52,7 @@ def run():
     contact_schema = json.load(args.contact)
     robot_jar = args.robot_jar
     ro_file = args.relations
+    profile = args.profile
 
     # Create the build directory for this ontology
     ontology_dir = args.outdir
@@ -99,7 +101,7 @@ def run():
     # Map of RO labels to RO IRIs
     ro_props = fp_007.get_ro_properties(ro_file)
 
-    if 'is_obsolete' in data and data['is_obsolete'] is 'true':
+    if 'is_obsolete' in data and data['is_obsolete'] == 'true':
         # do not run on obsolete ontologies
         print('{0} is obsolete and will not be checked...'.format(namespace), flush=True)
         sys.exit(0)
@@ -117,14 +119,14 @@ def run():
         if namespace != 'gaz':
             # Report currently takes TOO LONG for GAZ
             print('Running ROBOT report on {0}...'.format(namespace), flush=True)
-            report_obj = report_utils.BigReport(robot_gateway, namespace, ont_or_file)
+            report_obj = report_utils.BigReport(robot_gateway, namespace, ont_or_file, profile)
             report = report_obj.get_report()
             good_format = report_obj.get_good_format()
     else:
         if ont_or_file:
             # Ontology is not None
             print('Running ROBOT report on {0}...'.format(namespace), flush=True)
-            report = report_utils.run_report(robot_gateway, io_helper, ont_or_file)
+            report = report_utils.run_report(robot_gateway, io_helper, ont_or_file, profile)
 
     # Execute the numbered checks
     check_map = {}
