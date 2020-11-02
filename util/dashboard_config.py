@@ -37,7 +37,12 @@ def rundashboard(configfile, clean):
         for item in profile:
             if item:
                 f.write("%s\n" % item)
-    ontologies_path = os.path.join('dependencies', 'ontologies.yml')
+    dependencies_path = os.path.join('dependencies')
+
+    if not os.path.isdir(dependencies_path):
+        os.mkdir(dependencies_path)
+
+    ontologies_path = os.path.join(dependencies_path, 'ontologies.yml')
     with open(ontologies_path, 'w') as file:
         yaml.dump(ontologies, file)
 
