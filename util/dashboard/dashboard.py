@@ -22,6 +22,7 @@ import fp_012
 import fp_016
 import report_utils
 
+
 from argparse import ArgumentParser, FileType
 from py4j.java_gateway import JavaGateway
 
@@ -71,6 +72,19 @@ def run():
 
     # Handle ontology file
     big = namespace in BIG_ONTS
+
+    # Load dashboard data if exists
+    dashboard_yml = os.path.join(ontology_dir, "dashboard.yml")
+    data_yml = dict()
+    if os.path.isfile(dashboard_yml):
+        with open(dashboard_yml, 'r') as f:
+            data_yml = yaml.load(f, Loader=yaml.SafeLoader)
+
+    if 'changed' not in data_yml or 'results' not in data_yml or data_yml['changed'] == True:
+        print("Analysis has to be updated, running.")
+    else:
+        sys.exit(0)
+
     if not big:
         # Load ontology as OWLOntology object
         if not ontology_file or not os.path.exists(ontology_file) or dash_utils.whitespace_only(ontology_file):
@@ -92,8 +106,11 @@ def run():
         version_iri = dash_utils.get_big_version_iri(ont_or_file)
 
     # Get the registry data
-    yaml_data = yaml.load(registry, Loader=yaml.SafeLoader)
-    yaml_data = yaml_data['ontologies']
+    yaml_data_raw = yaml.load(registry, Loader=yaml.SafeLoader)
+    yaml_data = []
+    for o in yaml_data_raw['ontologies']:
+        yaml_data.append(yaml_data_raw['ontologies'][o])
+
     data = dash_utils.get_data(namespace, yaml_data)
 
     # Map of all ontologies to their domains
@@ -281,15 +298,16 @@ def run():
                  'summary': {'status': summary, 'comment': summary_comment}, 'results': all_checks}
 
     # Save to YAML file
-    outfile = os.path.join(ontology_dir, 'dashboard.yml')
-    print('Saving results to {0}'.format(outfile))
-    with open(outfile, 'w+') as f:
-        yaml.dump(save_data, f)
+    print('Saving results to {0}'.format(dashboard_yml))
+    with open(dashboard_yml, 'w+') as f:
+        for key in save_data:
+            data_yml[key] = save_data[key]
+        yaml.dump(data_yml, f)
 
     sys.exit(0)
 
-
-BIG_ONTS = ['bto', 'chebi', 'dron', 'gaz', 'ncbitaxon', 'ncit', 'pr', 'uberon']
+BIG_ONTS = []
+#BIG_ONTS = ['bto', 'chebi', 'dron', 'gaz', 'ncbitaxon', 'ncit', 'pr', 'uberon']
 OBO = 'http://purl.obolibrary.org/obo'
 
 PRINCIPLE_MAP = {

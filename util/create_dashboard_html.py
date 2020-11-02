@@ -7,6 +7,7 @@ import yaml
 
 from argparse import ArgumentParser
 from jinja2 import Template
+from lib import DashboardConfig
 
 
 def main(args):
@@ -19,6 +20,9 @@ def main(args):
     parser.add_argument('registry_yaml',
                         type=str,
                         help='Ontology registry data')
+    parser.add_argument('dashboard_config',
+                        type=str,
+                        help='Dashboard config file (typically dashboard-config.yml)')
     parser.add_argument('robot_version',
                         type=str,
                         help='Version of ROBOT used to build dashboard (version number)')
@@ -33,6 +37,9 @@ def main(args):
     registry_yaml = args.registry_yaml
     dashboard_dir = args.dashboard_dir
     outfile = args.outfile
+    dashboard_config = args.dashboard_config
+
+    config = DashboardConfig(dashboard_config)
 
     with open(registry_yaml, 'r') as f:
         data = yaml.load(f, Loader=yaml.SafeLoader)
@@ -59,7 +66,10 @@ def main(args):
                           date=date.strftime('%Y-%m-%d'),
                           robot=args.robot_version,
                           obomd=args.obomd_version,
-                          ontologies=ontologies)
+                          ontologies=ontologies,
+                          title=config.get_title(),
+                          description=config.get_description()
+                          )
 
     with open(outfile, 'w+') as f:
         f.write(res)
@@ -70,7 +80,7 @@ def get_ontology_order(data):
     """
     order = []
     for item in data:
-        ont_id = item['id']
+        ont_id = data[item]['id']
         order.append(ont_id)
     return order
 

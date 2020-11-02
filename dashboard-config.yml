@@ -1,0 +1,21 @@
+title: OBO Dashboard
+description: Quality control for all OBO Foundry ontologies. Under construction.
+ontologies:
+  #registry: "https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml"
+  #todo, deal with: bto chebi dron gaz ncbitaxon ncit pr uberon
+  custom:
+    - id: bfo
+      mirror_from: "http://purl.obolibrary.org/obo/bfo.owl"
+    - id: pato
+      extract_base: false
+    - id: testx
+prefer_base: True
+profile:
+  baseprofile: "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources/report_profile.txt"
+  custom:
+    - "WARN\tfile:./sparql/missing_xrefs.sparql"
+report_truncation_limit: 300
+redownload_after_hours: 0
+environment:
+  ROBOT_JAR: build/robot.jar
+  ROBOT: robot
