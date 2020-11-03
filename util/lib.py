@@ -87,7 +87,10 @@ class DashboardConfig:
                             continue
 
                     oid = o['id']
-                    oid_cap = oid.upper()
+                    if 'preferredPrefix' in o:
+                        oid_cap = o['preferredPrefix']
+                    else:
+                        oid_cap = oid.upper()
                     ontology['id'] = oid
 
                     if 'base_ns' in o:
@@ -105,7 +108,10 @@ class DashboardConfig:
             for o in ont_conf['custom']:
                 ontology = dict()
                 oid = o['id']
-                oid_cap = oid.upper()
+                if 'preferredPrefix' in o:
+                    oid_cap = o['preferredPrefix']
+                else:
+                    oid_cap = oid.upper()
                 ontology['id'] = oid
                 if 'mirror_from' in o:
                     ourl = o['mirror_from']
@@ -115,10 +121,13 @@ class DashboardConfig:
                     else:
                         ourl = f"http://purl.obolibrary.org/obo/{oid}.owl"
                 ontology['mirror_from'] = ourl
-                if 'base_ns' in o:
-                    ontology['base_ns'] = o['base_ns']
-                else:
+                if 'base_ns' not in o:
                     ontology['base_ns'] = [f'http://purl.obolibrary.org/obo/{oid_cap}_']
+                    
+                for key in o:
+                    if key not in ontology:
+                        ontology[key] = o[key]
+                
                 ontologies[oid] = ontology
         obo_registry_yaml = open_yaml_from_url(self.obo_registry)
         for oid in ontologies:
