@@ -21,7 +21,7 @@ ontologies:
         logo: http://mirrors.creativecommons.org/presskit/buttons/80x15/png/by.png
         url: http://creativecommons.org/licenses/by/4.0/
     - id: testx
-    - id: pato
+    - id: wbphenotype
 prefer_base: True
 profile:
   baseprofile: "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources/report_profile.txt"

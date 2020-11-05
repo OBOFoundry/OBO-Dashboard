@@ -119,9 +119,10 @@ def compute_obo_score(data, weights):
 
     if 'results' in data:
         if 'ROBOT Report' in data['results']:
-            report_errors = data['results']['ROBOT Report']['results']['ERROR']
-            report_warning = data['results']['ROBOT Report']['results']['WARN']
-            report_info = data['results']['ROBOT Report']['results']['INFO']
+            if 'results' in data['results']['ROBOT Report']:
+                report_errors = data['results']['ROBOT Report']['results']['ERROR']
+                report_warning = data['results']['ROBOT Report']['results']['WARN']
+                report_info = data['results']['ROBOT Report']['results']['INFO']
 
     if 'summary' in data:
         overall_error = data['summary']['summary_count']['ERROR']

@@ -138,11 +138,10 @@ class DashboardConfig:
                 ontology['mirror_from'] = ourl
                 if 'base_ns' not in o:
                     ontology['base_ns'] = [f'http://purl.obolibrary.org/obo/{oid_cap}_']
-                    
+
                 for key in o:
                     if key not in ontology:
                         ontology[key] = o[key]
-                
                 ontologies[oid] = ontology
         obo_registry_yaml = open_yaml_from_url(self.obo_registry)
         for oid in ontologies:
@@ -151,6 +150,9 @@ class DashboardConfig:
                     for key in ontology:
                         if key not in ontologies[oid]:
                             ontologies[oid][key] = ontology[key]
+                            if key == "preferredPrefix":
+                                oid_cap = ontology[key]
+                                ontologies[oid]['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid_cap}_')
                     break
         return {'ontologies': ontologies}
 
