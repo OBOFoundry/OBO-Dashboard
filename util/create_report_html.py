@@ -7,7 +7,7 @@ import sys
 import argparse
 
 from jinja2 import Template
-
+from lib import count_up
 
 def main(args):
     """
@@ -37,6 +37,8 @@ def main(args):
 
     headers = []
     rows = []
+    error_count_rule = dict()
+    error_count_level = dict()
     limitlines = args.limitlines
     i = 0
 
@@ -44,10 +46,12 @@ def main(args):
         headers = next(args.report).split('\t')
         for s in args.report:
             row = s.split('\t')
+            error_count_level = count_up(error_count_level, row[0])
+            error_count_rule = count_up(error_count_rule, row[1])
             if (limitlines == 0) or (i < limitlines):
                 rows.append(row)
                 i = i+1
-    except:
+    except Exception:
         pass
 
     contents = {'headers': headers, 'rows': rows}
@@ -60,7 +64,10 @@ def main(args):
                           maybe_get_link=maybe_get_link,
                           context=context,
                           title=args.title,
-                          file=os.path.basename(args.report.name))
+                          file=os.path.basename(args.report.name),
+                          error_count_rule=error_count_rule,
+                          error_count_level=error_count_level
+                          )
 
     args.outfile.write(res)
 

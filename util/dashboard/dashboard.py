@@ -293,9 +293,13 @@ def run():
         summary = 'PASS'
         summary_comment = ''
 
+    summary_count = dict()
+    summary_count['ERROR'] = err
+    summary_count['WARN'] = warn
+    summary_count['INFO'] = info
     date = datetime.datetime.today()
     save_data = {'namespace': namespace, 'version': version_iri, 'date': date.strftime('%Y-%m-%d'),
-                 'summary': {'status': summary, 'comment': summary_comment}, 'results': all_checks}
+                 'summary': {'status': summary, 'comment': summary_comment, 'summary_count': summary_count}, 'results': all_checks}
 
     # Save to YAML file
     print('Saving results to {0}'.format(dashboard_yml))
@@ -311,15 +315,15 @@ BIG_ONTS = []
 OBO = 'http://purl.obolibrary.org/obo'
 
 PRINCIPLE_MAP = {
-    1: 'FP1 Open',
-    2: 'FP2 Common Format',
-    3: 'FP3 URIs',
-    4: 'FP4 Versioning',
-    5: 'FP5 Scope',
-    6: 'FP6 Textual Definitions',
-    7: 'FP7 Relations',
-    8: 'FP8 Documented',
-    9: 'FP9 Plurality of Users',
+    1: 'FP01 Open',
+    2: 'FP02 Common Format',
+    3: 'FP03 URIs',
+    4: 'FP04 Versioning',
+    5: 'FP05 Scope',
+    6: 'FP06 Textual Definitions',
+    7: 'FP07 Relations',
+    8: 'FP08 Documented',
+    9: 'FP09 Plurality of Users',
     11: 'FP11 Locus of Authority',
     12: 'FP12 Naming Conventions',
     16: 'FP16 Maintenance'

@@ -113,20 +113,28 @@ def process_report(robot_gateway, report, ontology_dir):
     warns = report.getTotalViolations('WARN')
     info = report.getTotalViolations('INFO')
 
+    summary = dict()
+    summary['ERROR'] = errs
+    summary['WARN'] = warns
+    summary['INFO'] = info
+
     if errs > 0:
         return {'status': 'ERROR',
                 'file': 'robot_report',
+                'results': summary,
                 'comment': ' '.join(['{0} errors,'.format(errs),
                                      '{0} warnings,'.format(warns),
                                      '{0} info messages.'.format(info)])}
     elif warns > 0:
         return {'status': 'WARN',
                 'file': 'robot_report',
+                'results': summary,
                 'comment': ' '.join(['{0} warnings,'.format(warns),
                                      '{0} info messages.'.format(info)])}
     elif info > 0:
         return {'status': 'INFO',
                 'file': 'robot_report',
+                'results': summary,
                 'comment': '{0} info messages.'}
     else:
         return {'status': 'PASS'}

@@ -2,6 +2,7 @@ MAKEFLAGS += --warn-undefined-variables
 ROBOT_JAR := build/robot.jar
 REPORT_LENGTH_LIMIT := 200
 ROBOT_URL := "https://github.com/ontodev/robot/releases/download/v1.7.1/robot.jar"
+DASHBOARD_RESULTS := "dashboard/dashboard-results.yml"
 
 # ----------------- #
 ### MAKE COMMANDS ###
@@ -133,7 +134,7 @@ dashboard/%/dashboard.html: util/create_ontology_html.py dashboard/%/dashboard.y
 dashboard/index.html: util/create_dashboard_html.py dependencies/ontologies.yml util/templates/index.html.jinja2 dashboard-config.yml | $(SVGS)
 	$(eval ROBOT_VERSION := $(shell $(ROBOT) -version))
 	$(eval OBOMD_VERSION := $(shell curl https://api.github.com/repos/OBOFoundry/OBO-Dashboard/commits | jq '.[0].html_url'))
-	python3 $< dashboard $(word 2,$^) $(word 4,$^) "$(ROBOT_VERSION)" "$(OBOMD_VERSION)" $@
+	python3 $< dashboard $(word 2,$^) $(word 4,$^) "$(DASHBOARD_RESULTS)" "$(ROBOT_VERSION)" "$(OBOMD_VERSION)" $@
 
 # More details for users
 .PRECIOUS: dashboard/about.html

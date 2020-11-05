@@ -1,14 +1,27 @@
 title: OBO Dashboard
 description: Quality control for all OBO Foundry ontologies. Under construction.
+obo_score_weights:
+  no_base: 5
+  overall_error: 1
+  overall_warning: 0.5
+  overall_info: 0.1
+  report_errors: 0.05
+  report_warning: 0.01
+  report_info: 0.005
 ontologies:
   #registry: "https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml"
   #todo, deal with: bto chebi dron gaz ncbitaxon ncit pr uberon
   custom:
     - id: bfo
       mirror_from: "http://purl.obolibrary.org/obo/bfo.owl"
-    - id: pato
-      extract_base: false
+    - id: covoc
+      mirror_from: "https://raw.githubusercontent.com/EBISPOT/covoc/master/covoc.owl"
+      license:
+        label: CC-BY
+        logo: http://mirrors.creativecommons.org/presskit/buttons/80x15/png/by.png
+        url: http://creativecommons.org/licenses/by/4.0/
     - id: testx
+    - id: pato
 prefer_base: True
 profile:
   baseprofile: "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources/report_profile.txt"

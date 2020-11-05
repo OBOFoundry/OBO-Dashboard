@@ -44,6 +44,21 @@ class DashboardConfig:
         else:
             return "OBO Dashboard"
 
+    def get_oboscore_weights(self):
+        weights = dict()
+        weights['no_base'] = 5
+        weights['overall_error'] = 1
+        weights['overall_warning'] = 0.5
+        weights['overall_info'] = 0.1
+        weights['report_errors'] = 0.05
+        weights['report_warning'] = 0.01
+        weights['report_info'] = 0.005
+        if 'obo_score_weights' in self.config:
+            for weight in self.config['obo_score_weights']:
+                weights[weight] = self.config['obo_score_weights'][weight]
+        return weights
+
+
     def get_description(self):
         if "description" in self.config:
             return self.config.get("description")
@@ -142,7 +157,7 @@ class DashboardConfig:
     def base_url_if_exists(self, oid):
         ourl = f"http://purl.obolibrary.org/obo/{oid}/{oid}-base.owl"
         try:
-            ret = requests.head(ourl)
+            ret = requests.head(ourl, allow_redirects=True)
             if ret.status_code != 200:
                 ourl = f"http://purl.obolibrary.org/obo/{oid}.owl"
         except Exception:
@@ -219,6 +234,12 @@ def robot_prepare_ontology(o_path, o_out_path, base_iris, TIMEOUT="3600", robot_
         check_call(callstring)
     except Exception as e:
         raise Exception(f"Preparing {o_path} for dashboard failed...", e)
+
+def count_up(dictionary, value):
+    if value not in dictionary:
+        dictionary[value] = 0
+    dictionary[value] = dictionary[value] + 1
+    return dictionary
 
 
 def save_yaml(dictionary, file_path):

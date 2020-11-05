@@ -8,6 +8,20 @@
     <div class="col-md-12">
       <h1>{{ title }}</h1>
       <p class="lead"><a href="{{ file }}">Download TSV</a></p>
+      <h3>Types of errors</h3>
+      <div class="report_summary"><table class="table">
+      <tr><th><b>Level</b></th><th><b>Number of errors</b></th></tr>
+      {% for key, value in error_count_level.items() %}
+      <tr><td>{{key}}</td><td>{{value}}</td></tr>
+      {% endfor %}
+      </table></div>
+      <h3>Error breakdown</h3>
+      <div class="report_summary"><table class="table">
+      <th><td><b>Rule</b></td><td><b>NUmber of errors</b></td></th>
+      {% for key, value in error_count_rule.items() %}
+      <tr><td>{{key}}</td><td>{{value}}</td></tr>
+      {% endfor %}
+      </table></div>
       <p style="text-align:center; margin-top:-15px;">
         <small>Click on any term to direct to the term page.</small>
       </p>

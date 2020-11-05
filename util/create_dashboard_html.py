@@ -7,7 +7,7 @@ import yaml
 
 from argparse import ArgumentParser
 from jinja2 import Template
-from lib import DashboardConfig
+from lib import DashboardConfig, count_up, save_yaml
 
 
 def main(args):
@@ -23,6 +23,9 @@ def main(args):
     parser.add_argument('dashboard_config',
                         type=str,
                         help='Dashboard config file (typically dashboard-config.yml)')
+    parser.add_argument('dashboard_score_data',
+                        type=str,
+                        help='Dashboard yaml file with results')
     parser.add_argument('robot_version',
                         type=str,
                         help='Version of ROBOT used to build dashboard (version number)')
@@ -36,6 +39,7 @@ def main(args):
 
     registry_yaml = args.registry_yaml
     dashboard_dir = args.dashboard_dir
+    dashboard_score_data_file = args.dashboard_score_data
     outfile = args.outfile
     dashboard_config = args.dashboard_config
 
@@ -46,15 +50,20 @@ def main(args):
 
     # Put ontology data in order
     data = data['ontologies']
+
     order = get_ontology_order(data)
+    oboscore_weights = config.get_oboscore_weights()
     ontologies = []
     for o in order:
         dashboard_yaml = '{0}/{1}/dashboard.yml'.format(dashboard_dir, o)
         if not os.path.exists(dashboard_yaml):
             continue
+        this_data = dict()
         with open(dashboard_yaml, 'r') as f:
             this_data = yaml.load(f, Loader=yaml.SafeLoader)
-
+            this_data['oboscore'] = compute_obo_score(this_data, oboscore_weights)
+        this_data['mirror_from'] = data[o]['mirror_from']
+        this_data['base_generated'] = "-base" not in this_data['mirror_from']
         ontologies.append(this_data)
 
     # Load Jinja2 template
@@ -74,6 +83,11 @@ def main(args):
     with open(outfile, 'w+') as f:
         f.write(res)
 
+    dashboard_score_data = dict()
+    dashboard_score_data['ontologies'] = ontologies
+    dashboard_score_data['oboscore_weights'] = oboscore_weights
+    save_yaml(dashboard_score_data, dashboard_score_data_file)
+
 
 def get_ontology_order(data):
     """
@@ -85,15 +99,53 @@ def get_ontology_order(data):
     return order
 
 
-check_order = ['FP1 Open',
-               'FP2 Common Format',
-               'FP3 URIs',
-               'FP4 Versioning',
-               'FP5 Scope',
-               'FP6 Textual Definitions',
-               'FP7 Relations',
-               'FP8 Documented',
-               'FP9 Plurality of Users',
+def compute_obo_score(data, weights):
+
+    if 'failure' in data:
+        return 0
+
+    oboscore = 100
+    no_base = 0
+    report_errors = 0
+    report_warning = 0
+    report_info = 0
+
+    overall_error = 0
+    overall_warning = 0
+    overall_info = 0
+
+    if 'base_generated' in data and data['base_generated'] == True:
+        no_base = weights['base_generated']
+
+    if 'results' in data:
+        if 'ROBOT Report' in data['results']:
+            report_errors = data['results']['ROBOT Report']['results']['ERROR']
+            report_warning = data['results']['ROBOT Report']['results']['WARN']
+            report_info = data['results']['ROBOT Report']['results']['INFO']
+
+    if 'summary' in data:
+        overall_error = data['summary']['summary_count']['ERROR']
+        overall_warning = data['summary']['summary_count']['WARN']
+        overall_info = data['summary']['summary_count']['INFO']
+
+    oboscore = oboscore - (weights['no_base'] * no_base)
+    oboscore = oboscore - (weights['overall_error'] * overall_error)
+    oboscore = oboscore - (weights['overall_warning'] * overall_warning)
+    oboscore = oboscore - (weights['overall_info'] * overall_info)
+    oboscore = oboscore - (weights['report_errors'] * report_errors)
+    oboscore = oboscore - (weights['report_warning'] * report_warning)
+    oboscore = oboscore - (weights['report_info'] * report_info)
+    return oboscore
+
+check_order = ['FP01 Open',
+               'FP02 Common Format',
+               'FP03 URIs',
+               'FP04 Versioning',
+               'FP05 Scope',
+               'FP06 Textual Definitions',
+               'FP07 Relations',
+               'FP08 Documented',
+               'FP09 Plurality of Users',
                'FP11 Locus of Authority',
                'FP12 Naming Conventions',
                'FP16 Maintenance',
