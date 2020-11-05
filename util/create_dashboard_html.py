@@ -135,7 +135,7 @@ def compute_obo_score(data, weights):
     oboscore = oboscore - (weights['report_errors'] * report_errors)
     oboscore = oboscore - (weights['report_warning'] * report_warning)
     oboscore = oboscore - (weights['report_info'] * report_info)
-    return oboscore
+    return "%.2f" % oboscore
 
 check_order = ['FP01 Open',
                'FP02 Common Format',
