@@ -55,9 +55,24 @@ class DashboardConfig:
         weights['report_info'] = 0.005
         if 'obo_score_weights' in self.config:
             for weight in self.config['obo_score_weights']:
-                weights[weight] = self.config['obo_score_weights'][weight]
+                if 'impact_factor' in self.config['obo_score_weights']:
+                    weights[weight] = self.config['obo_score_weights']['impact_factor'][weight]
         return weights
 
+    def get_oboscore_max_impact(self):
+        weights = dict()
+        weights['no_base'] = 5
+        weights['overall_error'] = 20
+        weights['overall_warning'] = 10
+        weights['overall_info'] = 5
+        weights['report_errors'] = 10
+        weights['report_warning'] = 5
+        weights['report_info'] = 2
+        if 'obo_score_weights' in self.config:
+            for weight in self.config['obo_score_weights']:
+                if 'max_impact' in self.config['obo_score_weights']:
+                    weights[weight] = self.config['obo_score_weights']['max_impact'][weight]
+        return weights
 
     def get_description(self):
         if "description" in self.config:
@@ -223,7 +238,7 @@ def load_yaml(filepath):
 
 
 def robot_prepare_ontology(o_path, o_out_path, base_iris, TIMEOUT="3600", robot_opts="-v"):
-    print(f"Preparing {o_path} for dashboard.")
+    logging.info(f"Preparing {o_path} for dashboard.")
     try:
         timeout = ['timeout', TIMEOUT]
         callstring = ['robot', 'merge', robot_opts, '-i', o_path, 'remove']
@@ -232,7 +247,7 @@ def robot_prepare_ontology(o_path, o_out_path, base_iris, TIMEOUT="3600", robot_
             callstring.extend(['--base-iri',s])
         callstring.extend(["--axioms", "external", "-p", "false"])
         callstring.extend(['--output', o_out_path])
-        print(callstring)
+        logging.info(callstring)
         check_call(callstring)
     except Exception as e:
         raise Exception(f"Preparing {o_path} for dashboard failed...", e)

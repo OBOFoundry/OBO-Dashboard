@@ -53,6 +53,7 @@ def main(args):
 
     order = get_ontology_order(data)
     oboscore_weights = config.get_oboscore_weights()
+    oboscore_maximpacts = config.get_oboscore_max_impact()
     ontologies = []
     for o in order:
         dashboard_yaml = '{0}/{1}/dashboard.yml'.format(dashboard_dir, o)
@@ -61,7 +62,7 @@ def main(args):
         this_data = dict()
         with open(dashboard_yaml, 'r') as f:
             this_data = yaml.load(f, Loader=yaml.SafeLoader)
-            this_data['oboscore'] = compute_obo_score(this_data, oboscore_weights)
+            this_data['oboscore'] = compute_obo_score(this_data, oboscore_weights, oboscore_maximpacts)
         this_data['mirror_from'] = data[o]['mirror_from']
         this_data['base_generated'] = "-base" not in this_data['mirror_from']
         ontologies.append(this_data)
@@ -99,7 +100,7 @@ def get_ontology_order(data):
     return order
 
 
-def compute_obo_score(data, weights):
+def compute_obo_score(data, weights, maximpacts):
 
     if 'failure' in data:
         return 0
@@ -113,6 +114,14 @@ def compute_obo_score(data, weights):
     overall_error = 0
     overall_warning = 0
     overall_info = 0
+
+    report_errors_max = 0
+    report_warning_max = 0
+    report_info_max = 0
+
+    overall_error_max = 0
+    overall_warning_max = 0
+    overall_info_max = 0
 
     if 'base_generated' in data and data['base_generated'] == True:
         no_base = weights['base_generated']
@@ -129,14 +138,22 @@ def compute_obo_score(data, weights):
         overall_warning = data['summary']['summary_count']['WARN']
         overall_info = data['summary']['summary_count']['INFO']
 
-    oboscore = oboscore - (weights['no_base'] * no_base)
-    oboscore = oboscore - (weights['overall_error'] * overall_error)
-    oboscore = oboscore - (weights['overall_warning'] * overall_warning)
-    oboscore = oboscore - (weights['overall_info'] * overall_info)
-    oboscore = oboscore - (weights['report_errors'] * report_errors)
-    oboscore = oboscore - (weights['report_warning'] * report_warning)
-    oboscore = oboscore - (weights['report_info'] * report_info)
+    oboscore = oboscore - score_max(weights['no_base'] * no_base, maximpacts['no_base'])
+    oboscore = oboscore - score_max(weights['overall_error'] * overall_error, maximpacts['overall_error'])
+    oboscore = oboscore - score_max(weights['overall_warning'] * overall_warning, maximpacts['overall_warning'])
+    oboscore = oboscore - score_max(weights['overall_info'] * overall_info, maximpacts['overall_info'])
+    oboscore = oboscore - score_max(weights['report_errors'] * report_errors, maximpacts['report_errors'])
+    oboscore = oboscore - score_max(weights['report_warning'] * report_warning, maximpacts['report_warning'])
+    oboscore = oboscore - score_max(weights['report_info'] * report_info, maximpacts['report_info'])
     return "%.2f" % oboscore
+
+
+def score_max(score,maxscore):
+    if score > maxscore:
+        return maxscore
+    else:
+        return score
+
 
 check_order = ['FP01 Open',
                'FP02 Common Format',

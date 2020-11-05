@@ -18,13 +18,12 @@ clean:
 
 # Truncate potentially huge robot reports
 truncate_reports_for_github:
-	$(eval REPORTS := $(notdir $(wildcard dashboard/*/robot_report.tsv)))
+	$(eval REPORTS := $(wildcard dashboard/*/robot_report.tsv))
 	for REP in $(REPORTS); do \
 		touch $$REP; \
 		cat $$REP | head -$(REPORT_LENGTH_LIMIT) > $$REP.tmp; \
 		mv $$REP.tmp $$REP; \
 	done
-	
 
 # ------------------- #
 ### DIRECTORY SETUP ###
