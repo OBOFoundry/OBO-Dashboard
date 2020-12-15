@@ -85,6 +85,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
         ont_base_path = os.path.join(ontology_dir, f"{o}.owl")
         ont_metrics_path = os.path.join(ontology_dir, f"{o}-metrics.yml")
         ont_dashboard_dir = os.path.join(dashboard_dir, o)
+        ont_results_path = os.path.join(ont_dashboard_dir, "dashboard.yml")
+        download = True
 
         if not os.path.exists(ont_dashboard_dir):
             os.mkdir(ont_dashboard_dir)
@@ -95,11 +97,11 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             if hours_since < config.get_redownload_after_hours():
                 logging.info(f"File has only been processed recently ({hours_since} hours ago), skipping {o}. "
                              f"Redownloading after {config.get_redownload_after_hours()} hours..")
-                continue
+                download = False
             else:
                 logging.info(f"File has not been downloaded recently ({hours_since} hours ago), processing {o}...")
 
-        ont_results_path = os.path.join(ont_dashboard_dir, "dashboard.yml")
+
         ont_results = dict()
         ont_results['namespace'] = o
         if os.path.exists(ont_results_path):
@@ -127,14 +129,15 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             save_yaml(ont_results, ont_results_path)
             continue
 
-        logging.info(f"Downloading {o}...")
-        try:
-            urllib.request.urlretrieve(ourl, ont_path)
-        except Exception:
-            logging.exception(f'Failed to download {o} from {ourl}')
-            ont_results['failure'] = 'failed_download'
-            save_yaml(ont_results, ont_results_path)
-            continue
+        if download:
+            logging.info(f"Downloading {o}...")
+            try:
+                urllib.request.urlretrieve(ourl, ont_path)
+            except Exception:
+                logging.exception(f'Failed to download {o} from {ourl}')
+                ont_results['failure'] = 'failed_download'
+                save_yaml(ont_results, ont_results_path)
+                continue
 
         try:
             sha256_hash = sha256sum(ont_path)
