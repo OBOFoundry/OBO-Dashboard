@@ -278,17 +278,19 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 ont_results['metrics']['Info: Experimental OBO score'] = dashboard_score
                 save_yaml(ont_results, ont_results_path)
 
-        dashboard_html = os.path.join(ont_dashboard_dir, "dashboard.html")
+            dashboard_html = os.path.join(ont_dashboard_dir, "dashboard.html")
 
-        if (ont_results['changed'] == True or 'results' not in ont_results) and 'failure' not in ont_results:
-            logging.info(f"Creating dashboard for {o}...")
-            try:
-                runcmd(f"make  {make_parameters} {dashboard_html}")
-            except Exception:
-                logging.exception(f'Failed to build dashboard pages for {o}.')
-                ont_results['failure'] = 'failed_ontology_dashboard'
-                save_yaml(ont_results, ont_results_path)
-                continue
+            if (ont_results['changed'] == True or 'results' not in ont_results) and 'failure' not in ont_results:
+                logging.info(f"Creating dashboard for {o}...")
+                try:
+                    runcmd(f"make  {make_parameters} {dashboard_html}")
+                except Exception:
+                    logging.exception(f'Failed to build dashboard pages for {o}.')
+                    ont_results['failure'] = 'failed_ontology_dashboard'
+                    save_yaml(ont_results, ont_results_path)
+                    continue
+            else:
+                logging.error(f"{o} no dashboard yaml file found for {ont_results_path}!")
         else:
             logging.info(f"{o} has not changed since last run, skipping dashboard building.")
 
