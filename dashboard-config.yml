@@ -5,7 +5,7 @@ obo_score_weights:
     impact_factor: 5
     max_impact: 5
   overall_error:
-    impact_factor: 1
+    impact_factor: 5
     max_impact: 20
   overall_warning:
     impact_factor: 0.5
@@ -41,8 +41,14 @@ profile:
   baseprofile: "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources/report_profile.txt"
   custom:
     - "WARN\tfile:./sparql/missing_xrefs.sparql"
+robot_additional_prefixes:
+  COVOC: "http://purl.obolibrary.org/obo/COVOC_"
+  dbpedia: "http://dbpedia.org/resource/"
+  EFO: "http://www.ebi.ac.uk/efo/EFO_"
 report_truncation_limit: 300
 redownload_after_hours: 0
+force_regenerate_dashboard_after_hours: 0
+robot_opts: -vv
 environment:
   ROBOT_JAR: build/robot.jar
   ROBOT: robot

@@ -69,32 +69,36 @@ def rundashboard(configfile, clean):
     if not os.path.isdir(dashboard_dir):
         os.mkdir(dashboard_dir)
 
-    prepare_ontologies(ontologies['ontologies'], ontology_dir, dashboard_dir, make_parameters, config.get_redownload_after_hours())
+    prepare_ontologies(ontologies['ontologies'], ontology_dir, dashboard_dir, make_parameters, config)
     logging.info("Building the dashboard")
     runcmd(f"make dashboard {make_parameters} -B")
     logging.info("Postprocess files for github")
     runcmd(f"make truncate_reports_for_github {make_parameters} -B")
 
+def get_hours_since(timestamp):
+    modified_date = datetime.fromtimestamp(timestamp)
+    now = datetime.now()
+    duration = now - modified_date
+    hours_since = (duration.total_seconds() // 3600)
+    return hours_since
 
-def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters, repeat_after_hours=24):
+def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters, config):
     for o in ontologies:
         logging.info(f"Preparing {o}...")
         ont_path = os.path.join(ontology_dir, f"{o}-raw.owl")
+        ont_base_path = os.path.join(ontology_dir, f"{o}.owl")
+        ont_metrics_path = os.path.join(ontology_dir, f"{o}-metrics.yml")
         ont_dashboard_dir = os.path.join(dashboard_dir, o)
 
         if not os.path.exists(ont_dashboard_dir):
             os.mkdir(ont_dashboard_dir)
 
-        ont_base_path = os.path.join(ontology_dir, f"{o}.owl")
         if os.path.isfile(ont_base_path):
             modified_timestamp = os.path.getmtime(ont_base_path)
-            modified_date = datetime.fromtimestamp(modified_timestamp)
-            now = datetime.now()
-            duration = now - modified_date
-            hours_since = (duration.total_seconds() // 3600)
-            if hours_since < repeat_after_hours:
-                logging.info(f"File has only been downloaded recently ({hours_since} hours ago), skipping {o}. "
-                             f"Redownloading after {repeat_after_hours} hours..")
+            hours_since = get_hours_since(modified_timestamp)
+            if hours_since < config.get_redownload_after_hours():
+                logging.info(f"File has only been processed recently ({hours_since} hours ago), skipping {o}. "
+                             f"Redownloading after {config.get_redownload_after_hours()} hours..")
                 continue
             else:
                 logging.info(f"File has not been downloaded recently ({hours_since} hours ago), processing {o}...")
@@ -144,9 +148,21 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             save_yaml(ont_results, ont_results_path)
             continue
 
+        ont_results['changed'] = True
         if 'sha256_hash' in ont_results:
             if ont_results['sha256_hash'] == sha256_hash:
-                ont_results['changed'] = False
+                if os.path.isfile(ont_base_path):
+                    modified_timestamp = os.path.getmtime(ont_base_path)
+                    hours_since = get_hours_since(modified_timestamp)
+                    if hours_since >= config.get_force_regenerate_dashboard_after_hours():
+                        logging.info(f"{o} has been processed a while ago ({hours_since} hours ago). "
+                                     f"Forcing dashboard generation..")
+                    else:
+                        logging.info(f"File has is the same for {o} and has been processed recently "
+                                     f"(less than {config.get_force_regenerate_dashboard_after_hours()} hours ago). "
+                                     f"Skipping.")
+                        ont_results['changed'] = False
+
             else:
                 ont_results['changed'] = True
                 # If the sha changed, we should try again and
@@ -179,7 +195,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
 
             logging.info(f"Creating basefile for {o}...")
             try:
-                robot_prepare_ontology(ont_path, ont_base_path, base_namespaces, TIMEOUT="3600", robot_opts="-v")
+                robot_prepare_ontology(ont_path, ont_base_path, ont_metrics_path, base_namespaces, robot_prefixes=config.get_robot_additional_prefixes(), robot_opts=config.get_robot_opts())
             except Exception:
                 logging.exception(f'Failed to compute base file for {o}.')
                 ont_results['failure'] = 'failed_robot_base'
@@ -187,6 +203,40 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 continue
         else:
             logging.info(f"{o} has not changed since last run, skipping process.")
+
+
+        try:
+            metrics = load_yaml(ont_metrics_path)
+            ont_results['metrics'] = {}
+            ont_results['metrics']['consistent'] = metrics['metrics']['consistent']
+            ont_results['metrics']['unsatisfiable_class_count'] = metrics['metrics']['unsatisfiable_class_count']
+            ont_results['metrics']['axiom_count'] = metrics['metrics']['axiom_count_incl']
+            ont_results['metrics']['class_count'] = metrics['metrics']['class_count_incl']
+            ont_results['metrics']['obj_property_count'] = metrics['metrics']['obj_property_count_incl']
+            ont_results['metrics']['namespace_axiom_count'] = metrics['metrics']['namespace_axiom_count_incl']
+            ont_results['metrics']['individual_count'] = metrics['metrics']['individual_count_incl']
+            ont_results['metrics']['dataproperty_count'] = metrics['metrics']['dataproperty_count_incl']
+            ont_results['metrics']['annotation_property_count'] = metrics['metrics']['annotation_property_count_incl']
+            ont_results['metrics']['owl2_dl'] = metrics['metrics']['owl2_dl']
+            ont_results['metrics']['syntax'] = metrics['metrics']['syntax']
+            save_yaml(ont_results, ont_results_path)
+        except Exception:
+            logging.exception(f'Corrupted metrics file for {o}: {ont_metrics_path}')
+            ont_results['failure'] = 'corrupted_metrics_file'
+            save_yaml(ont_results, ont_results_path)
+            continue
+
+        if ont_results['metrics']['axiom_count'] < 1:
+            logging.exception(f'Ontology has lass than one axiom: {o}')
+            ont_results['failure'] = 'empty_ontology'
+            save_yaml(ont_results, ont_results_path)
+            continue
+
+        if not ont_results['metrics']['consistent']:
+            logging.exception(f'Ontology is inconsistent: {o}')
+            ont_results['failure'] = 'inconsistent_ontology'
+            save_yaml(ont_results, ont_results_path)
+            continue
 
         dashboard_html = os.path.join(ont_dashboard_dir, "dashboard.html")
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import yaml
 import logging
 import subprocess
@@ -7,6 +8,7 @@ import urllib.request
 import hashlib
 from subprocess import check_call
 import requests
+from pathlib import Path
 
 def runcmd(cmd):
     logging.info("RUNNING: {}".format(cmd))
@@ -91,6 +93,12 @@ class DashboardConfig:
         else:
             return 0
 
+    def get_robot_additional_prefixes(self):
+        if "robot_additional_prefixes" in self.config:
+            return self.config.get("robot_additional_prefixes")
+        else:
+            return {}
+
     def get_environment_variables(self):
         if "environment" in self.config:
             return self.config.get("environment")
@@ -100,6 +108,18 @@ class DashboardConfig:
     def get_redownload_after_hours(self):
         if "redownload_after_hours" in self.config:
             return self.config.get("redownload_after_hours")
+        else:
+            return 0
+
+    def get_robot_opts(self):
+        if "robot_opts" in self.config:
+            return self.config.get("robot_opts")
+        else:
+            return ""
+
+    def get_force_regenerate_dashboard_after_hours(self):
+        if "force_regenerate_dashboard_after_hours" in self.config:
+            return self.config.get("force_regenerate_dashboard_after_hours")
         else:
             return 0
 
@@ -237,11 +257,14 @@ def load_yaml(filepath):
     return data
 
 
-def robot_prepare_ontology(o_path, o_out_path, base_iris, TIMEOUT="3600", robot_opts="-v"):
+def robot_prepare_ontology(o_path, o_out_path, o_metrics_path, base_iris, robot_prefixes={}, robot_opts="-v"):
     logging.info(f"Preparing {o_path} for dashboard.")
     try:
-        timeout = ['timeout', TIMEOUT]
-        callstring = ['robot', 'merge', robot_opts, '-i', o_path, 'remove']
+        callstring = ['robot']
+        callstring.extend(['metrics', robot_opts, '-i', o_path])
+        for prefix in robot_prefixes:
+            callstring.extend(['--prefix', f"{prefix}: {robot_prefixes[prefix]}"])
+        callstring.extend(['--metrics', 'extended-reasoner','-f','yaml','-o',o_metrics_path, 'merge', 'remove'])
         #base_iris_string = " ".join([f"--base-iri \"{s}\"" for s in sbase_iris])
         for s in base_iris:
             callstring.extend(['--base-iri',s])

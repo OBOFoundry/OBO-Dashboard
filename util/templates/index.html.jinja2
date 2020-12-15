@@ -137,14 +137,18 @@ $(function () {
                 {% if 'comment' in r %}
                     {% if r.status == 'ERROR' %}
                         {% set tdclass = 'danger' %}
+                        {% set icon = 'x' %}
                     {% elif r.status == 'WARN' %}
                         {% set tdclass = 'warning' %}
+                        {% set icon = 'warning' %}
                     {% elif r.status == 'INFO' %}
                         {% set tdclass = 'info' %}
+                        {% set icon = 'info' %}
+                        {% set icon = 'check' %}
                     {% else %}
                         {% set tdclass = 'success' %}
                     {% endif %}
-                    <td class="check table-{{ tdclass }}">{{ o.oboscore }}</td>
+                    <td class="check table-{{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px"></td>
                 {% else %}
                     {% if r.status == 'ERROR' %}
                         {% set tdclass = 'danger' %}
@@ -159,10 +163,12 @@ $(function () {
                         {% set tdclass = 'success' %}
                         {% set icon = 'check' %}
                     {% endif %}
-                    <td class="check table-{{ tdclass }}">{{ o.oboscore }}</td>
+                    {% set tdclass = 'check' %}
+                    <td class="check table-{{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px"></td>
                 {% endif %}
             {% else %}
-                <td class="check table-danger">{{ o.oboscore }}</td>
+            {% set tdclass = 'danger' %}
+                <td class="check table-danger"><img src="assets/{{ icon }}.svg" height="15px"></td>
             {% endif %}
         </tr>
     {% endfor %}
