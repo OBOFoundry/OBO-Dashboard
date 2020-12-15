@@ -249,6 +249,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             save_yaml(ont_results, ont_results_path)
             continue
 
+        save_yaml(ont_results, ont_results_path)
+
     # This has to be done after all ontologies are analysed, because we need their usage information to quantify impact.
     oboscore_weights = config.get_oboscore_weights()
     oboscore_maximpacts = config.get_oboscore_max_impact()
