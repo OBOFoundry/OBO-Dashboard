@@ -22,6 +22,16 @@ obo_score_weights:
   report_info:
     impact_factor: 0.005
     max_impact: 3
+  impact:
+    impact_factor: 3
+    max_impact: 3
+  dashboard:
+    impact_factor: 2
+    max_impact: 2
+  reuse:
+    impact_factor: 1
+    max_impact: 1
+
 ontologies:
   #registry: "https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml"
   #todo, deal with: bto chebi dron gaz ncbitaxon ncit pr uberon

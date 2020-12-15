@@ -52,10 +52,9 @@ def main(args):
     data = data['ontologies']
 
     order = get_ontology_order(data)
-    oboscore_weights = config.get_oboscore_weights()
-    oboscore_maximpacts = config.get_oboscore_max_impact()
+
     ontologies = []
-    ontology_use = {}
+
     for o in order:
         dashboard_yaml = '{0}/{1}/dashboard.yml'.format(dashboard_dir, o)
         if not os.path.exists(dashboard_yaml):
@@ -65,22 +64,7 @@ def main(args):
         this_data['mirror_from'] = data[o]['mirror_from']
         this_data['base_generated'] = "-base" not in this_data['mirror_from']
         ontologies.append(this_data)
-        if 'metrics' in this_data:
-            for base_prefix in this_data['base_prefixes']:
-                for used_prefix in this_data['metrics']['Info: Usage of namespaces in axioms']:
-                    if used_prefix not in ontology_use:
-                        ontology_use[used_prefix] = []
-                    ontology_use[used_prefix].append(base_prefix)
 
-    # Compute useage statistics
-    for data in ontologies:
-        uses = []
-        if 'base_prefixes' in data:
-            for base_prefix in data['base_prefixes']:
-                if base_prefix in ontology_use:
-                    uses.extend(ontology_use[base_prefix])
-        uses = list(set(uses))
-        data['use_ontology'] = len(uses)
 
     # Load Jinja2 template
     template = Template(open('util/templates/index.html.jinja2').read())
@@ -99,9 +83,13 @@ def main(args):
     with open(outfile, 'w+') as f:
         f.write(res)
 
+    oboscore_weights = config.get_oboscore_weights()
+    oboscore_maximpacts = config.get_oboscore_max_impact()
     dashboard_score_data = dict()
     dashboard_score_data['ontologies'] = ontologies
-    dashboard_score_data['oboscore_weights'] = oboscore_weights
+    dashboard_score_data['oboscore'] = {}
+    dashboard_score_data['oboscore']['dashboard_score_weights'] = oboscore_weights
+    dashboard_score_data['oboscore']['dashboard_score_max_impact'] = oboscore_maximpacts
     save_yaml(dashboard_score_data, dashboard_score_data_file)
 
 
@@ -115,59 +103,6 @@ def get_ontology_order(data):
     return order
 
 
-def compute_obo_score(data, weights, maximpacts):
-
-    if 'failure' in data:
-        return 0
-
-    oboscore = 100
-    no_base = 0
-    report_errors = 0
-    report_warning = 0
-    report_info = 0
-
-    overall_error = 0
-    overall_warning = 0
-    overall_info = 0
-
-    report_errors_max = 0
-    report_warning_max = 0
-    report_info_max = 0
-
-    overall_error_max = 0
-    overall_warning_max = 0
-    overall_info_max = 0
-
-    if 'base_generated' in data and data['base_generated'] == True:
-        no_base = weights['base_generated']
-
-    if 'results' in data:
-        if 'ROBOT Report' in data['results']:
-            if 'results' in data['results']['ROBOT Report']:
-                report_errors = data['results']['ROBOT Report']['results']['ERROR']
-                report_warning = data['results']['ROBOT Report']['results']['WARN']
-                report_info = data['results']['ROBOT Report']['results']['INFO']
-
-    if 'summary' in data:
-        overall_error = data['summary']['summary_count']['ERROR']
-        overall_warning = data['summary']['summary_count']['WARN']
-        overall_info = data['summary']['summary_count']['INFO']
-
-    oboscore = oboscore - score_max(weights['no_base'] * no_base, maximpacts['no_base'])
-    oboscore = oboscore - score_max(weights['overall_error'] * overall_error, maximpacts['overall_error'])
-    oboscore = oboscore - score_max(weights['overall_warning'] * overall_warning, maximpacts['overall_warning'])
-    oboscore = oboscore - score_max(weights['overall_info'] * overall_info, maximpacts['overall_info'])
-    oboscore = oboscore - score_max(weights['report_errors'] * report_errors, maximpacts['report_errors'])
-    oboscore = oboscore - score_max(weights['report_warning'] * report_warning, maximpacts['report_warning'])
-    oboscore = oboscore - score_max(weights['report_info'] * report_info, maximpacts['report_info'])
-    return "%.2f" % oboscore
-
-
-def score_max(score,maxscore):
-    if score > maxscore:
-        return maxscore
-    else:
-        return score
 
 
 check_order = ['FP01 Open',
