@@ -50,12 +50,8 @@ build/robot.jar: | build
 dependencies/obo_context.jsonld: dependencies
 	curl -Lk -o $@ https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/obo_context.jsonld
 
-# Schemas
-dependencies/license.json: dependencies
-	curl -Lk -o $@ https://github.com/OBOFoundry/OBOFoundry.github.io/raw/master/util/schema/license.json
-
-dependencies/contact.json: dependencies
-	curl -Lk -o $@ https://github.com/OBOFoundry/OBOFoundry.github.io/raw/master/util/schema/contact.json
+dependencies/registry_schema.json: dependencies
+	curl -Lk -o $@ https://github.com/OBOFoundry/OBOFoundry.github.io/raw/master/util/schema/registry_schema.json
 
 # RO is used to compare properties
 dependencies/ro-merged.owl: | dependencies build/robot.jar
@@ -101,7 +97,7 @@ dashboard/assets/%.svg: | dashboard/assets
 
 # dashboard.py has several dependencies, and generates four files,
 .PRECIOUS: dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv
-dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv: util/dashboard/dashboard.py build/ontologies/%.owl dependencies/ontologies.yml dependencies/license.json dependencies/contact.json build/ro-properties.csv profile.txt | build/robot.jar
+dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv: util/dashboard/dashboard.py build/ontologies/%.owl dependencies/ontologies.yml dependencies/registry_schema.json build/ro-properties.csv profile.txt | build/robot.jar
 	python3 $^ $(dir $@) $(ROBOT_JAR)
 
 # HTML output of ROBOT report

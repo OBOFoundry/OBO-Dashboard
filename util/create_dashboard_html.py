@@ -55,17 +55,32 @@ def main(args):
     oboscore_weights = config.get_oboscore_weights()
     oboscore_maximpacts = config.get_oboscore_max_impact()
     ontologies = []
+    ontology_use = {}
     for o in order:
         dashboard_yaml = '{0}/{1}/dashboard.yml'.format(dashboard_dir, o)
         if not os.path.exists(dashboard_yaml):
             continue
-        this_data = dict()
         with open(dashboard_yaml, 'r') as f:
             this_data = yaml.load(f, Loader=yaml.SafeLoader)
-            this_data['oboscore'] = compute_obo_score(this_data, oboscore_weights, oboscore_maximpacts)
         this_data['mirror_from'] = data[o]['mirror_from']
         this_data['base_generated'] = "-base" not in this_data['mirror_from']
         ontologies.append(this_data)
+        if 'metrics' in this_data:
+            for base_prefix in this_data['base_prefixes']:
+                for used_prefix in this_data['metrics']['Info: Usage of namespaces in axioms']:
+                    if used_prefix not in ontology_use:
+                        ontology_use[used_prefix] = []
+                    ontology_use[used_prefix].append(base_prefix)
+
+    # Compute useage statistics
+    for data in ontologies:
+        uses = []
+        if 'base_prefixes' in data:
+            for base_prefix in data['base_prefixes']:
+                if base_prefix in ontology_use:
+                    uses.extend(ontology_use[base_prefix])
+        uses = list(set(uses))
+        data['use_ontology'] = len(uses)
 
     # Load Jinja2 template
     template = Template(open('util/templates/index.html.jinja2').read())

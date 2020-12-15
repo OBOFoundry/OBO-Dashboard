@@ -144,9 +144,9 @@ $(function () {
                     {% elif r.status == 'INFO' %}
                         {% set tdclass = 'info' %}
                         {% set icon = 'info' %}
-                        {% set icon = 'check' %}
                     {% else %}
                         {% set tdclass = 'success' %}
+                        {% set icon = 'check' %}
                     {% endif %}
                     <td class="check table-{{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px"></td>
                 {% else %}
@@ -163,11 +163,11 @@ $(function () {
                         {% set tdclass = 'success' %}
                         {% set icon = 'check' %}
                     {% endif %}
-                    {% set tdclass = 'check' %}
                     <td class="check table-{{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px"></td>
                 {% endif %}
             {% else %}
-            {% set tdclass = 'danger' %}
+                {% set tdclass = 'danger' %}
+                {% set icon = 'x' %}
                 <td class="check table-danger"><img src="assets/{{ icon }}.svg" height="15px"></td>
             {% endif %}
         </tr>

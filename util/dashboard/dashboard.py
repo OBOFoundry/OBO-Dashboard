@@ -36,8 +36,7 @@ def run():
     parser = ArgumentParser(description='Create dashboard files')
     parser.add_argument('ontology', type=str, help='Input ontology file')
     parser.add_argument('registry', type=FileType('r'), help='Registry YAML file')
-    parser.add_argument('license', type=FileType('r'), help='License JSON schema')
-    parser.add_argument('contact', type=FileType('r'), help='Contact JSON schema')
+    parser.add_argument('schema', type=FileType('r'), help='OBO JSON schema')
     parser.add_argument('relations', type=FileType('r'), help='Table containing RO IRIs and labels')
     parser.add_argument('profile', type=str, help='Optional location of profile.txt file.')
     parser.add_argument('outdir', type=str, help='Output directory')
@@ -49,8 +48,28 @@ def run():
 
     ontology_file = args.ontology
     registry = args.registry
-    license_schema = json.load(args.license)
-    contact_schema = json.load(args.contact)
+    schema = json.load(args.schema)
+    contact_schema = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "http://obofoundry.org/config/registry_schema/contact",
+        "title": "registry_schema",
+        "properties": {
+
+            "contact": schema['properties']['contact'],
+        },
+        "required": ["contact"],
+        "level": "error"
+    }
+    license_schema = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "http://obofoundry.org/config/registry_schema/license",
+        "title": "registry_schema",
+        "properties": {
+            "license": schema['properties']['license'],
+        },
+        "required": ["license"],
+        "level": "error"
+    }
     robot_jar = args.robot_jar
     ro_file = args.relations
     profile = args.profile
