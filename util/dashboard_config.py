@@ -256,26 +256,27 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
     for o in ontologies:
         ont_dashboard_dir = os.path.join(dashboard_dir, o)
         ont_results_path = os.path.join(ont_dashboard_dir, "dashboard.yml")
-        with open(ont_results_path, 'r') as f:
-            ont_results = yaml.load(f, Loader=yaml.SafeLoader)
-        if 'metrics' in ont_results:
-            uses = []
-            if 'base_prefixes' in ont_results:
-                for base_prefix in ont_results['base_prefixes']:
-                    if base_prefix in ontology_use:
-                        uses.extend(ontology_use[base_prefix])
-            uses = list(set(uses))
+        if os.path.exists(ont_results_path):
+            with open(ont_results_path, 'r') as f:
+                ont_results = yaml.load(f, Loader=yaml.SafeLoader)
+            if 'metrics' in ont_results:
+                uses = []
+                if 'base_prefixes' in ont_results:
+                    for base_prefix in ont_results['base_prefixes']:
+                        if base_prefix in ontology_use:
+                            uses.extend(ontology_use[base_prefix])
+                uses = list(set(uses))
 
-            ont_results['metrics']['Info: How many ontologies use it?'] = len(uses)
-            dashboard_score = {}
-            dashboard_score['_impact'] = round_float(float(ont_results['metrics']['Info: How many ontologies use it?'])/len(ontologies))
-            dashboard_score['_reuse'] = round_float(float(ont_results['metrics']['Entities: % of entities reused'])/100)
-            dashboard_score['_dashboard'] = round_float(float(compute_dashboard_score(ont_results, oboscore_weights, oboscore_maximpacts))/100)
-            oboscore = compute_obo_score(dashboard_score['_impact'], dashboard_score['_reuse'], dashboard_score['_dashboard'], oboscore_weights)
-            dashboard_score['oboscore'] = round_float(oboscore['score'])
-            dashboard_score['_formula'] = oboscore['formula']
-            ont_results['metrics']['Info: Experimental OBO score'] = dashboard_score
-            save_yaml(ont_results, ont_results_path)
+                ont_results['metrics']['Info: How many ontologies use it?'] = len(uses)
+                dashboard_score = {}
+                dashboard_score['_impact'] = round_float(float(ont_results['metrics']['Info: How many ontologies use it?'])/len(ontologies))
+                dashboard_score['_reuse'] = round_float(float(ont_results['metrics']['Entities: % of entities reused'])/100)
+                dashboard_score['_dashboard'] = round_float(float(compute_dashboard_score(ont_results, oboscore_weights, oboscore_maximpacts))/100)
+                oboscore = compute_obo_score(dashboard_score['_impact'], dashboard_score['_reuse'], dashboard_score['_dashboard'], oboscore_weights)
+                dashboard_score['oboscore'] = round_float(oboscore['score'])
+                dashboard_score['_formula'] = oboscore['formula']
+                ont_results['metrics']['Info: Experimental OBO score'] = dashboard_score
+                save_yaml(ont_results, ont_results_path)
 
         dashboard_html = os.path.join(ont_dashboard_dir, "dashboard.html")
 
