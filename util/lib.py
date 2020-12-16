@@ -9,6 +9,8 @@ from subprocess import check_call
 import requests
 from datetime import datetime
 
+obo_purl = "http://purl.obolibrary.org/obo/"
+
 def runcmd(cmd):
     logging.info("RUNNING: {}".format(cmd))
     p = subprocess.Popen([cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -362,7 +364,7 @@ def compute_dashboard_score(data, weights, maximpacts):
 
 
 def round_float(n):
-    strfloat = "%.2f" % n
+    strfloat = "%.3f" % n
     return (float(strfloat))
 
 def score_max(score,maxscore):
@@ -375,6 +377,10 @@ def get_prefix_from_url_namespace(ns, curie_map):
     for prefix in curie_map:
         if ns==curie_map[prefix]:
             return prefix
+    if ns.startswith(obo_purl) and ns.endswith("_"):
+        ns = ns.replace(obo_purl,"")
+        ns = ns[:-1]
+        return ns
     raise Exception(f"Namespace {ns} not found in curie map, aborting..")
 
 def get_base_prefixes(curie_map, base_namespaces):
