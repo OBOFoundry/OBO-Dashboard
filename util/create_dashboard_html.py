@@ -7,7 +7,7 @@ import yaml
 
 from argparse import ArgumentParser
 from jinja2 import Template
-from lib import DashboardConfig, count_up, save_yaml
+from lib import DashboardConfig, count_up, save_yaml, round_float, compute_dashboard_score, compute_obo_score
 
 
 def main(args):
@@ -61,8 +61,6 @@ def main(args):
             continue
         with open(dashboard_yaml, 'r') as f:
             this_data = yaml.load(f, Loader=yaml.SafeLoader)
-        this_data['mirror_from'] = data[o]['mirror_from']
-        this_data['base_generated'] = "-base" not in this_data['mirror_from']
         ontologies.append(this_data)
 
 

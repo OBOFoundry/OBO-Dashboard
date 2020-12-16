@@ -87,6 +87,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
         ont_dashboard_dir = os.path.join(dashboard_dir, o)
         ont_results_path = os.path.join(ont_dashboard_dir, "dashboard.yml")
         download = True
+        make_base = True
 
         if not os.path.exists(ont_dashboard_dir):
             os.mkdir(ont_dashboard_dir)
@@ -193,8 +194,11 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 continue
 
             logging.info(f"Creating basefile for {o}...")
+
             try:
-                robot_prepare_ontology(ont_path, ont_base_path, ont_metrics_path, base_namespaces, robot_prefixes=config.get_robot_additional_prefixes(), robot_opts=config.get_robot_opts())
+                if f'{o}-base.' in ourl:
+                    make_base = False
+                robot_prepare_ontology(ont_path, ont_base_path, ont_metrics_path, base_namespaces, make_base=make_base, robot_prefixes=config.get_robot_additional_prefixes(), robot_opts=config.get_robot_opts())
             except Exception:
                 logging.exception(f'Failed to compute base file for {o}.')
                 ont_results['failure'] = 'failed_robot_base'
@@ -252,11 +256,12 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             save_yaml(ont_results, ont_results_path)
             continue
 
+        ont_results['base_generated'] = make_base
+        ont_results['mirror_from'] = ourl
         save_yaml(ont_results, ont_results_path)
 
     # This has to be done after all ontologies are analysed, because we need their usage information to quantify impact.
-    oboscore_weights = config.get_oboscore_weights()
-    oboscore_maximpacts = config.get_oboscore_max_impact()
+
 
     for o in ontologies:
         ont_dashboard_dir = os.path.join(dashboard_dir, o)
@@ -276,10 +281,6 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 dashboard_score = {}
                 dashboard_score['_impact'] = round_float(float(ont_results['metrics']['Info: How many ontologies use it?'])/len(ontologies))
                 dashboard_score['_reuse'] = round_float(float(ont_results['metrics']['Entities: % of entities reused'])/100)
-                dashboard_score['_dashboard'] = round_float(float(compute_dashboard_score(ont_results, oboscore_weights, oboscore_maximpacts))/100)
-                oboscore = compute_obo_score(dashboard_score['_impact'], dashboard_score['_reuse'], dashboard_score['_dashboard'], oboscore_weights)
-                dashboard_score['oboscore'] = round_float(oboscore['score'])
-                dashboard_score['_formula'] = oboscore['formula']
                 ont_results['metrics']['Info: Experimental OBO score'] = dashboard_score
                 save_yaml(ont_results, ont_results_path)
 
@@ -294,6 +295,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                     ont_results['failure'] = 'failed_ontology_dashboard'
                     save_yaml(ont_results, ont_results_path)
                     continue
+
             else:
                 logging.error(f"{o} no dashboard yaml file found for {ont_results_path}!")
         else:

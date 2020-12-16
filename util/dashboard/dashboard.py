@@ -6,6 +6,7 @@ import os
 import py4j
 import sys
 import yaml
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
 import dash_utils
 import fp_001
@@ -25,6 +26,7 @@ import report_utils
 
 from argparse import ArgumentParser, FileType
 from py4j.java_gateway import JavaGateway
+from lib import round_float, compute_dashboard_score, compute_obo_score, DashboardConfig
 
 
 def run():
@@ -39,10 +41,12 @@ def run():
     parser.add_argument('schema', type=FileType('r'), help='OBO JSON schema')
     parser.add_argument('relations', type=FileType('r'), help='Table containing RO IRIs and labels')
     parser.add_argument('profile', type=str, help='Optional location of profile.txt file.')
+    parser.add_argument('configfile', type=str, help='Location of the dashboard config file', default='build/robot.jar')
     parser.add_argument('outdir', type=str, help='Output directory')
     parser.add_argument('robot_jar',type=str,help='Location of your local ROBOT jar', default='build/robot.jar')
     args = parser.parse_args()
 
+    config = DashboardConfig(args.configfile)
     owl = os.path.basename(args.ontology)
     namespace = os.path.splitext(owl)[0]
 
@@ -320,11 +324,24 @@ def run():
     save_data = {'namespace': namespace, 'version': version_iri, 'date': date.strftime('%Y-%m-%d'),
                  'summary': {'status': summary, 'comment': summary_comment, 'summary_count': summary_count}, 'results': all_checks}
 
+    oboscore_weights = config.get_oboscore_weights()
+    oboscore_maximpacts = config.get_oboscore_max_impact()
+
+    for key in save_data:
+        data_yml[key] = save_data[key]
+
+    data_yml['metrics']['Info: Experimental OBO score']['_dashboard'] = round_float(
+        float(compute_dashboard_score(data_yml, oboscore_weights, oboscore_maximpacts)) / 100)
+    oboscore = compute_obo_score(data_yml['metrics']['Info: Experimental OBO score']['_impact'],
+                                 data_yml['metrics']['Info: Experimental OBO score']['_reuse'],
+                                 data_yml['metrics']['Info: Experimental OBO score']['_dashboard'],
+                                 oboscore_weights)
+    data_yml['metrics']['Info: Experimental OBO score']['oboscore'] = round_float(oboscore['score'])
+    data_yml['metrics']['Info: Experimental OBO score']['_formula'] = oboscore['formula']
+
     # Save to YAML file
     print('Saving results to {0}'.format(dashboard_yml))
     with open(dashboard_yml, 'w+') as f:
-        for key in save_data:
-            data_yml[key] = save_data[key]
         yaml.dump(data_yml, f)
 
     sys.exit(0)

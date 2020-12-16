@@ -274,18 +274,20 @@ def load_yaml(filepath):
     return data
 
 
-def robot_prepare_ontology(o_path, o_out_path, o_metrics_path, base_iris, robot_prefixes={}, robot_opts="-v"):
+def robot_prepare_ontology(o_path, o_out_path, o_metrics_path, base_iris, make_base, robot_prefixes={}, robot_opts="-v"):
     logging.info(f"Preparing {o_path} for dashboard.")
     try:
         callstring = ['robot']
         callstring.extend(['measure', robot_opts, '-i', o_path])
         for prefix in robot_prefixes:
             callstring.extend(['--prefix', f"{prefix}: {robot_prefixes[prefix]}"])
-        callstring.extend(['--metrics', 'extended-reasoner','-f','yaml','-o',o_metrics_path, 'merge', 'remove'])
-        #base_iris_string = " ".join([f"--base-iri \"{s}\"" for s in sbase_iris])
-        for s in base_iris:
-            callstring.extend(['--base-iri',s])
-        callstring.extend(["--axioms", "external", "-p", "false"])
+        callstring.extend(['--metrics', 'extended-reasoner','-f','yaml','-o',o_metrics_path, 'merge'])
+        if make_base:
+            callstring.extend(['remove'])
+            #base_iris_string = " ".join([f"--base-iri \"{s}\"" for s in sbase_iris])
+            for s in base_iris:
+                callstring.extend(['--base-iri',s])
+            callstring.extend(["--axioms", "external", "-p", "false"])
         callstring.extend(['--output', o_out_path])
         logging.info(callstring)
         check_call(callstring)
@@ -339,7 +341,7 @@ def compute_dashboard_score(data, weights, maximpacts):
     overall_info = 0
 
     if 'base_generated' in data and data['base_generated'] == True:
-        no_base = weights['base_generated']
+        no_base = weights['no_base']
 
     if 'results' in data:
         if 'ROBOT Report' in data['results']:
