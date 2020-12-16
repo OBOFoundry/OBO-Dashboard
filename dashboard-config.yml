@@ -31,10 +31,8 @@ obo_score_weights:
   reuse:
     impact_factor: 1
     max_impact: 1
-
 ontologies:
   #registry: "https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml"
-  #todo, deal with: bto chebi dron gaz ncbitaxon ncit pr uberon
   custom:
     - id: bfo
       mirror_from: "http://purl.obolibrary.org/obo/bfo.owl"
@@ -62,3 +60,4 @@ robot_opts: -vv
 environment:
   ROBOT_JAR: build/robot.jar
   ROBOT: robot
+skip_existing: True

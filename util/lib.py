@@ -36,7 +36,7 @@ def open_yaml_from_url(url):
 class DashboardConfig:
 
     def __init__(self, config_file):
-        self.config = yaml.load(open(config_file, 'r'))
+        self.config = yaml.load(open(config_file, 'r'), Loader=yaml.SafeLoader)
         self.default_profile = "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources" \
                                "/report_profile.txt "
         self.obo_registry = "https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml"
@@ -111,6 +111,12 @@ class DashboardConfig:
             return self.config.get("environment")
         else:
             return {}
+
+    def is_skip_existing(self):
+        if "skip_existing" in self.config:
+            return self.config.get("skip_existing")
+        else:
+            return False
 
     def get_redownload_after_hours(self):
         if "redownload_after_hours" in self.config:
