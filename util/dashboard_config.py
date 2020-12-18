@@ -310,23 +310,18 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 ontology_base_prefixes[prefix] = o
 
     for o in ontologies_results:
-        print(o)
         ont_results = ontologies_results[o]
-        print(ont_results)
         if 'metrics' in ont_results and \
                 info_usage_namespace in ont_results['metrics'] and \
                 'base_prefixes' in ont_results:
 
-            print(ontology_base_prefixes)
             for used_prefix in ont_results['metrics'][info_usage_namespace]:
-                print(used_prefix)
                 if used_prefix in ontology_base_prefixes:
                     ont_used_prefix = ontology_base_prefixes[used_prefix]
                     if ont_used_prefix not in ontology_use:
                         ontology_use[ont_used_prefix] = []
                     ontology_use[ont_used_prefix].append(o)
 
-    print(ontology_use)
     logging.info(f"Computing obo score and generating individual dashboard files...")
     for o in ontologies_results:
         ont_dashboard_dir = os.path.join(dashboard_dir, o)
