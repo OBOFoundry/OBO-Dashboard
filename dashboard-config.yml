@@ -44,6 +44,8 @@ ontologies:
         url: http://creativecommons.org/licenses/by/4.0/
     - id: testx
     - id: wbphenotype
+    - id: ddpheno
+    - id: cido
 prefer_base: True
 profile:
   baseprofile: "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources/report_profile.txt"
@@ -57,7 +59,7 @@ report_truncation_limit: 300
 redownload_after_hours: 0
 force_regenerate_dashboard_after_hours: 0
 robot_opts: -vv
+skip_existing: False
 environment:
   ROBOT_JAR: build/robot.jar
   ROBOT: robot
-skip_existing: True

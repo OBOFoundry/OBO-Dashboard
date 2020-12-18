@@ -76,8 +76,11 @@ def rundashboard(configfile, clean):
     logging.info("Postprocess files for github")
     runcmd(f"make truncate_reports_for_github {make_parameters} -B")
 
+info_usage_namespace = 'Info: Usage of namespaces in axioms'
+
 def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters, config):
-    ontology_use = {}
+    ontologies_results = {}
+
     for o in ontologies:
         logging.info(f"Preparing {o}...")
         ont_path = os.path.join(ontology_dir, f"{o}-raw.owl")
@@ -95,7 +98,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
         ont_results = dict()
         if os.path.exists(ont_results_path):
             if config.is_skip_existing():
-                logging.warning(f'..skipping second pipeline step as well for {o}.')
+                logging.warning(f"Config is set to skipping, and {ont_results_path} exists, so dashboard HTML generation is entirely skipped for {o}")
                 continue
 
             try:
@@ -151,42 +154,52 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             logging.info(f"Downloading {o} skipped.")
 
         # Determine hashcode of downloaded file, if either a new file was downloaded, or there is no hash from a
-        # previous result
-        sha256_hash = None
-        if download or 'sha256_hash' not in ont_results:
+        # previous result. By default, we assume the file has changed; if there was a previously generated hashcode
+        # and the hashcode is the same as the hashcode of the new file, we then assume it has not changed.
+        ont_results['changed'] = download
+        if download:
+            logging.info(f"Computing hashcode for {ont_path}..")
             try:
                 sha256_hash = sha256sum(ont_path)
+                if 'sha256_hash' in ont_results:
+                    if ont_results['sha256_hash'] == sha256_hash:
+                        modified_timestamp = os.path.getmtime(ont_path)
+                        hours_since = get_hours_since(modified_timestamp)
+                        if hours_since >= config.get_force_regenerate_dashboard_after_hours():
+                            logging.info(f"{o} has been processed a while ago ({hours_since} hours ago). "
+                                         f"Forcing dashboard generation..")
+                        else:
+                            logging.info(
+                                f"The downloaded file for {o} is the same as the one used for a previous run "
+                                f"(less than {config.get_force_regenerate_dashboard_after_hours()} hours ago). "
+                                f"Skipping..")
+                            ont_results['changed'] = False
+                    else:
+                        logging.info(f"Hashcode for downloaded file is different, . "
+                                     f"Forcing dashboard generation..")
+                # Setting the new hashcode
+                ont_results['sha256_hash'] = sha256_hash
             except Exception:
                 logging.exception(f'Failed to compute hashcode of {o}.')
                 ont_results['failure'] = 'failed_sha256_hash'
                 save_yaml(ont_results, ont_results_path)
                 continue
+        else:
+            logging.info(f"{o} Not computing new hashcode because no new file downloaded.")
 
-        ont_results['changed'] = True
-
-        if 'sha256_hash' in ont_results:
-            if sha256_hash and ont_results['sha256_hash'] == sha256_hash:
-                if os.path.isfile(ont_path):
-                    modified_timestamp = os.path.getmtime(ont_path)
-                    hours_since = get_hours_since(modified_timestamp)
-                    if hours_since >= config.get_force_regenerate_dashboard_after_hours():
-                        logging.info(f"{o} has been processed a while ago ({hours_since} hours ago). "
-                                     f"Forcing dashboard generation..")
-                    else:
-                        logging.info(f"The downloaded file for {o} is the same as the one used for a previous run "
-                                     f"(less than {config.get_force_regenerate_dashboard_after_hours()} hours ago). "
-                                     f"Skipping..")
-                        ont_results['changed'] = False
 
         # If the files was previously processed, but there was a failure, we get rid of the error message
-        # to try again.
-        ont_results.pop('failure', None)
-        ont_results['sha256_hash'] = sha256_hash
+        # to try again. I cant think of a way that could happen, just playing it safe.
+        if ont_results.get('sha256_hash'):
+            ont_results.pop('failure', None)
+        else:
+            logging.exception(f'No hashcode for {ont_path}, aborting.')
+            ont_results['failure'] = 'failed_sha256_hash'
+            save_yaml(ont_results, ont_results_path)
+            continue
+
         ont_results['base_generated'] = make_base
         ont_results['mirror_from'] = ourl
-
-        # todo necessary to save at this point?
-        save_yaml(ont_results, ont_results_path)
 
         # Only if the downloaded file changed, run the rest of the code.
         if ont_results['changed'] == True or not os.path.isfile(ont_metrics_path) or not os.path.isfile(ont_base_path):
@@ -202,7 +215,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                         if 'ListBucketResult' in line:
                             raise Exception("BBOP file, not url.. skipping.")
             except Exception:
-                logging.exception(f'Failed to verify {o} as downloaded from {ourl}')
+                logging.error(f'Failed to verify {o} as downloaded from {ourl}')
                 ont_results['failure'] = 'not_an_ontology'
                 save_yaml(ont_results, ont_results_path)
                 continue
@@ -233,7 +246,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                         'obj_property_count_incl']
                     ont_results['metrics']['Entities: % of entities reused'] = compute_percentage_reused_entities(
                         metrics['metrics']['namespace_entity_count_incl'], base_prefixes)
-                    ont_results['metrics']['Info: Usage of namespaces in axioms'] = metrics['metrics'][
+                    ont_results['metrics'][info_usage_namespace] = metrics['metrics'][
                         'namespace_axiom_count_incl']
                     ont_results['metrics']['Entities: Number of individuals'] = metrics['metrics'][
                         'individual_count_incl']
@@ -248,13 +261,6 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                     ont_results['metrics']['Info: Does the ontology fall under OWL 2 DL?'] = metrics['metrics'][
                         'owl2_dl']
                     ont_results['metrics']['Info: Syntax'] = metrics['metrics']['syntax']
-
-                    for base_prefix in base_prefixes:
-                        for used_prefix in ont_results['metrics']['Info: Usage of namespaces in axioms']:
-                            if used_prefix not in ontology_use:
-                                ontology_use[used_prefix] = []
-                            ontology_use[used_prefix].append(base_prefix)
-
                 except Exception:
                     logging.exception(f'Broken metrics file for {o}: {ont_metrics_path}')
                     ont_results['failure'] = 'broken_metrics_file'
@@ -287,51 +293,98 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             save_yaml(ont_results, ont_results_path)
             continue
 
-        save_yaml(ont_results, ont_results_path)
+        logging.info(f"{o}: preprocessing successful.")
+        ontologies_results[o] = ont_results
 
     # This has to be done after all ontologies are analysed, because we need their usage information to quantify impact.
 
-    for o in ontologies:
+    logging.info(f"Computing cross-OBO usage metrics...")
+    ontology_use = {}
+    ontology_base_prefixes = {}
+    for o in ontologies_results:
+        if 'base_prefixes' in ontologies_results[o]:
+            for prefix in ontologies_results[o]['base_prefixes']:
+                ontology_base_prefixes[prefix] = o
+
+    for o in ontologies_results:
+        ont_results = ontologies_results[o]
+        if 'metrics' in ont_results and \
+                info_usage_namespace in ont_results['metrics'] and \
+                'base_prefixes' in ont_results:
+
+            for used_prefix in ont_results['metrics'][info_usage_namespace]:
+                if used_prefix in ontology_base_prefixes:
+                    if o not in ontology_use:
+                        ontology_use[o] = []
+                    ontology_use[o].append(ontology_base_prefixes[used_prefix])
+
+    print(ontology_use)
+    logging.info(f"Computing obo score and generating individual dashboard files...")
+    for o in ontologies_results:
         ont_dashboard_dir = os.path.join(dashboard_dir, o)
         ont_results_path = os.path.join(ont_dashboard_dir, "dashboard.yml")
-        if os.path.exists(ont_results_path):
-            if config.is_skip_existing():
-                continue
+        ont_results = ontologies_results[o]
 
-            with open(ont_results_path, 'r') as f:
-                ont_results = yaml.load(f, Loader=yaml.SafeLoader)
-            if 'metrics' in ont_results:
-                uses = []
-                if 'base_prefixes' in ont_results:
-                    for base_prefix in ont_results['base_prefixes']:
-                        if base_prefix in ontology_use:
-                            uses.extend(ontology_use[base_prefix])
-                uses = list(set(uses))
+        if os.path.exists(ont_results_path) and config.is_skip_existing():
+            continue
 
-                ont_results['metrics']['Info: How many ontologies use it?'] = len(uses)
-                dashboard_score = {}
-                dashboard_score['_impact'] = round_float(float(ont_results['metrics']['Info: How many ontologies use it?'])/len(ontologies))
-                dashboard_score['_reuse'] = round_float(float(ont_results['metrics']['Entities: % of entities reused'])/100)
-                ont_results['metrics']['Info: Experimental OBO score'] = dashboard_score
-                save_yaml(ont_results, ont_results_path)
+        logging.info(f"Computing final metrics for {o}")
+        if 'metrics' in ont_results and 'failure' not in ont_results:
+            uses = ontology_use[o]
 
-                dashboard_html = os.path.join(ont_dashboard_dir, "dashboard.html")
+            ### Computing dashboard score
+            if 'base_prefixes' in ont_results:
+                for base_prefix in ont_results['base_prefixes']:
+                    if base_prefix in ontology_use and base_prefix in ontology_base_prefixes:
+                        uses.extend(ontology_base_prefixes[base_prefix])
+            uses = list(set(uses))
 
-                # Metrics should be completely computed for this the dashboard to be executed.
-                if (ont_results['changed'] == True or 'results' not in ont_results) and 'failure' not in ont_results:
-                    logging.info(f"Creating dashboard for {o}...")
-                    try:
-                        runcmd(f"make  {make_parameters} {dashboard_html}")
-                    except Exception:
-                        logging.exception(f'Failed to build dashboard pages for {o}.')
-                        ont_results['failure'] = 'failed_ontology_dashboard'
-                        save_yaml(ont_results, ont_results_path)
-                        continue
+            ont_results['metrics']['Info: How many ontologies use it?'] = len(uses)
+            dashboard_score = {}
+            dashboard_score['_impact'] = round_float(float(ont_results['metrics']['Info: How many ontologies use it?'])/len(ontologies))
+            dashboard_score['_reuse'] = round_float(float(ont_results['metrics']['Entities: % of entities reused'])/100)
+            ont_results['metrics']['Info: Experimental OBO score'] = dashboard_score
+            save_yaml(ont_results, ont_results_path)
 
+            dashboard_html = os.path.join(ont_dashboard_dir, "dashboard.html")
+
+            # Metrics should be completely computed for this the dashboard to be executed.
+            force = True
+            if os.path.exists(dashboard_html):
+                force = False
+                modified_timestamp = os.path.getmtime(dashboard_html)
+                hours_since = get_hours_since(modified_timestamp)
+                if hours_since >= config.get_force_regenerate_dashboard_after_hours():
+                    logging.info(f"{dashboard_html} has been generated more than {hours_since} hours ago, so "
+                                 f"forcing dashboard generation..")
+                    force = True
+            elif 'last_ontology_dashboard_run_failed' in ont_results and ont_results['last_ontology_dashboard_run_failed']:
+                force = False
+                modified_timestamp = os.path.getmtime(ont_results_path)
+                hours_since = get_hours_since(modified_timestamp)
+                if hours_since >= config.get_force_regenerate_dashboard_after_hours():
+                    logging.info(f"{dashboard_html} has been generated more than {hours_since} hours ago, so "
+                                 f"forcing dashboard generation..")
+                    force = True
+            if force or ont_results['changed']:
+                logging.info(f"Creating dashboard for {o}...")
+                try:
+                    runcmd(f"make  {make_parameters} {dashboard_html}")
+                    ont_results.pop('last_ontology_dashboard_run_failed', None)
+                except Exception:
+                    logging.exception(f'Failed to build dashboard pages for {o}.')
+                    ont_results['failure'] = 'failed_ontology_dashboard'
+                    ont_results['last_ontology_dashboard_run_failed'] = True
+                    save_yaml(ont_results, ont_results_path)
+                    continue
             else:
-                logging.error(f"{o} no dashboard yaml file found for {ont_results_path}!")
+                logging.info(f"Not runnning dashboard for {o} because it has not changed ({ont_results['changed']}) "
+                             f"nor forced ({force})..")
         else:
-            logging.info(f"{o} has not changed since last run, skipping dashboard building.")
+            logging.info(f"{o} has a results file, but no metrics were computed ({'metrics' not in ont_results}), "
+                         f"or a failure registered ({'failure' not in ont_results})). "
+                         f"This suggests there was an error with the basefile computation, so we"
+                         f"dont even try to generate the dashboard.")
 
 
 if __name__ == '__main__':
