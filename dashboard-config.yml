@@ -53,6 +53,7 @@ profile:
     - "WARN\tfile:./sparql/missing_xrefs.sparql"
 robot_additional_prefixes:
   COVOC: "http://purl.obolibrary.org/obo/COVOC_"
+  CIDO: "http://purl.obolibrary.org/obo/CIDO_"
   dbpedia: "http://dbpedia.org/resource/"
   EFO: "http://www.ebi.ac.uk/efo/EFO_"
 report_truncation_limit: 300
