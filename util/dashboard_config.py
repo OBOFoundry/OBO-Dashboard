@@ -160,35 +160,31 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
         # previous result. By default, we assume the file has changed; if there was a previously generated hashcode
         # and the hashcode is the same as the hashcode of the new file, we then assume it has not changed.
         ont_results['changed'] = download
-        if download:
-            logging.info(f"Computing hashcode for {ont_path}..")
-            try:
-                sha256_hash = sha256sum(ont_path)
-                if 'sha256_hash' in ont_results:
-                    if ont_results['sha256_hash'] == sha256_hash:
-                        modified_timestamp = os.path.getmtime(ont_path)
-                        hours_since = get_hours_since(modified_timestamp)
-                        if hours_since >= config.get_force_regenerate_dashboard_after_hours():
-                            logging.info(f"{o} has been processed a while ago ({hours_since} hours ago). "
-                                         f"Forcing dashboard generation..")
-                        else:
-                            logging.info(
-                                f"The downloaded file for {o} is the same as the one used for a previous run "
-                                f"(less than {config.get_force_regenerate_dashboard_after_hours()} hours ago). "
-                                f"Skipping..")
-                            ont_results['changed'] = False
-                    else:
-                        logging.info(f"Hashcode for downloaded file is different, . "
+        try:
+            sha256_hash = sha256sum(ont_path)
+            if 'sha256_hash' in ont_results:
+                if ont_results['sha256_hash'] == sha256_hash:
+                    modified_timestamp = os.path.getmtime(ont_path)
+                    hours_since = get_hours_since(modified_timestamp)
+                    if hours_since >= config.get_force_regenerate_dashboard_after_hours():
+                        logging.info(f"{o} has been processed a while ago ({hours_since} hours ago). "
                                      f"Forcing dashboard generation..")
-                # Setting the new hashcode
-                ont_results['sha256_hash'] = sha256_hash
-            except Exception:
-                logging.exception(f'Failed to compute hashcode of {o}.')
-                ont_results['failure'] = 'failed_sha256_hash'
-                save_yaml(ont_results, ont_results_path)
-                continue
-        else:
-            logging.info(f"{o} Not computing new hashcode because no new file downloaded.")
+                    else:
+                        logging.info(
+                            f"The downloaded file for {o} is the same as the one used for a previous run "
+                            f"(less than {config.get_force_regenerate_dashboard_after_hours()} hours ago). "
+                            f"Skipping..")
+                        ont_results['changed'] = False
+                else:
+                    logging.info(f"Hashcode for downloaded file is different, . "
+                                 f"Forcing dashboard generation..")
+            # Setting the new hashcode
+            ont_results['sha256_hash'] = sha256_hash
+        except Exception:
+            logging.exception(f'Failed to compute hashcode of {o}.')
+            ont_results['failure'] = 'failed_sha256_hash'
+            save_yaml(ont_results, ont_results_path)
+            continue
 
 
         # If the files was previously processed, but there was a failure, we get rid of the error message
@@ -197,7 +193,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             ont_results.pop('failure', None)
         else:
             logging.exception(f'No hashcode for {ont_path}, aborting.')
-            ont_results['failure'] = 'failed_sha256_hash'
+            ont_results['failure'] = 'no_sha256_hash'
             save_yaml(ont_results, ont_results_path)
             continue
 
