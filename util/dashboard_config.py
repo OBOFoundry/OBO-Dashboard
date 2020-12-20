@@ -342,14 +342,15 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                             uses.extend(ontology_base_prefixes[base_prefix])
                 uses = list(set(uses))
             else:
-                uses = 1
+                uses = []
+                uses.append(o)
                 logging.warning(f"{o} has no registered uses, but should, at least, use itself. This is usually an "
                                 f"indication that the prefix is unknown.")
-            uses = uses - 1
+            uses_count = len(uses) - 1
 
 
 
-            ont_results['metrics']['Info: How many ontologies use it?'] = len(uses)
+            ont_results['metrics']['Info: How many ontologies use it?'] = uses_count
             dashboard_score = {}
             dashboard_score['_impact'] = round_float(float(ont_results['metrics']['Info: How many ontologies use it?'])/len(ontologies))
             dashboard_score['_reuse'] = round_float(float(ont_results['metrics']['Entities: % of entities reused'])/100)
