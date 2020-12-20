@@ -333,14 +333,21 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
 
         logging.info(f"Computing final metrics for {o}")
         if 'metrics' in ont_results and 'failure' not in ont_results:
-            uses = ontology_use[o]
+            if o in ontology_use:
+                uses = ontology_use[o]
+                ### Computing dashboard score
+                if 'base_prefixes' in ont_results:
+                    for base_prefix in ont_results['base_prefixes']:
+                        if base_prefix in ontology_use and base_prefix in ontology_base_prefixes:
+                            uses.extend(ontology_base_prefixes[base_prefix])
+                uses = list(set(uses))
+            else:
+                uses = 1
+                logging.warning(f"{o} has no registered uses, but should, at least, use itself. This is usually an "
+                                f"indication that the prefix is unknown.")
+            uses = uses - 1
 
-            ### Computing dashboard score
-            if 'base_prefixes' in ont_results:
-                for base_prefix in ont_results['base_prefixes']:
-                    if base_prefix in ontology_use and base_prefix in ontology_base_prefixes:
-                        uses.extend(ontology_base_prefixes[base_prefix])
-            uses = list(set(uses))
+
 
             ont_results['metrics']['Info: How many ontologies use it?'] = len(uses)
             dashboard_score = {}
