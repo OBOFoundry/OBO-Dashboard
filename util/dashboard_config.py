@@ -339,7 +339,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                     ontology_use[ont_used_prefix].append(o)
 
     logging.info(f"Build dashboard dependencies")
-    runcmd(f"make dependencies/ontologies.yml dependencies/registry_schema.json build/ro-properties.csv profile.txt dashboard-config.yml")
+    runcmd(f"make  {make_parameters} dependencies/ontologies.yml dependencies/registry_schema.json build/ro-properties.csv profile.txt dashboard-config.yml")
 
     logging.info(f"Computing obo score and generating individual dashboard files...")
     for o in ontologies_results:
