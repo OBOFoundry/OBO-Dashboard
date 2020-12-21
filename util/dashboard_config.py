@@ -229,42 +229,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 save_yaml(ont_results, ont_results_path)
                 continue
 
-            # Processing metrics
-            if os.path.exists(ont_metrics_path):
-                try:
-                    metrics = load_yaml(ont_metrics_path)
-                    base_prefixes = get_base_prefixes(metrics['metrics']['curie_map'], base_namespaces)
-                    ont_results['base_prefixes'] = base_prefixes
-                    ont_results['metrics'] = {}
-                    ont_results['metrics']['Info: Logical consistency'] = metrics['metrics']['consistent']
-                    ont_results['metrics']['Entities: Number of unsatisfiable classes'] = metrics['metrics'][
-                        'unsatisfiable_class_count']
-                    ont_results['metrics']['Axioms: Number of axioms'] = metrics['metrics']['axiom_count_incl']
-                    ont_results['metrics']['Entities: Number of classes'] = metrics['metrics']['class_count_incl']
-                    ont_results['metrics']['Entities: Number of object properties'] = metrics['metrics'][
-                        'obj_property_count_incl']
-                    ont_results['metrics']['Entities: % of entities reused'] = compute_percentage_reused_entities(
-                        metrics['metrics']['namespace_entity_count_incl'], base_prefixes)
-                    ont_results['metrics'][info_usage_namespace] = metrics['metrics'][
-                        'namespace_axiom_count_incl']
-                    ont_results['metrics']['Entities: Number of individuals'] = metrics['metrics'][
-                        'individual_count_incl']
-                    ont_results['metrics']['Entities: Number of data properties'] = metrics['metrics'][
-                        'dataproperty_count_incl']
-                    ont_results['metrics']['Entities: Number of annotation properties'] = metrics['metrics'][
-                        'annotation_property_count_incl']
-                    ont_results['metrics']['Axioms: Breakdown of axiom types'] = metrics['metrics'][
-                        'axiom_type_count_incl']
-                    ont_results['metrics']['Info: Breakdown of OWL class expressions used'] = metrics['metrics'][
-                        'class_expression_count_incl']
-                    ont_results['metrics']['Info: Does the ontology fall under OWL 2 DL?'] = metrics['metrics'][
-                        'owl2_dl']
-                    ont_results['metrics']['Info: Syntax'] = metrics['metrics']['syntax']
-                except Exception:
-                    logging.exception(f'Broken metrics file for {o}: {ont_metrics_path}')
-                    ont_results['failure'] = 'broken_metrics_file'
-                    save_yaml(ont_results, ont_results_path)
-                    continue
+
             else:
                 logging.exception(f'Missing metrics file for {o}: {ont_metrics_path}')
                 ont_results['failure'] = 'missing_metrics_file'
@@ -272,6 +237,43 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 continue
         else:
             logging.info(f"{o} has not changed since last run, skipping process.")
+
+        # Processing metrics
+        if os.path.exists(ont_metrics_path):
+            try:
+                metrics = load_yaml(ont_metrics_path)
+                base_prefixes = get_base_prefixes(metrics['metrics']['curie_map'], base_namespaces)
+                ont_results['base_prefixes'] = base_prefixes
+                ont_results['metrics'] = {}
+                ont_results['metrics']['Info: Logical consistency'] = metrics['metrics']['consistent']
+                ont_results['metrics']['Entities: Number of unsatisfiable classes'] = metrics['metrics'][
+                    'unsatisfiable_class_count']
+                ont_results['metrics']['Axioms: Number of axioms'] = metrics['metrics']['axiom_count_incl']
+                ont_results['metrics']['Entities: Number of classes'] = metrics['metrics']['class_count_incl']
+                ont_results['metrics']['Entities: Number of object properties'] = metrics['metrics'][
+                    'obj_property_count_incl']
+                ont_results['metrics']['Entities: % of entities reused'] = compute_percentage_reused_entities(
+                    metrics['metrics']['namespace_entity_count_incl'], base_prefixes)
+                ont_results['metrics'][info_usage_namespace] = metrics['metrics'][
+                    'namespace_axiom_count_incl']
+                ont_results['metrics']['Entities: Number of individuals'] = metrics['metrics'][
+                    'individual_count_incl']
+                ont_results['metrics']['Entities: Number of data properties'] = metrics['metrics'][
+                    'dataproperty_count_incl']
+                ont_results['metrics']['Entities: Number of annotation properties'] = metrics['metrics'][
+                    'annotation_property_count_incl']
+                ont_results['metrics']['Axioms: Breakdown of axiom types'] = metrics['metrics'][
+                    'axiom_type_count_incl']
+                ont_results['metrics']['Info: Breakdown of OWL class expressions used'] = metrics['metrics'][
+                    'class_expression_count_incl']
+                ont_results['metrics']['Info: Does the ontology fall under OWL 2 DL?'] = metrics['metrics'][
+                    'owl2_dl']
+                ont_results['metrics']['Info: Syntax'] = metrics['metrics']['syntax']
+            except Exception:
+                logging.exception(f'Broken metrics file for {o}: {ont_metrics_path}')
+                ont_results['failure'] = 'broken_metrics_file'
+                save_yaml(ont_results, ont_results_path)
+                continue
 
         #### Check that the ontology has at least 1 axiom and is logically consistent
         try:
@@ -287,8 +289,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 save_yaml(ont_results, ont_results_path)
                 continue
         except Exception:
-            logging.exception(f'Metrics not available for {o}: {ont_metrics_path}')
-            ont_results['failure'] = 'missing_metrics'
+            logging.exception(f'Metrics based checks failed for {o}: {ont_metrics_path}')
+            ont_results['failure'] = 'metrics_check_failed'
             save_yaml(ont_results, ont_results_path)
             continue
 
