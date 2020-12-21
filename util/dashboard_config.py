@@ -78,6 +78,24 @@ def rundashboard(configfile, clean):
 
 info_usage_namespace = 'Info: Usage of namespaces in axioms'
 
+errors={
+    'corrupted_results_file': '',
+    'missing_url': '',
+    'missing_base_namespaces': '',
+    'failed_download': '',
+    'failed_sha256_hash': '',
+    'no_sha256_hash': '',
+    'not_an_ontology': '',
+    'failed_robot_base': '',
+    'missing_metrics_file': '',
+    'empty_ontology': '',
+    'inconsistent_ontology': '',
+    'metrics_check_failed': '',
+    'broken_metrics_file': '',
+    'failed_ontology_dashboard': ''
+}
+
+
 def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters, config):
     ontologies_results = {}
 
@@ -319,6 +337,9 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                     if ont_used_prefix not in ontology_use:
                         ontology_use[ont_used_prefix] = []
                     ontology_use[ont_used_prefix].append(o)
+
+    logging.info(f"Build dashboard dependencies")
+    runcmd(f"make dependencies/ontologies.yml dependencies/registry_schema.json build/ro-properties.csv profile.txt dashboard-config.yml")
 
     logging.info(f"Computing obo score and generating individual dashboard files...")
     for o in ontologies_results:
