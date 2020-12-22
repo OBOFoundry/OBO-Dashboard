@@ -56,7 +56,7 @@ def rundashboard(configfile, clean):
         make_parameters += f"{envi}={val} "
 
     if clean:
-        runcmd(f"make clean {make_parameters} -B")
+        runcmd(f"make clean {make_parameters} -B", config.get_dashboard_report_timeout_seconds())
 
     logging.info("Prepare ontologies")
     build_dir = os.path.join("build")
@@ -72,9 +72,9 @@ def rundashboard(configfile, clean):
 
     prepare_ontologies(ontologies['ontologies'], ontology_dir, dashboard_dir, make_parameters, config)
     logging.info("Building the dashboard")
-    runcmd(f"make dashboard {make_parameters} -B")
+    runcmd(f"make dashboard {make_parameters} -B", config.get_dashboard_report_timeout_seconds())
     logging.info("Postprocess files for github")
-    runcmd(f"make truncate_reports_for_github {make_parameters} -B")
+    runcmd(f"make truncate_reports_for_github {make_parameters} -B", config.get_dashboard_report_timeout_seconds())
 
 info_usage_namespace = 'Info: Usage of namespaces in axioms'
 
@@ -248,11 +248,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 continue
 
 
-            else:
-                logging.exception(f'Missing metrics file for {o}: {ont_metrics_path}')
-                ont_results['failure'] = 'missing_metrics_file'
-                save_yaml(ont_results, ont_results_path)
-                continue
+
         else:
             logging.info(f"{o} has not changed since last run, skipping process.")
 
@@ -292,6 +288,11 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 ont_results['failure'] = 'broken_metrics_file'
                 save_yaml(ont_results, ont_results_path)
                 continue
+        else:
+            logging.exception(f'Missing metrics file for {o}: {ont_metrics_path}')
+            ont_results['failure'] = 'missing_metrics_file'
+            save_yaml(ont_results, ont_results_path)
+            continue
 
         #### Check that the ontology has at least 1 axiom and is logically consistent
         try:
@@ -339,7 +340,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                     ontology_use[ont_used_prefix].append(o)
 
     logging.info(f"Build dashboard dependencies")
-    runcmd(f"make  {make_parameters} dependencies/ontologies.yml dependencies/registry_schema.json build/ro-properties.csv profile.txt dashboard-config.yml")
+    runcmd(f"make  {make_parameters} dependencies/ontologies.yml dependencies/registry_schema.json build/ro-properties.csv profile.txt dashboard-config.yml", config.get_dashboard_report_timeout_seconds())
 
     logging.info(f"Computing obo score and generating individual dashboard files...")
     for o in ontologies_results:
@@ -399,7 +400,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             if force or ont_results['changed']:
                 logging.info(f"Creating dashboard for {o}...")
                 try:
-                    runcmd(f"make  {make_parameters} {dashboard_html}")
+                    runcmd(f"make  {make_parameters} {dashboard_html}", config.get_dashboard_report_timeout_seconds())
                     ont_results.pop('last_ontology_dashboard_run_failed', None)
                 except Exception:
                     logging.exception(f'Failed to build dashboard pages for {o}.')

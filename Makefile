@@ -103,21 +103,25 @@ dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashb
 # HTML output of ROBOT report
 .PRECIOUS: dashboard/%/robot_report.html
 dashboard/%/robot_report.html: util/create_report_html.py dashboard/%/robot_report.tsv dependencies/obo_context.jsonld util/templates/report.html.jinja2
+	echo "Processing $@"
 	python3 $^ "ROBOT Report - $*" $@ $(REPORT_LENGTH_LIMIT)
 
 # HTML output of IRI report
 .PRECIOUS: dashboard/%/fp3.html
 dashboard/%/fp3.html: util/create_report_html.py dashboard/%/fp3.tsv dependencies/obo_context.jsonld util/templates/report.html.jinja2
+	echo "Processing $@"
 	python3 $^ "IRI Report - $*" $@
 
 # HTML output of Relations report
 .PRECIOUS: dashboard/%/fp7.html
 dashboard/%/fp7.html: util/create_report_html.py dashboard/%/fp7.tsv dependencies/obo_context.jsonld util/templates/report.html.jinja2
+	echo "Processing $@"
 	python3 $^ "Relations Report - $*" $@
 
 # Convert dashboard YAML to HTML page
 .PRECIOUS: dashboard/%/dashboard.html
 dashboard/%/dashboard.html: util/create_ontology_html.py dashboard/%/dashboard.yml util/templates/ontology.html.jinja2 dashboard/%/robot_report.html dashboard/%/fp3.html dashboard/%/fp7.html | $(SVGS)
+	echo "Processing $@"
 	python3 $(wordlist 1,3,$^) $@
 
 # -------------------------- #

@@ -3,6 +3,7 @@
 import yaml
 import logging
 import subprocess
+import threading
 import urllib.request
 import hashlib
 from subprocess import check_call
@@ -11,15 +12,35 @@ from datetime import datetime
 
 obo_purl = "http://purl.obolibrary.org/obo/"
 
-def runcmd(cmd):
-    logging.info("RUNNING: {}".format(cmd))
-    p = subprocess.Popen([cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    (out, err) = p.communicate()
-    logging.info('OUT: {}'.format(out))
-    if err:
-        logging.error(err)
-    if p.returncode != 0:
-        raise Exception('Failed: {}'.format(cmd))
+class Command(object):
+    def __init__(self, cmd):
+        self.cmd = cmd
+        self.process = None
+
+    def run(self, timeout):
+        def target():
+            logging.info(f"RUNNING: {self.cmd} (Timeout: {timeout})")
+            self.process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            (out, err) = self.process.communicate()
+            logging.info('OUT: {}'.format(out))
+            if err:
+                logging.info('ERROR: {}'.format(err))
+
+        thread = threading.Thread(target=target)
+        thread.start()
+
+        thread.join(timeout)
+        if thread.is_alive():
+            print('Terminating process')
+            self.process.terminate()
+            thread.join()
+        if self.process.returncode != 0:
+            raise Exception(f'Failed: {self.cmd} with return code {self.process.returncode}')
+
+
+def runcmd(cmd, timeout=3600):
+    command = Command(cmd)
+    command.run(timeout=timeout)
 
 
 def read_txt_from_url_as_lines(url):
@@ -88,6 +109,13 @@ class DashboardConfig:
             return self.config.get("description")
         else:
             return "No description provided."
+
+    def get_dashboard_report_timeout_seconds(self):
+        if "dashboard_report_timeout_seconds" in self.config:
+            return self.config.get("dashboard_report_timeout_seconds")
+        else:
+            return 3600
+
 
     def get_report_truncation_limit(self):
         if "report_truncation_limit" in self.config:

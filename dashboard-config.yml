@@ -61,6 +61,7 @@ redownload_after_hours: 0
 force_regenerate_dashboard_after_hours: 0
 robot_opts: -vv
 skip_existing: False
+dashboard_report_timeout_seconds: 100
 environment:
   ROBOT_JAR: build/robot.jar
   ROBOT: robot
