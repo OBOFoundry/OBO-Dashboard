@@ -437,4 +437,4 @@ def compute_percentage_reused_entities(entity_use_map, internal_ns):
 
     reuse_score = 100*(external_entities/(external_entities+internal_entities))
     score_string = "%.2f" % round(reuse_score, 2)
-    return score_string
+    return float(score_string)
