@@ -368,8 +368,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                                 f"indication that the prefix is unknown.")
             uses_count = len(uses) - 1
 
-
-
+            ont_results['metrics']['Info: Which ontologies use it?'] = uses
             ont_results['metrics']['Info: How many ontologies use it?'] = uses_count
             dashboard_score = {}
             dashboard_score['_impact'] = round_float(float(ont_results['metrics']['Info: How many ontologies use it?'])/len(ontologies))
