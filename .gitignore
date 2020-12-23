@@ -13,3 +13,4 @@ sparql
 test.sh
 debug.Makefile
 profile.txt
+.ipynb_checkpoints

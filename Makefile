@@ -9,7 +9,7 @@ DASHBOARD_RESULTS := "dashboard/dashboard-results.yml"
 # ----------------- #
 
 all: dashboard
-dashboard: dashboard/index.html dashboard/about.html
+dashboard: dashboard/index.html dashboard/about.html dashboard/analysis.html
 
 # Remove build directories
 # WARNING: This will delete *ALL* dashboard files!
@@ -154,3 +154,6 @@ test:
 
 tr: util/create_report_html.py dashboard/bfo/robot_report.tsv dependencies/obo_context.jsonld util/templates/report.html.jinja2
 	python3 $^ "ROBOT Report - bfo" dashboard/bfo/robot_report.html $(REPORT_LENGTH_LIMIT)
+	
+dashboard/analysis.html:
+	jupyter nbconvert dashboard_analysis.ipynb  --no-input --execute --to html --output $@
