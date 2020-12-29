@@ -5,4 +5,4 @@ python:
 install:
   - "pip install -r requirements.txt"
 
-script: ONTS="bfo obi eco" make all
+script: python ./util/dashboard_config.py rundashboard -C dashboard-config.yml
