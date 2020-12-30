@@ -6,6 +6,7 @@ jinja2
 markdown
 click
 pandas
+scipy
 notebook
 plotly
 networkx
