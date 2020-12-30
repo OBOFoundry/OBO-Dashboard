@@ -8,4 +8,4 @@ click
 notebook
 pandas
 plotly
-networkx==2.2
+networkx
