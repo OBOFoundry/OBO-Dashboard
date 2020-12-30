@@ -49,8 +49,8 @@ ontologies:
 prefer_base: True
 profile:
   baseprofile: "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources/report_profile.txt"
-  custom:
-    - "WARN\tfile:./sparql/missing_xrefs.sparql"
+  #custom:
+  #  - "WARN\tfile:./sparql/missing_xrefs.sparql"
 robot_additional_prefixes:
   COVOC: "http://purl.obolibrary.org/obo/COVOC_"
   CIDO: "http://purl.obolibrary.org/obo/CIDO_"
