@@ -6,8 +6,8 @@ install:
   - pip install -r requirements.txt
   - mkdir -p ${TRAVIS_BUILD_DIR}/tools
   - export PATH=${TRAVIS_BUILD_DIR}/tools/:$PATH
-  - curl https://github.com/ontodev/robot/releases/download/v1.7.2/robot.jar -o ${TRAVIS_BUILD_DIR}/tools/robot.jar 
-  - curl https://raw.githubusercontent.com/ontodev/robot/v1.7.2/bin/robot -o ${TRAVIS_BUILD_DIR}/tools/robot
+  - curl -L https://github.com/ontodev/robot/releases/download/v1.7.2/robot.jar -o ${TRAVIS_BUILD_DIR}/tools/robot.jar 
+  - curl -L https://raw.githubusercontent.com/ontodev/robot/v1.7.2/bin/robot -o ${TRAVIS_BUILD_DIR}/tools/robot
   - chmod +x ${TRAVIS_BUILD_DIR}/tools/robot
   - chmod +x ${TRAVIS_BUILD_DIR}/tools/robot.jar
 
