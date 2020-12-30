@@ -13,5 +13,4 @@ install:
 
 script:
   - robot --version
-  - robot merge -I https://raw.githubusercontent.com/obophenotype/dicty-phenotype-ontology/master/ddpheno.owl -o test.owl
-  #python ./util/dashboard_config.py rundashboard -C dashboard-config.yml
+  - python ./util/dashboard_config.py rundashboard -C dashboard-config.yml
