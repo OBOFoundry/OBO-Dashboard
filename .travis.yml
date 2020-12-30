@@ -6,9 +6,9 @@ install:
   - pip install -r requirements.txt
   - mkdir -p tools
   - export PATH=/tools/:$PATH
-  - wget https://github.com/ontodev/robot/releases/download/v1.7.2/robot.jar -O tools/robot.jar && \
-      wget https://raw.githubusercontent.com/ontodev/robot/v1.7.2/bin/robot -O tools/robot && \
-      chmod +x tools/robot && \
-      chmod +x tools/robot.jar
+  - curl --silent https://github.com/ontodev/robot/releases/download/v1.7.2/robot.jar > tools/robot.jar 
+  - curl --silent https://raw.githubusercontent.com/ontodev/robot/v1.7.2/bin/robot > tools/robot
+  - chmod +x tools/robot
+  - chmod +x tools/robot.jar
 
 script: python ./util/dashboard_config.py rundashboard -C dashboard-config.yml
