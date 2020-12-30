@@ -311,8 +311,10 @@ def load_yaml(filepath):
 def robot_prepare_ontology(o_path, o_out_path, o_metrics_path, base_iris, make_base, robot_prefixes={}, robot_opts="-v"):
     logging.info(f"Preparing {o_path} for dashboard.")
     try:
-        callstring = ['robot']
-        callstring.extend(['measure', robot_opts, '-i', o_path])
+        callstring = ['robot','measure']
+        if robot_opts:
+            callstring.append(f"{robot_opts}")
+        callstring.extend(['-i', o_path])
         for prefix in robot_prefixes:
             callstring.extend(['--prefix', f"{prefix}: {robot_prefixes[prefix]}"])
         callstring.extend(['--metrics', 'extended-reasoner','-f','yaml','-o',o_metrics_path, 'merge'])
