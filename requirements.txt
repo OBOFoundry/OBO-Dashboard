@@ -6,3 +6,6 @@ jinja2
 markdown
 click
 notebook
+pandas
+plotly
+networkx==2.2
