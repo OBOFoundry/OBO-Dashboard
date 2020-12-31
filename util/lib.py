@@ -80,6 +80,7 @@ class DashboardConfig:
         weights['dashboard'] = 2
         weights['impact'] = 3
         weights['reuse'] = 1
+        weights['impact_external'] = 3
         if 'obo_score_weights' in self.config:
             for weight in self.config['obo_score_weights']:
                 if 'impact_factor' in self.config['obo_score_weights'][weight]:
@@ -98,6 +99,7 @@ class DashboardConfig:
         weights['dashboard'] = 2
         weights['impact'] = 3
         weights['reuse'] = 1
+        weights['impact_external'] = 3
         if 'obo_score_weights' in self.config:
             for weight in self.config['obo_score_weights']:
                 if 'max_impact' in self.config['obo_score_weights'][weight]:
@@ -350,13 +352,14 @@ def get_hours_since(timestamp):
     hours_since = (duration.total_seconds() // 3600)
     return hours_since
 
-def compute_obo_score(impact, reuse, dashboard, weights):
+def compute_obo_score(impact, reuse, dashboard, impact_external, weights):
     impact_weight = weights['impact']
     reuse_weight = weights['reuse']
     dashboard_weight = weights['dashboard']
-    sum_weights = impact_weight+reuse_weight+dashboard_weight
-    score_sum = sum([impact_weight*impact, reuse_weight*reuse, dashboard_weight*dashboard])
-    formula = f"({impact_weight}*impact+{dashboard_weight}*dashboard+{reuse_weight}*reuse)/{sum_weights}"
+    impact_external_weight = weights['impact_external']
+    sum_weights = impact_weight+reuse_weight+dashboard_weight+impact_external_weight
+    score_sum = sum([impact_weight*impact, reuse_weight*reuse, dashboard_weight*dashboard, impact_external_weight*impact_external])
+    formula = f"({impact_weight}*impact+{dashboard_weight}*dashboard+{reuse_weight}*reuse+{impact_external_weight}*impact_external)/{sum_weights}"
     score = score_sum/sum_weights
     return { "score": score, "formula" : formula }
 

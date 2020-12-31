@@ -96,6 +96,24 @@ errors={
 }
 
 
+def compute_external_impact(number_uses):
+    try:
+        number_uses = int(number_uses)
+        if number_uses > 10:
+            return 1
+        elif number_uses > 5:
+            return 0.75
+        elif number_uses > 2:
+            return 0.5
+        elif number_uses >= 1:
+            return 0.25
+        else:
+            return 0
+    except:
+        logging.warning(f'The variable {number_uses} is not a valid number of uses')
+    return 0
+
+
 def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters, config):
     ontologies_results = {}
 
@@ -282,6 +300,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                     'class_expression_count_incl']
                 ont_results['metrics']['Info: Does the ontology fall under OWL 2 DL?'] = metrics['metrics'][
                     'owl2_dl']
+                ont_results['metrics']['Info: How many externally documented uses?'] = len(ontologies[o]['usages']) if 'usages' in ontologies[o] else 0
                 ont_results['metrics']['Info: Syntax'] = metrics['metrics']['syntax']
             except Exception:
                 logging.exception(f'Broken metrics file for {o}: {ont_metrics_path}')
@@ -370,6 +389,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
 
 
             dashboard_score = {}
+            dashboard_score['_impact_external'] = compute_external_impact(ont_results['metrics']['Info: How many externally documented uses?'])
             dashboard_score['_impact'] = round_float(float(uses_count)/len(ontologies))
             dashboard_score['_reuse'] = round_float(float(ont_results['metrics']['Entities: % of entities reused'])/100)
 

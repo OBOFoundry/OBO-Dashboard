@@ -339,6 +339,7 @@ def run():
         oboscore = compute_obo_score(data_yml['metrics']['Info: Experimental OBO score']['_impact'],
                                      data_yml['metrics']['Info: Experimental OBO score']['_reuse'],
                                      data_yml['metrics']['Info: Experimental OBO score']['_dashboard'],
+                                     data_yml['metrics']['Info: Experimental OBO score']['_impact_external'],
                                      oboscore_weights)
         data_yml['metrics']['Info: Experimental OBO score']['oboscore'] = round_float(oboscore['score'])
         data_yml['metrics']['Info: Experimental OBO score']['_formula'] = oboscore['formula']
