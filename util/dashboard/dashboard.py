@@ -325,7 +325,7 @@ def run():
         summary_count['WARN'] = warn
         summary_count['INFO'] = info
         date = datetime.datetime.today()
-        save_data = {'namespace': namespace, 'version': version_iri, 'date': date.strftime('%Y-%m-%d'),
+        save_data = {'namespace': namespace, 'version': version_iri,
                      'summary': {'status': summary, 'comment': summary_comment, 'summary_count': summary_count}, 'results': all_checks}
 
         oboscore_weights = config.get_oboscore_weights()

@@ -386,7 +386,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 logging.warning(f"{o} has no registered uses, but should, at least, use itself. This is usually an "
                                 f"indication that the prefix is unknown.")
             uses_count = len(uses) - 1
-
+            uses.sort()
 
             dashboard_score = {}
             dashboard_score['_impact_external'] = compute_external_impact(ont_results['metrics']['Info: How many externally documented uses?'])
