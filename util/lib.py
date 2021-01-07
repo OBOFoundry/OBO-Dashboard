@@ -131,10 +131,16 @@ class DashboardConfig:
             return 0
 
     def get_robot_additional_prefixes(self):
+        prefixes = {}
+        ontologies = self.get_ontologies().get('ontologies')
+
+        for o in ontologies:
+            prefixes[o.upper()+"ALT"] = f'http://purl.obolibrary.org/obo/{o}#'
+
         if "robot_additional_prefixes" in self.config:
-            return self.config.get("robot_additional_prefixes")
-        else:
-            return {}
+            prefixes.update(self.config.get("robot_additional_prefixes"))
+
+        return prefixes
 
     def get_environment_variables(self):
         if "environment" in self.config:
@@ -191,7 +197,7 @@ class DashboardConfig:
                     else:
                         ontology['base_ns'] = []
                         ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid_cap}_')
-                        #ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid}#')
+                        ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid}#')
 
                     if self._get_prefer_base():
                         ourl = self.base_url_if_exists(oid)
@@ -219,7 +225,7 @@ class DashboardConfig:
                 if 'base_ns' not in o:
                     ontology['base_ns'] = []
                     ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid_cap}_')
-                    #ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid}#')
+                    ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid}#')
 
                 for key in o:
                     if key not in ontology:
@@ -431,7 +437,8 @@ def get_prefix_from_url_namespace(ns, curie_map):
         ns = ns.replace(obo_purl,"")
         ns = ns[:-1]
         return ns
-    raise Exception(f"Namespace {ns} not found in curie map, aborting..")
+    msg = f"Namespace {ns} not found in curie map, aborting.."
+    raise Exception(msg)
 
 def get_base_prefixes(curie_map, base_namespaces):
     internal_ns = []

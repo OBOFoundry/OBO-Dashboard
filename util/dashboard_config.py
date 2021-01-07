@@ -274,7 +274,9 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
         if os.path.exists(ont_metrics_path):
             try:
                 metrics = load_yaml(ont_metrics_path)
-                base_prefixes = get_base_prefixes(metrics['metrics']['curie_map'], base_namespaces)
+                curie_map = config.get_robot_additional_prefixes()
+                curie_map.update(metrics['metrics']['curie_map'])
+                base_prefixes = get_base_prefixes(curie_map, base_namespaces)
                 ont_results['base_prefixes'] = base_prefixes
                 ont_results['metrics'] = {}
                 ont_results['metrics']['Info: Logical consistency'] = metrics['metrics']['consistent']
