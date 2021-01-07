@@ -189,7 +189,9 @@ class DashboardConfig:
                     if 'base_ns' in o:
                         ontology['base_ns'] = o['base_ns']
                     else:
-                        ontology['base_ns'] = [f'http://purl.obolibrary.org/obo/{oid_cap}_']
+                        ontology['base_ns'] = []
+                        ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid_cap}_')
+                        ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid}#')
 
                     if self._get_prefer_base():
                         ourl = self.base_url_if_exists(oid)
@@ -215,7 +217,9 @@ class DashboardConfig:
                         ourl = f"http://purl.obolibrary.org/obo/{oid}.owl"
                 ontology['mirror_from'] = ourl
                 if 'base_ns' not in o:
-                    ontology['base_ns'] = [f'http://purl.obolibrary.org/obo/{oid_cap}_']
+                    ontology['base_ns'] = []
+                    ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid_cap}_')
+                    ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid}#')
 
                 for key in o:
                     if key not in ontology:
@@ -357,9 +361,14 @@ def compute_obo_score(impact, reuse, dashboard, impact_external, weights):
     reuse_weight = weights['reuse']
     dashboard_weight = weights['dashboard']
     impact_external_weight = weights['impact_external']
-    sum_weights = impact_weight+reuse_weight+dashboard_weight+impact_external_weight
-    score_sum = sum([impact_weight*impact, reuse_weight*reuse, dashboard_weight*dashboard, impact_external_weight*impact_external])
-    formula = f"({impact_weight}*impact+{dashboard_weight}*dashboard+{reuse_weight}*reuse+{impact_external_weight}*impact_external)/{sum_weights}"
+    #sum_weights = impact_weight + reuse_weight + dashboard_weight + impact_external_weight
+    #score_sum = sum([impact_weight * impact, reuse_weight * reuse, dashboard_weight * dashboard,
+    #                 impact_external_weight * impact_external])
+    #formula = f"({impact_weight}*impact+{dashboard_weight}*dashboard+{reuse_weight}*reuse+{impact_external_weight}*impact_external)/{sum_weights}"
+
+    sum_weights = impact_weight+dashboard_weight
+    score_sum = sum([impact_weight*impact, dashboard_weight*dashboard])
+    formula = f"({impact_weight}*impact+{dashboard_weight}*dashboard)/{sum_weights}"
     score = score_sum/sum_weights
     return { "score": score, "formula" : formula }
 
