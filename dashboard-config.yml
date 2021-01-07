@@ -45,7 +45,9 @@ ontologies:
     - id: testx
     - id: wbphenotype
     - id: ddpheno
-    - id: cido
+    - id: ontoneo
+      base_ns:
+        - http://purl.bioontology.org/OntONeo/ONTONEO_
 prefer_base: True
 profile:
   baseprofile: "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources/report_profile.txt"
@@ -56,6 +58,7 @@ robot_additional_prefixes:
   CIDO: "http://purl.obolibrary.org/obo/CIDO_"
   dbpedia: "http://dbpedia.org/resource/"
   EFO: "http://www.ebi.ac.uk/efo/EFO_"
+  ONTONEO: "http://purl.bioontology.org/OntONeo/ONTONEO_"
 report_truncation_limit: 300
 redownload_after_hours: 0
 force_regenerate_dashboard_after_hours: 0
