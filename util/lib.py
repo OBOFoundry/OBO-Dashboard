@@ -132,7 +132,7 @@ class DashboardConfig:
 
     def get_robot_additional_prefixes(self):
         prefixes = {}
-        ontologies = self.get_ontologies().get('ontologies')
+        ontologies = self.get_ontology_ids()
 
         for o in ontologies:
             prefixes[o.upper()+"ALT"] = f'http://purl.obolibrary.org/obo/{o}#'
@@ -171,6 +171,25 @@ class DashboardConfig:
             return self.config.get("force_regenerate_dashboard_after_hours")
         else:
             return 0
+
+    def get_ontology_ids(self):
+        ontologies = []
+        ont_conf = self.config.get("ontologies")
+
+        if 'registry' in ont_conf:
+            if ont_conf['registry'] and ont_conf['registry'] != 'None':
+                base = open_yaml_from_url(ont_conf['registry'])
+                for o in base['ontologies']:
+                    if 'activity_status' in o:
+                        if o['activity_status'] != 'active':
+                            continue
+
+                    oid = o['id']
+                    ontologies.append(oid)
+        if 'custom' in ont_conf:
+            for o in ont_conf['custom']:
+                ontologies.append(o['id'])
+        return list(set(ontologies))
 
     def get_ontologies(self):
         ontologies = dict()
