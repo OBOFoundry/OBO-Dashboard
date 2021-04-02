@@ -266,9 +266,9 @@ def run():
             print('ERROR: unable to run check 16 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
         try:
-            check_map[9] = fp_020.is_responsive(data)
+            check_map[20] = fp_020.is_responsive(data)
         except Exception as e:
-            check_map[9] = 'INFO|unable to run check 20'
+            check_map[20] = 'INFO|unable to run check 20'
             print('ERROR: unable to run check 20 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
         # finally, add the report results to the dashboard and save the report
