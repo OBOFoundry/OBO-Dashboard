@@ -380,7 +380,8 @@ PRINCIPLE_MAP = {
     9: 'FP09 Plurality of Users',
     11: 'FP11 Locus of Authority',
     12: 'FP12 Naming Conventions',
-    16: 'FP16 Maintenance'
+    16: 'FP16 Maintenance',
+    20: 'FP20 Responsiveness'
 }
 
 
