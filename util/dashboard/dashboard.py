@@ -22,6 +22,7 @@ import fp_009
 import fp_011
 import fp_012
 import fp_016
+import fp_020
 import report_utils
 
 logging.basicConfig(level=logging.INFO)
@@ -263,6 +264,12 @@ def run():
         except Exception as e:
             check_map[16] = 'INFO|unable to run check 16'
             print('ERROR: unable to run check 16 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
+
+        try:
+            check_map[9] = fp_020.is_responsive(data)
+        except Exception as e:
+            check_map[9] = 'INFO|unable to run check 20'
+            print('ERROR: unable to run check 20 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
         # finally, add the report results to the dashboard and save the report
         try:
