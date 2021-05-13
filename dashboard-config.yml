@@ -1,0 +1,69 @@
+title: OBO Dashboard
+description: Quality control for all OBO Foundry ontologies. Under construction.
+obo_score_weights:
+  no_base:
+    impact_factor: 5
+    max_impact: 5
+  overall_error:
+    impact_factor: 5
+    max_impact: 20
+  overall_warning:
+    impact_factor: 0.5
+    max_impact: 10
+  overall_info:
+    impact_factor: 0.1
+    max_impact: 5
+  report_errors:
+    impact_factor: 0.05
+    max_impact: 10
+  report_warning:
+    impact_factor: 0.01
+    max_impact: 5
+  report_info:
+    impact_factor: 0.005
+    max_impact: 3
+  impact:
+    impact_factor: 3
+    max_impact: 3
+  dashboard:
+    impact_factor: 2
+    max_impact: 2
+  reuse:
+    impact_factor: 1
+    max_impact: 1
+ontologies:
+  #registry: "https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml"
+  custom:
+    - id: bfo
+      mirror_from: "http://purl.obolibrary.org/obo/bfo.owl"
+    - id: covoc
+      mirror_from: "https://raw.githubusercontent.com/EBISPOT/covoc/master/covoc.owl"
+      license:
+        label: CC-BY
+        logo: http://mirrors.creativecommons.org/presskit/buttons/80x15/png/by.png
+        url: http://creativecommons.org/licenses/by/4.0/
+    - id: testx
+    - id: wbphenotype
+    - id: ddpheno
+    - id: ontoneo
+      base_ns:
+        - http://purl.bioontology.org/OntONeo/ONTONEO_
+prefer_base: True
+profile:
+  baseprofile: "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources/report_profile.txt"
+  #custom:
+  #  - "WARN\tfile:./sparql/missing_xrefs.sparql"
+robot_additional_prefixes:
+  COVOC: "http://purl.obolibrary.org/obo/COVOC_"
+  CIDO: "http://purl.obolibrary.org/obo/CIDO_"
+  dbpedia: "http://dbpedia.org/resource/"
+  EFO: "http://www.ebi.ac.uk/efo/EFO_"
+  ONTONEO: "http://purl.bioontology.org/OntONeo/ONTONEO_"
+report_truncation_limit: 300
+redownload_after_hours: 0
+force_regenerate_dashboard_after_hours: 0
+skip_existing: False
+dashboard_report_timeout_seconds: 100
+environment:
+  ROBOT_JAR: build/robot.jar
+  ROBOT: robot

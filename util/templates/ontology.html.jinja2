@@ -10,7 +10,8 @@
                 <h1>Dashboard Report - <a href="http://obofoundry.org/ontology/{{ o.namespace }}.html">{{ o.namespace }}</a></h1>
                 <p class="lead"><b>Version</b>: {{ o.version }}</p>
                 <p class="lead" style="margin-top:-15px;"><b>Date run</b>: {{ o.date }}</p>
-                <p class="lead" style="margin-top:-15px;"><a href="dashboard.yml">View YAML</a></p>
+                <p class="lead" style="margin-top:-15px;"><a href="dashboard.yml">View dashboard results as YAML</a></p>
+                <h3>Error Breakdown</h3>
                 {% set summary = o.summary %}
                 {% if 'comment' in summary %}
                     {% if summary.status == 'ERROR' %}
@@ -68,6 +69,33 @@
                     {% endfor %}
                     <tr>
                 </table>
+                <h3>Ontology metrics</h3>
+                {% set metrics = o.metrics %}
+                <div class="info">
+                    <table class="table">
+                        <tr>
+                            <th>Metric</th>
+                            <th>Values</th>
+                        </tr>
+                        {% set res = o.results %}
+                        {% for m in metrics %}
+                            <tr>
+                                <td>{{ m }}</td>
+                                {% set value = metrics[m] %}
+                                {% if value is mapping %}
+                                    <td><ul>
+                                        {% for ns in value %}
+                                        <li>{{ ns }}: {{ value[ns] }}</li>
+                                        {% endfor %}
+                                    </ul></td>
+                                {% else %}
+                                    <td>{{ value }}</td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

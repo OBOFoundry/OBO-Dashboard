@@ -4,3 +4,9 @@ py4j
 pyyaml
 jinja2
 markdown
+click
+pandas
+scipy
+notebook
+plotly
+networkx

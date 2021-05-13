@@ -1,5 +1,5 @@
 <head>
-  <title>OBO Dashboard ALPHA {{ date }}</title>
+  <title>{{ title }} ({{ date }})</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <style>
 body {
@@ -38,9 +38,10 @@ $(function () {
 </script>
 </head>
 <body>
-  <h1>OBO Dashboard ALPHA {{ date }}</h1>
-  <h4>Under active development. <a href="about.html">Learn More!</a></h4>
-  <p>Created with <a href="http://robot.obolibrary.org/">{{ robot }}</a> and <a href="{{ obomd }}">OBO Metadata Schema</a></p>
+  <h1>{{ title }} ({{ date }})</h1>
+  <h4>{{ description }} <a href="about.html">Learn More!</a></h4>
+  <p>Created with <a href="http://robot.obolibrary.org/">{{ robot }}</a> and <a href="{{ obomd }}">OBO Metadata Schema</a>.</p>
+  <p>A very basic analysis of the results can be found <a href="analysis.html">here</a>.</p>
   <table class="table table-borderless">
     <thead>
       <tr>
@@ -93,6 +94,7 @@ $(function () {
     {% for o in ontologies %}
         <tr>
             <td><b><a href="{{ o.namespace }}/dashboard.html">{{ o.namespace }}</a></b></td>
+            {% if o.results is defined %}
             {% set res = o.results %}
             {% for c in checkorder %}
                 {% set r = res[c] %}
@@ -128,42 +130,49 @@ $(function () {
                     <td class="check table-{{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px"></td>
                 {% endif %}
             {% endfor %}
-            {% set r = o.summary %}
-            {% if 'comment' in r %}
-                {% if r.status == 'ERROR' %}
-                    {% set tdclass = 'danger' %}
-                    {% set icon = 'x' %}
-                {% elif r.status == 'WARN' %}
-                    {% set tdclass = 'warning' %}
-                    {% set icon = 'warning' %}
-                {% elif r.status == 'INFO' %}
-                    {% set tdclass = 'info' %}
-                    {% set icon = 'info' %}
-                {% else %}
-                    {% set tdclass = 'success' %}
-                    {% set icon = 'check' %}
-                {% endif %}
-                <td class="check table-{{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px" data-toggle="tooltip" data-html="true" data-placement="right" title="{{ r.comment }}"></td>
             {% else %}
-                {% if r.status == 'ERROR' %}
-                    {% set tdclass = 'danger' %}
-                    {% set icon = 'x' %}
-                {% elif r.status == 'WARN' %}
-                    {% set tdclass = 'warning' %}
-                    {% set icon = 'warning' %}
-                {% elif r.status == 'INFO' %}
-                    {% set tdclass = 'info' %}
-                    {% set icon = 'info' %}
+                <td class="table-notchecked" colspan="13">Failed to process ontology: {{ o.failure }}</td>
+            {% endif %}
+            {% if o.summary is defined %}
+                {% set r = o.summary %}
+                {% if 'comment' in r %}
+                    {% if r.status == 'ERROR' %}
+                        {% set tdclass = 'danger' %}
+                        {% set icon = 'x' %}
+                    {% elif r.status == 'WARN' %}
+                        {% set tdclass = 'warning' %}
+                        {% set icon = 'warning' %}
+                    {% elif r.status == 'INFO' %}
+                        {% set tdclass = 'info' %}
+                        {% set icon = 'info' %}
+                    {% else %}
+                        {% set tdclass = 'success' %}
+                        {% set icon = 'check' %}
+                    {% endif %}
+                    <td class="check table-{{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px"></td>
                 {% else %}
-                    {% set tdclass = 'success' %}
-                    {% set icon = 'check' %}
+                    {% if r.status == 'ERROR' %}
+                        {% set tdclass = 'danger' %}
+                        {% set icon = 'x' %}
+                    {% elif r.status == 'WARN' %}
+                        {% set tdclass = 'warning' %}
+                        {% set icon = 'warning' %}
+                    {% elif r.status == 'INFO' %}
+                        {% set tdclass = 'info' %}
+                        {% set icon = 'info' %}
+                    {% else %}
+                        {% set tdclass = 'success' %}
+                        {% set icon = 'check' %}
+                    {% endif %}
+                    <td class="check table-{{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px"></td>
                 {% endif %}
-                <td class="check table-{{ tdclass }}"><img src="assets/{{ icon }}.svg" height="15px"></td>
+            {% else %}
+                {% set tdclass = 'danger' %}
+                {% set icon = 'x' %}
+                <td class="check table-danger"><img src="assets/{{ icon }}.svg" height="15px"></td>
             {% endif %}
         </tr>
     {% endfor %}
     </tbody>
   </table>
-  </div>
-  </div>
 </body>

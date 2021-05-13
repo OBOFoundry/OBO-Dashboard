@@ -1,4 +1,4 @@
-dashboard/
+/dashboard/
 dashboard.zip
 dependencies/
 build/
@@ -6,3 +6,11 @@ __pycache__/
 _venv/
 shell.nix
 .tdb
+.DS_Store
+.idea
+ontologies.txt
+sparql
+test.sh
+debug.Makefile
+profile.txt
+.ipynb_checkpoints
