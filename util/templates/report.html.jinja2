@@ -47,8 +47,12 @@
             <td>{{ loop.index }}</td>
             {% for cell in row %}
               <td>
+              {% if docmap is defined %}
               {% if cell in docmap %}
                 <a href="{{ docmap[cell] }}">{{ cell }}</a>
+              {% else %}
+                {{ maybe_get_link(cell, context) }}
+              {% endif %}
               {% else %}
                 {{ maybe_get_link(cell, context) }}
               {% endif %}
