@@ -36,18 +36,18 @@ ontologies:
   custom:
     - id: bfo
       mirror_from: "http://purl.obolibrary.org/obo/bfo.owl"
-    - id: covoc
-      mirror_from: "https://raw.githubusercontent.com/EBISPOT/covoc/master/covoc.owl"
-      license:
-        label: CC-BY
-        logo: http://mirrors.creativecommons.org/presskit/buttons/80x15/png/by.png
-        url: http://creativecommons.org/licenses/by/4.0/
-    - id: testx
-    - id: wbphenotype
-    - id: ddpheno
-    - id: ontoneo
-      base_ns:
-        - http://purl.bioontology.org/OntONeo/ONTONEO_
+    # - id: covoc
+    #   mirror_from: "https://raw.githubusercontent.com/EBISPOT/covoc/master/covoc.owl"
+    #   license:
+    #     label: CC-BY
+    #     logo: http://mirrors.creativecommons.org/presskit/buttons/80x15/png/by.png
+    #     url: http://creativecommons.org/licenses/by/4.0/
+    # - id: testx
+    # - id: wbphenotype
+    # - id: ddpheno
+    - id: genepio
+    - id: ons
+    - id: dron
 prefer_base: True
 profile:
   baseprofile: "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources/report_profile.txt"
