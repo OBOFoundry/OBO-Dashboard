@@ -49,6 +49,7 @@ check_order = ['FP01 Open',
                'FP11 Locus of Authority',
                'FP12 Naming Conventions',
                'FP16 Maintenance',
+               'FP20 Responsiveness',
                'ROBOT Report']
 
 link_map = {
@@ -64,6 +65,7 @@ link_map = {
     'FP11': 'http://obofoundry.org/principles/fp-011-locus-of-authority.html',
     'FP12': 'http://obofoundry.org/principles/fp-012-naming-conventions.html',
     'FP16': 'http://obofoundry.org/principles/fp-016-maintenance.html',
+    'FP20': 'http://obofoundry.org/principles/fp-020-responsiveness.html',
     'ROBOT Report': 'http://robot.obolibrary.org/report'
 }
 

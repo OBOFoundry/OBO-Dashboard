@@ -115,6 +115,7 @@ check_order = ['FP01 Open',
                'FP11 Locus of Authority',
                'FP12 Naming Conventions',
                'FP16 Maintenance',
+               'FP20 Responsiveness',
                'ROBOT Report']
 
 if __name__ == '__main__':
