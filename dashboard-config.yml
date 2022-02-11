@@ -34,8 +34,7 @@ obo_score_weights:
 ontologies:
   #registry: "https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/registry/ontologies.yml"
   custom:
-    - id: bfo
-      mirror_from: "http://purl.obolibrary.org/obo/bfo.owl"
+    - id: genepio
     # - id: covoc
     #   mirror_from: "https://raw.githubusercontent.com/EBISPOT/covoc/master/covoc.owl"
     #   license:
@@ -44,10 +43,8 @@ ontologies:
     #     url: http://creativecommons.org/licenses/by/4.0/
     # - id: testx
     # - id: wbphenotype
-    # - id: ddpheno
-    - id: genepio
-    - id: ons
-    - id: dron
+    - id: ddpheno
+    - id: omo
 prefer_base: True
 profile:
   baseprofile: "https://raw.githubusercontent.com/ontodev/robot/master/robot-core/src/main/resources/report_profile.txt"
