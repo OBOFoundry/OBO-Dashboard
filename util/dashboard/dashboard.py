@@ -40,6 +40,7 @@ def run():
     # parse input args
     parser = ArgumentParser(description='Create dashboard files')
     parser.add_argument('ontology', type=str, help='Input ontology file')
+    parser.add_argument('ontologymetrics', type=str, help='Output from ROBOT metrics run')
     parser.add_argument('registry', type=FileType('r'), help='Registry YAML file')
     parser.add_argument('schema', type=FileType('r'), help='OBO JSON schema')
     parser.add_argument('relations', type=FileType('r'), help='Table containing RO IRIs and labels')
@@ -54,6 +55,8 @@ def run():
     namespace = os.path.splitext(owl)[0]
 
     ontology_file = args.ontology
+    metrics_file = args.ontologymetrics
+
     registry = args.registry
     schema = json.load(args.schema)
     contact_schema = {
@@ -112,6 +115,22 @@ def run():
             print("Analysis has to be updated, running.")
         else:
             sys.exit(0)
+
+        # Load raw ontology as OWLOntology object
+        syntax = None
+        if not metrics_file or not os.path.exists(metrics_file) or dash_utils.whitespace_only(metrics_file):
+            # If ontology_file is None, the file does not exist, or the file is empty
+            # Then the ontology is None
+            syntax = None
+        else:
+            try:
+                with open(metrics_file, 'r') as stream:
+                    metrics_data = yaml.safe_load(stream)
+                if metrics_data:
+                    if 'metrics' in metrics_data and 'syntax' in metrics_data['metrics']:
+                        syntax = metrics_data['metrics']['syntax']
+            except Exception as e:
+                print(f"ERROR: Unable to load {metrics_file}, cause: {e}.", flush=True)
 
         if not big:
             # Load ontology as OWLOntology object
@@ -185,10 +204,7 @@ def run():
             print('ERROR: unable to run check 1 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
 
         try:
-            if big:
-                check_map[2] = fp_002.big_is_common_format(good_format)
-            else:
-                check_map[2] = fp_002.is_common_format(ont_or_file)
+            check_map[2] = fp_002.is_common_format(syntax)
         except Exception as e:
             check_map[2] = 'INFO|unable to run check 2'
             print('ERROR: unable to run check 2 for {0}\nCAUSE:\n{1}'.format(namespace, str(e)), flush=True)
