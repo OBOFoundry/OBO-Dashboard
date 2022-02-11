@@ -8,7 +8,7 @@ shell.nix
 .tdb
 .DS_Store
 .idea
-ontologies.txt
+ontologies
 sparql
 test.sh
 debug.Makefile
