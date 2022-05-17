@@ -71,12 +71,11 @@ def has_versioning(ontology):
 
 
 def url_exists(url: str):
-    # from https://stackoverflow.com/a/61404519/5775947
-    res = requests.get(url, stream=True)
-    if res.status_code == 200:
-        return True
-    else:
-        return False
+    # check the URL resolves, but don't download it in full
+    # inspired by https://stackoverflow.com/a/61404519/5775947
+    with requests.get(url, stream=True) as res:
+        return res.status_code == 200
+
 
 def big_has_versioning(file):
     """Check fp 4 - versioning.
