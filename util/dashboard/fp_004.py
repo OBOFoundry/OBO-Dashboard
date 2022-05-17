@@ -31,6 +31,7 @@ from dash_utils import format_msg
 
 # regex pattern to match dated version IRIs
 pat = r'http:\/\/purl\.obolibrary\.org/obo/.*/([0-9]{4}-[0-9]{2}-[0-9]{2})/.*'
+PATTERN = re.compile(pat)
 
 # descriptions of issues
 bad_format = 'Version IRI \'{0}\' is not in recommended format'
@@ -62,8 +63,7 @@ def has_versioning(ontology):
         return {"status": "ERROR", "comment": "Version IRI does not resolve"}
 
     # compare version IRI to the regex pattern
-    search = re.search(pat, version_iri)
-    if not search:
+    if not PATTERN.search(version_iri):
         return {'status': 'WARN',
                 'comment': bad_format.format(version_iri)}
 
@@ -93,8 +93,7 @@ def big_has_versioning(file):
     if not url_exists(version_iri):
         return {"status": "ERROR", "comment": "Version IRI does not resolve"}
     # compare version IRI to the regex pattern
-    search = re.search(pat, version_iri)
-    if not search:
+    if not PATTERN.search(version_iri):
         return {'status': 'WARN',
                 'comment': bad_format.format(version_iri)}
 
