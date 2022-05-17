@@ -58,14 +58,14 @@ def has_versioning(ontology):
     if not version_iri:
         return {'status': 'ERROR', 'comment': missing_version}
 
+    if not url_exists(version_iri):
+        return {"status": "ERROR", "comment": "Version IRI does not resolve"}
+
     # compare version IRI to the regex pattern
     search = re.search(pat, version_iri)
     if not search:
         return {'status': 'WARN',
                 'comment': bad_format.format(version_iri)}
-
-    if not url_exists(version_iri):
-        return {"status": "ERROR", "comment": "Version IRI does not resolve"}
 
     return {'status': 'PASS'}
 
