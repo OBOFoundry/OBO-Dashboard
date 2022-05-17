@@ -70,13 +70,6 @@ def has_versioning(ontology):
     return {'status': 'PASS'}
 
 
-def url_exists(url: str):
-    # check the URL resolves, but don't download it in full
-    # inspired by https://stackoverflow.com/a/61404519/5775947
-    with requests.get(url, stream=True) as res:
-        return res.status_code == 200
-
-
 def big_has_versioning(file):
     """Check fp 4 - versioning.
 
@@ -93,16 +86,23 @@ def big_has_versioning(file):
     # may return empty string if version IRI is missing
     # or None if ontology cannot be parsed
     version_iri = dash_utils.get_big_version_iri(file)
-
-    if version_iri and version_iri != '':
-        # compare version IRI to the regex pattern
-        search = re.search(pat, version_iri)
-        if search:
-            return {'status': 'PASS'}
-        else:
-            return {'status': 'WARN',
-                    'comment': bad_format.format(version_iri)}
-    elif version_iri == '':
-        return {'status': 'ERROR', 'comment': missing_version}
-    else:
+    if version_iri is None:
         return {'status': 'ERROR', 'comment': 'Unable to parse ontology'}
+    if version_iri == "":
+        return {'status': 'ERROR', 'comment': missing_version}
+    if not url_exists(version_iri):
+        return {"status": "ERROR", "comment": "Version IRI does not resolve"}
+    # compare version IRI to the regex pattern
+    search = re.search(pat, version_iri)
+    if not search:
+        return {'status': 'WARN',
+                'comment': bad_format.format(version_iri)}
+
+    return {'status': 'PASS'}
+
+
+def url_exists(url: str):
+    # check the URL resolves, but don't download it in full
+    # inspired by https://stackoverflow.com/a/61404519/5775947
+    with requests.get(url, stream=True) as res:
+        return res.status_code == 200
