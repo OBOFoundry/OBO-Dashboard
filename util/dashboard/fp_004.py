@@ -25,6 +25,8 @@
 import dash_utils
 import re
 
+import requests
+
 from dash_utils import format_msg
 
 # regex pattern to match dated version IRIs
@@ -53,19 +55,28 @@ def has_versioning(ontology):
 
     # retrieve version IRI or None from ontology
     version_iri = dash_utils.get_version_iri(ontology)
-    if version_iri:
-        # compare version IRI to the regex pattern
-        search = re.search(pat, version_iri)
-        if search:
-            return {'status': 'PASS'}
-        else:
-            return {'status': 'WARN',
-                    'comment': bad_format.format(version_iri)}
-    else:
+    if not version_iri:
         return {'status': 'ERROR', 'comment': missing_version}
 
-    # TODO: check that versionIRI resolves
+    # compare version IRI to the regex pattern
+    search = re.search(pat, version_iri)
+    if not search:
+        return {'status': 'WARN',
+                'comment': bad_format.format(version_iri)}
 
+    if not url_exists(version_iri):
+        return {"status": "ERROR", "comment": "Version IRI does not resolve"}
+
+    return {'status': 'PASS'}
+
+
+def url_exists(url: str):
+    # from https://stackoverflow.com/a/61404519/5775947
+    res = requests.get(url, stream=True)
+    if res.status_code == 200:
+        return True
+    else:
+        return False
 
 def big_has_versioning(file):
     """Check fp 4 - versioning.
