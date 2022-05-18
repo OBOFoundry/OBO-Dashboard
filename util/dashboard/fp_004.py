@@ -25,10 +25,13 @@
 import dash_utils
 import re
 
+import requests
+
 from dash_utils import format_msg
 
 # regex pattern to match dated version IRIs
 pat = r'http:\/\/purl\.obolibrary\.org/obo/.*/([0-9]{4}-[0-9]{2}-[0-9]{2})/.*'
+PATTERN = re.compile(pat)
 
 # descriptions of issues
 bad_format = 'Version IRI \'{0}\' is not in recommended format'
@@ -53,18 +56,18 @@ def has_versioning(ontology):
 
     # retrieve version IRI or None from ontology
     version_iri = dash_utils.get_version_iri(ontology)
-    if version_iri:
-        # compare version IRI to the regex pattern
-        search = re.search(pat, version_iri)
-        if search:
-            return {'status': 'PASS'}
-        else:
-            return {'status': 'WARN',
-                    'comment': bad_format.format(version_iri)}
-    else:
+    if not version_iri:
         return {'status': 'ERROR', 'comment': missing_version}
 
-    # TODO: check that versionIRI resolves
+    if not url_exists(version_iri):
+        return {"status": "ERROR", "comment": "Version IRI does not resolve"}
+
+    # compare version IRI to the regex pattern
+    if not PATTERN.search(version_iri):
+        return {'status': 'WARN',
+                'comment': bad_format.format(version_iri)}
+
+    return {'status': 'PASS'}
 
 
 def big_has_versioning(file):
@@ -83,16 +86,22 @@ def big_has_versioning(file):
     # may return empty string if version IRI is missing
     # or None if ontology cannot be parsed
     version_iri = dash_utils.get_big_version_iri(file)
-
-    if version_iri and version_iri != '':
-        # compare version IRI to the regex pattern
-        search = re.search(pat, version_iri)
-        if search:
-            return {'status': 'PASS'}
-        else:
-            return {'status': 'WARN',
-                    'comment': bad_format.format(version_iri)}
-    elif version_iri == '':
-        return {'status': 'ERROR', 'comment': missing_version}
-    else:
+    if version_iri is None:
         return {'status': 'ERROR', 'comment': 'Unable to parse ontology'}
+    if version_iri == "":
+        return {'status': 'ERROR', 'comment': missing_version}
+    if not url_exists(version_iri):
+        return {"status": "ERROR", "comment": "Version IRI does not resolve"}
+    # compare version IRI to the regex pattern
+    if not PATTERN.search(version_iri):
+        return {'status': 'WARN',
+                'comment': bad_format.format(version_iri)}
+
+    return {'status': 'PASS'}
+
+
+def url_exists(url: str):
+    # check the URL resolves, but don't download it in full
+    # inspired by https://stackoverflow.com/a/61404519/5775947
+    with requests.get(url, stream=True) as res:
+        return res.status_code == 200
