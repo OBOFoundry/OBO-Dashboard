@@ -100,8 +100,13 @@ def big_has_versioning(file):
     return {'status': 'PASS'}
 
 
-def url_exists(url: str):
+def url_exists(url: str) -> bool:
     # check the URL resolves, but don't download it in full
     # inspired by https://stackoverflow.com/a/61404519/5775947
-    with requests.get(url, stream=True) as res:
-        return res.status_code == 200
+    try:
+        with requests.get(url, stream=True) as res:
+            return res.status_code == 200
+    except Exception:
+        # Any errors with connection will be considered
+        # as the URL not existing
+        return False
