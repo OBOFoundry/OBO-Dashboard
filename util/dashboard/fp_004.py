@@ -22,6 +22,8 @@
 ## ### Implementation
 ## The version IRI is retrieved from the ontology using OWL API. For very large ontologies, the RDF/XML ontology header is parsed to find the owl:versionIRI declaration. If found, the IRI is compared to a regex pattern to determine if it is in date format. If it is not in date format, a warning is issued. If the version IRI is not present, this is an error.
 
+from typing import Optional
+
 import dash_utils
 import re
 
@@ -32,6 +34,8 @@ from dash_utils import format_msg
 # regex pattern to match dated version IRIs
 pat = r'http:\/\/purl\.obolibrary\.org/obo/.*/([0-9]{4}-[0-9]{2}-[0-9]{2})/.*'
 PATTERN = re.compile(pat)
+SEMVER_PATTERN = re.compile("...")
+DATE_PATTERN = re.compile("...")
 
 # descriptions of issues
 bad_format = 'Version IRI \'{0}\' is not in recommended format'
@@ -61,6 +65,10 @@ def has_versioning(ontology):
 
     if not url_exists(version_iri):
         return {"status": "ERROR", "comment": "Version IRI does not resolve"}
+
+    has_version_message = url_has_version(version_iri)
+    if has_version_message is not None:
+        return {"status": "ERROR", "comment": has_version_message}
 
     # compare version IRI to the regex pattern
     if not PATTERN.search(version_iri):
@@ -112,3 +120,15 @@ def url_exists(url: str) -> bool:
         return False
     else:
         return rv
+
+
+def url_has_version(url: str) -> Optional[str]:
+    matches_semver = SEMVER_PATTERN.match(url)
+    matches_date = DATE_PATTERN.match(url)
+    if matches_date and matches_semver:
+        return "Version IRI should not contain both a semantic version and date"
+    if not matches_date and not matches_semver:
+        return "Version IRI has neither a semantic version nor a date"
+    # None means it's all gucci
+    return None
+
