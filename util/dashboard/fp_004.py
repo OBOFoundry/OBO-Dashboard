@@ -68,9 +68,9 @@ def has_versioning(ontology):
     if not url_exists(version_iri):
         return {"status": "ERROR", "comment": "Version IRI does not resolve"}
 
-    has_version_message = iri_has_version(version_iri)
-    if has_version_message is not None:
-        return {"status": "ERROR", "comment": has_version_message}
+    iri_version_error_message = get_iri_version_error_message(version_iri)
+    if iri_version_error_message is not None:
+        return {"status": "ERROR", "comment": iri_version_error_message}
 
     # compare version IRI to the regex pattern
     if not PATTERN.search(version_iri):
@@ -124,7 +124,7 @@ def url_exists(url: str) -> bool:
         return rv
 
 
-def iri_has_version(version_iri: str) -> Optional[str]:
+def get_iri_version_error_message(version_iri: str) -> Optional[str]:
     """Check a version IRI has exactly one of a semantic version or ISO 8601 date (YYYY-MM-DD) in it."""
     matches_semver = SEMVER_PATTERN.match(version_iri)
     matches_date = DATE_PATTERN.match(version_iri)
