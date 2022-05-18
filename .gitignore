@@ -15,3 +15,4 @@ debug.Makefile
 profile.txt
 .ipynb_checkpoints
 .tox
+.venv

@@ -29,8 +29,6 @@ import re
 
 import requests
 
-from dash_utils import format_msg
-
 # regex pattern to match dated version IRIs
 pat = r'http:\/\/purl\.obolibrary\.org/obo/.*/([0-9]{4}-[0-9]{2}-[0-9]{2})/.*'
 PATTERN = re.compile(pat)
@@ -124,6 +122,40 @@ def url_exists(url: str) -> bool:
         return rv
 
 
+def contains_semver(s: str) -> bool:
+    """Return if the string contains a semantic version substring.
+
+    >>> contains_semver("https://example.org/1.0.0/ontology.owl")
+    True
+    >>> contains_semver("https://example.org/1.0/ontology.owl")
+    True
+    >>> contains_semver("https://example.org/2022-01-01/1.0.0/ontology.owl")
+    True
+    >>> contains_semver("https://example.org/ontology.owl")
+    False
+    >>> contains_semver("https://example.org/2022-01-01/ontology.owl")
+    False
+    """
+    return bool(SEMVER_PATTERN.match(s))
+
+
+def contains_date(s: str) -> bool:
+    """Return if the string contains a date substring.
+
+    >>> contains_date("https://example.org/1.0.0/ontology.owl")
+    False
+    >>> contains_date("https://example.org/1.0/ontology.owl")
+    False
+    >>> contains_date("https://example.org/2022-01-01/1.0.0/ontology.owl")
+    True
+    >>> contains_date("https://example.org/ontology.owl")
+    False
+    >>> contains_date("https://example.org/2022-01-01/ontology.owl")
+    True
+    """
+    return bool(DATE_PATTERN.match(s))
+
+
 def get_iri_version_error_message(version_iri: str) -> Optional[str]:
     """Check a version IRI has exactly one of a semantic version or ISO 8601 date (YYYY-MM-DD) in it.
 
@@ -138,8 +170,8 @@ def get_iri_version_error_message(version_iri: str) -> Optional[str]:
     >>> get_iri_version_error_message("https://example.org/2022-01-01/1.0.0/ontology.owl")
     'Version IRI should not contain both a semantic version and date'
     """
-    matches_semver = SEMVER_PATTERN.match(version_iri)
-    matches_date = DATE_PATTERN.match(version_iri)
+    matches_semver = contains_semver(version_iri)
+    matches_date = contains_date(version_iri)
     if matches_date and matches_semver:
         return "Version IRI should not contain both a semantic version and date"
     if not matches_date and not matches_semver:
