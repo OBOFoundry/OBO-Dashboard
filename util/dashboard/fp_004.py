@@ -125,7 +125,19 @@ def url_exists(url: str) -> bool:
 
 
 def get_iri_version_error_message(version_iri: str) -> Optional[str]:
-    """Check a version IRI has exactly one of a semantic version or ISO 8601 date (YYYY-MM-DD) in it."""
+    """Check a version IRI has exactly one of a semantic version or ISO 8601 date (YYYY-MM-DD) in it.
+
+    >>> get_iri_version_error_message("https://example.org/2022-01-01/ontology.owl")
+    None
+    >>> get_iri_version_error_message("https://example.org/1.0.0/ontology.owl")
+    None
+    >>> get_iri_version_error_message("https://example.org/1.0/ontology.owl")
+    None
+    >>> get_iri_version_error_message("https://obofoundry.org")
+    'Version IRI has neither a semantic version nor a date'
+    >>> get_iri_version_error_message("https://example.org/2022-01-01/1.0.0/ontology.owl")
+    'Version IRI should not contain both a semantic version and date'
+    """
     matches_semver = SEMVER_PATTERN.match(version_iri)
     matches_date = DATE_PATTERN.match(version_iri)
     if matches_date and matches_semver:
