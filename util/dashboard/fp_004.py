@@ -105,8 +105,10 @@ def url_exists(url: str) -> bool:
     # inspired by https://stackoverflow.com/a/61404519/5775947
     try:
         with requests.get(url, stream=True) as res:
-            return res.status_code == 200
+            rv = res.status_code == 200
     except Exception:
         # Any errors with connection will be considered
         # as the URL not existing
         return False
+    else:
+        return rv
