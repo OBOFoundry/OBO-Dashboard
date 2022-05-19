@@ -23,6 +23,7 @@
 ## The version IRI is retrieved from the ontology using OWL API. For very large ontologies, the RDF/XML ontology header is parsed to find the owl:versionIRI declaration. If found, the IRI is compared to a regex pattern to determine if it is in date format. If it is not in date format, a warning is issued. If the version IRI is not present, this is an error.
 
 from typing import Optional
+from urllib.parse import urlparse
 
 import dash_utils
 import re
@@ -33,9 +34,9 @@ import requests
 pat = r'http:\/\/purl\.obolibrary\.org/obo/.*/([0-9]{4}-[0-9]{2}-[0-9]{2})/.*'
 PATTERN = re.compile(pat)
 #: Official regex for semantic versions from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-SEMVER_PATTERN = re.compile(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?")
+SEMVER_PATTERN = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$")
 #: Regular expression for ISO 8601 compliant date in YYYY-MM-DD format
-DATE_PATTERN = re.compile(r"([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])")
+DATE_PATTERN = re.compile(r"^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$")
 
 # descriptions of issues
 bad_format = 'Version IRI \'{0}\' is not in recommended format'
@@ -122,8 +123,8 @@ def url_exists(url: str) -> bool:
         return rv
 
 
-def contains_semver(s: str) -> bool:
-    """Return if the string contains a semantic version substring.
+def contains_semver(iri: str) -> bool:
+    """Return if the IRI contains a semantic version substring.
 
     >>> contains_semver("https://example.org/1.0.0/ontology.owl")
     True
@@ -136,11 +137,11 @@ def contains_semver(s: str) -> bool:
     >>> contains_semver("https://example.org/2022-01-01/ontology.owl")
     False
     """
-    return bool(SEMVER_PATTERN.match(s))
+    return _match_any_part(iri, SEMVER_PATTERN)
 
 
-def contains_date(s: str) -> bool:
-    """Return if the string contains a date substring.
+def contains_date(iri: str) -> bool:
+    """Return if the IRI contains a date substring.
 
     >>> contains_date("https://example.org/1.0.0/ontology.owl")
     False
@@ -153,7 +154,15 @@ def contains_date(s: str) -> bool:
     >>> contains_date("https://example.org/2022-01-01/ontology.owl")
     True
     """
-    return bool(DATE_PATTERN.match(s))
+    return _match_any_part(iri, DATE_PATTERN)
+
+
+def _match_any_part(iri, pattern):
+    parse_result = urlparse(iri)
+    return any(
+        bool(pattern.match(part))
+        for part in parse_result.path.split("/")
+    )
 
 
 def get_iri_version_error_message(version_iri: str) -> Optional[str]:
