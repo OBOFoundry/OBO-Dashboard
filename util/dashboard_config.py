@@ -432,7 +432,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                     save_yaml(ont_results, ont_results_path)
                     continue
             else:
-                logging.info(f"Not runnning dashboard for {o} because it has not changed ({ont_results['changed']}) "
+                logging.info(f"Not running dashboard for {o} because it has not changed ({ont_results['changed']}) "
                              f"nor forced ({force})..")
         else:
             logging.info(f"{o} has a results file, but no metrics were computed ({'metrics' not in ont_results}), "
