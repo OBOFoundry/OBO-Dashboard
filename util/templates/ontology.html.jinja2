@@ -84,10 +84,10 @@
                                 {% set value = metrics[m] %}
                                 {% if value is mapping %}
                                     <td>
-                                        <dl class="row">
+                                        <dl>
                                             {% for ns in value %}
-                                                <dt class="col-sm-3 text-right">{{ ns }}</dt>
-                                                <dd class="col-sm-9 text-left">{{ value[ns] }}</dd>
+                                                <dt>{{ ns }}</dt>
+                                                <dd>{{ value[ns] }}</dd>
                                             {% endfor %}
                                         </dl>
                                     </td>
