@@ -419,7 +419,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 logging.info(f"Creating dashboard for {o}...")
                 try:
                     # Only overwrite these metrics when we actually overwrite the dashboard..
-                    ont_results['metrics']['Info: Which ontologies use it?'] = uses
+                    ont_results['metrics']['Info: Which ontologies use it?'] = [use for use in uses if use != o]
                     ont_results['metrics']['Info: How many ontologies use it?'] = uses_count
                     ont_results['metrics']['Info: Experimental OBO score'] = dashboard_score
                     save_yaml(ont_results, ont_results_path)
