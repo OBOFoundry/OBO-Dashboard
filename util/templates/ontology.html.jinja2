@@ -91,7 +91,7 @@
                                             {% endfor %}
                                         </dl>
                                     </td>
-                                {% elif value is list %}
+                                {% elif value.__class__.__name__ == "list" %}
                                     <td><ul>
                                         {% for lvalue in value %}
                                             <li>{{ lvalue }}</li>
