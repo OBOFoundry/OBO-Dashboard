@@ -84,12 +84,11 @@
                                 {% set value = metrics[m] %}
                                 {% if value is mapping %}
                                     <td>
-                                        <dl>
+                                        <ul>
                                             {% for ns in value %}
-                                                <dt>{{ ns }}</dt>
-                                                <dd>{{ value[ns] }}</dd>
+                                                <li>{{ ns }}: {{ value[ns] }}</li>
                                             {% endfor %}
-                                        </dl>
+                                        </ul>
                                     </td>
                                 {% elif value.__class__.__name__ == "list" %}
                                     <td><ul>
