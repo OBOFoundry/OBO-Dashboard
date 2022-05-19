@@ -84,7 +84,7 @@
                                 {% set value = metrics[m] %}
                                 {% if value is mapping %}
                                     <td>
-                                        <dl class="row">
+                                        <dl>
                                             {% for ns in value %}
                                                 <dt>{{ ns }}</dt>
                                                 <dd>{{ value[ns] }}</dd>
