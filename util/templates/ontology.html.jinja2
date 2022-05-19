@@ -83,9 +83,18 @@
                                 <td>{{ m }}</td>
                                 {% set value = metrics[m] %}
                                 {% if value is mapping %}
+                                    <td>
+                                        <dl class="row">
+                                            {% for ns in value %}
+                                                <dt class="col-sm-3 text-right">{{ ns }}</dt>
+                                                <dd class="col-sm-9 text-left">{{ value[ns] }}</dd>
+                                            {% endfor %}
+                                        </dl>
+                                    </td>
+                                {% elif value is list %}
                                     <td><ul>
-                                        {% for ns in value %}
-                                        <li>{{ ns }}: {{ value[ns] }}</li>
+                                        {% for lvalue in value %}
+                                            <li>{{ lvalue }}</li>
                                         {% endfor %}
                                     </ul></td>
                                 {% else %}
