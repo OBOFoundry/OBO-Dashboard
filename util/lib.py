@@ -354,7 +354,7 @@ def robot_prepare_ontology(o_path, o_out_path, o_metrics_path, base_iris, make_b
             #base_iris_string = " ".join([f"--base-iri \"{s}\"" for s in sbase_iris])
             for s in base_iris:
                 callstring.extend(['--base-iri',s])
-            callstring.extend(["--axioms", "external", "-p", "false"])
+            callstring.extend(["--axioms", "external", "--trim", "false", "-p", "false"])
         callstring.extend(['--output', o_out_path])
         logging.info(callstring)
         check_call(callstring)
