@@ -179,6 +179,11 @@ def run():
         # Get the report based on if it's big or not
         report = None
         good_format = None
+        
+        for base_iri in data['base_ns']:
+            logging.warning(f"Adding base IRI to IO Helper: {base_iri}.")
+            io_helper.addBaseNamespace(base_iri)
+        
         if big:
             if namespace != 'gaz':
                 # Report currently takes TOO LONG for GAZ
