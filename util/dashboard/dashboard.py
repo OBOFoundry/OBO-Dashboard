@@ -183,6 +183,8 @@ def run():
         for base_iri in data['base_ns']:
             logging.warning(f"Adding base IRI to IO Helper: {base_iri}.")
             io_helper.addBaseNamespace(base_iri)
+        # This is added so the dashboard os not skippig checks on the ontology itself.
+        io_helper.addBaseNamespace(f"http://purl.obolibrary.org/obo/{namespace}")
         
         if big:
             if namespace != 'gaz':
