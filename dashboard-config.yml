@@ -43,7 +43,50 @@ ontologies:
     #     url: http://creativecommons.org/licenses/by/4.0/
     # - id: testx
     # - id: wbphenotype
-    - id: mmusdv
+    - id: gombo
+      mirror_from: "https://raw.githubusercontent.com/BridgetSquidget/gombo/main/gombo_v1.owx"
+      title: General Ontology for Marine Bioluminescent Organs
+      contact:
+        email: bridget.vincent@lifesci.ucsb.edu
+        label: Bridget Vincent
+        description: An ontology describing the structures in the bioluminescent components of marine animals.
+      domain: anatomy
+      homepage: https://github.com/BridgetSquidget/gombo/blob/main/gombo_v1.owx
+      products:
+        - id: gombo.owl
+        - id: gombo.obo
+      dependencies:
+        - id: uberon
+        - id: afm
+        - id: cl
+        - id: ncit
+        - id: fma
+        - id: spd
+        - id: zfa
+        - id: plana
+        - id: go
+        - id: chebi
+        - id: ms
+        - id: bao
+        - id: ogi
+        - id: scdo
+        - id: so
+        - id: pr
+        - id: obi
+        - id: txpo
+        - id: xco
+        - id: mod
+        - id: nbitaxon
+        - id: ceph
+        - id: xao
+        - id: emapa
+        - id: aeo
+        - id: mc
+        - id: mpath
+      tracker: https://github.com/BridgetSquidget/gombo/issues
+      license:
+        url: https://creativecommons.org/licenses/by/4.0/
+        label: CC BY 4.0
     - id: omo
 prefer_base: True
 profile:
@@ -57,7 +100,7 @@ robot_additional_prefixes:
   EFO: "http://www.ebi.ac.uk/efo/EFO_"
   ONTONEO: "http://purl.bioontology.org/OntONeo/ONTONEO_"
 report_truncation_limit: 300
-redownload_after_hours: 0
+redownload_after_hours: 10
 force_regenerate_dashboard_after_hours: 0
 skip_existing: False
 dashboard_report_timeout_seconds: 100
