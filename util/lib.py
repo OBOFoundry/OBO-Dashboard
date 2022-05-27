@@ -341,22 +341,36 @@ def load_yaml(filepath):
 
 def robot_prepare_ontology(o_path, o_out_path, o_metrics_path, base_iris, make_base, robot_prefixes={}, robot_opts="-v"):
     logging.info(f"Preparing {o_path} for dashboard.")
+    
+    callstring = ['robot', 'merge', '-i', o_path]
+    
+    if robot_opts:
+        callstring.append(f"{robot_opts}")
+    
+    ### Measure stuff
+    callstring.extend(['measure'])
+    for prefix in robot_prefixes:
+        callstring.extend(['--prefix', f"{prefix}: {robot_prefixes[prefix]}"])
+    callstring.extend(['--metrics', 'extended-reasoner','-f','yaml','-o',o_metrics_path])
+    
+    ## Extract base
+    if make_base:
+        callstring.extend(['remove'])
+        for s in base_iris:
+            callstring.extend(['--base-iri',s])
+        callstring.extend(["--axioms", "external", "--trim", "false", "-p", "false"])
+    
+    ### Measure stuff on base
+    callstring.extend(['measure'])
+    for prefix in robot_prefixes:
+        callstring.extend(['--prefix', f"{prefix}: {robot_prefixes[prefix]}"])
+    callstring.extend(['--metrics', 'extended-reasoner','-f','yaml','-o',f"{o_metrics_path}.base.yml"])
+    
+    ## Output
+    callstring.extend(['merge', '--output', o_out_path])
+    logging.info(callstring)
+    
     try:
-        callstring = ['robot','measure']
-        if robot_opts:
-            callstring.append(f"{robot_opts}")
-        callstring.extend(['-i', o_path])
-        for prefix in robot_prefixes:
-            callstring.extend(['--prefix', f"{prefix}: {robot_prefixes[prefix]}"])
-        callstring.extend(['--metrics', 'extended-reasoner','-f','yaml','-o',o_metrics_path, 'merge'])
-        if make_base:
-            callstring.extend(['remove'])
-            #base_iris_string = " ".join([f"--base-iri \"{s}\"" for s in sbase_iris])
-            for s in base_iris:
-                callstring.extend(['--base-iri',s])
-            callstring.extend(["--axioms", "external", "--trim", "false", "-p", "false"])
-        callstring.extend(['--output', o_out_path])
-        logging.info(callstring)
         check_call(callstring)
     except Exception as e:
         raise Exception(f"Preparing {o_path} for dashboard failed...", e)
