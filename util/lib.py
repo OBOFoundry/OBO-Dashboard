@@ -217,6 +217,7 @@ class DashboardConfig:
                         ontology['base_ns'] = []
                         ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid_cap}_')
                         ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid}#')
+                        ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid}') #This is to catch the ontology itself when running report
 
                     if self._get_prefer_base():
                         ourl = self.base_url_if_exists(oid)
@@ -245,6 +246,7 @@ class DashboardConfig:
                     ontology['base_ns'] = []
                     ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid_cap}_')
                     ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid}#')
+                    ontology['base_ns'].append(f'http://purl.obolibrary.org/obo/{oid}')
 
                 for key in o:
                     if key not in ontology:
