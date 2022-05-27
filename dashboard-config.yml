@@ -43,7 +43,7 @@ ontologies:
     #     url: http://creativecommons.org/licenses/by/4.0/
     # - id: testx
     # - id: wbphenotype
-    - id: ddpheno
+    - id: mmusdv
     - id: omo
 prefer_base: True
 profile:
