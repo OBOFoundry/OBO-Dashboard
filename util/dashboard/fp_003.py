@@ -175,7 +175,6 @@ def big_has_valid_uris(namespace, file, ontology_dir):
 
 
 def is_valid_ontology_iri(iri, namespace):
-    logging.info(f"isVALID({iri},{namespace}")
     if iri:
         if iri == 'http://purl.obolibrary.org/obo/{0}.owl'.format(namespace):
             return True
