@@ -29,7 +29,8 @@ logging.basicConfig(level=logging.INFO)
 
 from argparse import ArgumentParser, FileType
 from py4j.java_gateway import JavaGateway
-from lib import round_float, compute_dashboard_score, compute_obo_score, DashboardConfig
+from lib import round_float, compute_dashboard_score, compute_obo_score, DashboardConfig, \
+    create_dashboard_score_badge, create_dashboard_qc_badge
 
 
 def run():
@@ -337,18 +338,29 @@ def run():
             all_checks[key] = result
 
         # Summary status
+        badge_message = []
+        color = ""
+
         if err > 0:
             summary = 'ERROR'
+            color = "red"
             summary_comment = '{0} errors'.format(err)
+            badge_message.append(f"ERROR {err}")
         elif warn > 0:
             summary = 'WARN'
+            color = "yellow"
             summary_comment = '{0} warnings'.format(warn)
         elif info > 0:
             summary = 'INFO'
+            color = 'green'
             summary_comment = '{0} info messages'.format(info)
         else:
             summary = 'PASS'
             summary_comment = ''
+            color = 'green'
+
+        if warn > 0:
+            badge_message.append(f"WARN {warn}")
 
         summary_count = dict()
         summary_count['ERROR'] = err
@@ -364,18 +376,25 @@ def run():
         for key in save_data:
             data_yml[key] = save_data[key]
 
-        data_yml['metrics']['Info: Experimental OBO score']['_dashboard'] = round_float(
+        obo_dashboard_score = round_float(
             float(compute_dashboard_score(data_yml, oboscore_weights, oboscore_maximpacts)) / 100)
+        data_yml['metrics']['Info: Experimental OBO score']['_dashboard'] = obo_dashboard_score
         oboscore = compute_obo_score(data_yml['metrics']['Info: Experimental OBO score']['_impact'],
                                      data_yml['metrics']['Info: Experimental OBO score']['_reuse'],
                                      data_yml['metrics']['Info: Experimental OBO score']['_dashboard'],
                                      data_yml['metrics']['Info: Experimental OBO score']['_impact_external'],
                                      oboscore_weights)
+
         data_yml['metrics']['Info: Experimental OBO score']['oboscore'] = round_float(oboscore['score'])
         data_yml['metrics']['Info: Experimental OBO score']['_formula'] = oboscore['formula']
 
+
+
         # Save to YAML file
         print('Saving results to {0}'.format(dashboard_yml))
+        create_dashboard_qc_badge(color, ", ".join(badge_message), ontology_dir)
+        create_dashboard_score_badge("blue", obo_dashboard_score, ontology_dir)
+
         with open(dashboard_yml, 'w+') as f:
             yaml.dump(data_yml, f)
     except Exception:
