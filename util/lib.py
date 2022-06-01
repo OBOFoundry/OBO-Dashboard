@@ -452,6 +452,44 @@ def compute_dashboard_score(data, weights, maximpacts):
     oboscore = oboscore - score_max(weights['report_info'] * report_info, maximpacts['report_info'])
     return "%.2f" % oboscore
 
+def compute_dashboard_score_alt1(data, weights, maximpacts):
+    """Computing dashboard score based purely on the number of failed categories"""
+
+    if 'failure' in data:
+        return 0
+
+    score = 100
+
+    if 'results' in data:
+        ct_categories = len(data['results']) + 1 # The + 1 is the requirement of having a base.
+        weight_per_category = float((100 / ct_categories))
+        for cat in data['results']:
+            if 'status' in data['results'][cat]:
+                if data['results'][cat]['status'] == 'ERROR':
+                    score -= weight_per_category
+                elif data['results'][cat]['status'] == 'WARN':
+                    score -= (weight_per_category/3)
+                elif data['results'][cat]['status'] == 'INFO':
+                    score -= (weight_per_category / 10)
+                elif data['results'][cat]['status'] == 'PASS':
+                    score -= 0
+                else:
+                    logging.warning(f"compute_dashboard_score_alt1(): Results section exists but unrecognised status {data['results'][cat]['status']}.")
+                    return 0
+            else:
+                logging.warning(
+                    f"compute_dashboard_score_alt1(): Results section exists but no status entry for {cat}.")
+                return 0
+    else:
+        return 0
+
+    if 'base_generated' in data and data['base_generated'] == True:
+        score -= weight_per_category
+
+    if score < 0:
+        score = 0
+
+    return "%.2f" % score
 
 def round_float(n):
     strfloat = "%.3f" % n
@@ -514,3 +552,15 @@ def create_badge(color: str, message: str, label:str, filepath: str):
     json_string = json.dumps(json_data)
     with open(filepath, "w") as text_file:
         print(json_string, file=text_file)
+
+def url_exists(url: str) -> bool:
+    # check the URL resolves, but don't download it in full
+    # inspired by https://stackoverflow.com/a/61404519/5775947
+    try:
+        with requests.get(url, stream=True) as res:
+            return (res.status_code == 200)
+    except Exception as e:
+        # Any errors with connection will be considered
+        # as the URL not existing
+        logging.error(e, exc_info=True)
+    return False

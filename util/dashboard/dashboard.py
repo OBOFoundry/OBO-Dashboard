@@ -29,7 +29,7 @@ logging.basicConfig(level=logging.INFO)
 
 from argparse import ArgumentParser, FileType
 from py4j.java_gateway import JavaGateway
-from lib import round_float, compute_dashboard_score, compute_obo_score, DashboardConfig, \
+from lib import round_float, compute_dashboard_score_alt1, compute_obo_score, DashboardConfig, \
     create_dashboard_score_badge, create_dashboard_qc_badge
 
 
@@ -367,7 +367,7 @@ def run():
         summary_count['WARN'] = warn
         summary_count['INFO'] = info
         date = datetime.datetime.today()
-        save_data = {'namespace': namespace, 'version': version_iri,
+        save_data = {'namespace': namespace, 'version': version_iri, 'date': date,
                      'summary': {'status': summary, 'comment': summary_comment, 'summary_count': summary_count}, 'results': all_checks}
 
         oboscore_weights = config.get_oboscore_weights()
@@ -376,8 +376,9 @@ def run():
         for key in save_data:
             data_yml[key] = save_data[key]
 
-        obo_dashboard_score = round_float(
-            float(compute_dashboard_score(data_yml, oboscore_weights, oboscore_maximpacts)) / 100)
+        raw_dashboard_score = compute_dashboard_score_alt1(data_yml, oboscore_weights, oboscore_maximpacts)
+        raw_dashboard_score = float(raw_dashboard_score) / float(100)
+        obo_dashboard_score = round_float(float(raw_dashboard_score))
         data_yml['metrics']['Info: Experimental OBO score']['_dashboard'] = obo_dashboard_score
         oboscore = compute_obo_score(data_yml['metrics']['Info: Experimental OBO score']['_impact'],
                                      data_yml['metrics']['Info: Experimental OBO score']['_reuse'],
@@ -388,12 +389,11 @@ def run():
         data_yml['metrics']['Info: Experimental OBO score']['oboscore'] = round_float(oboscore['score'])
         data_yml['metrics']['Info: Experimental OBO score']['_formula'] = oboscore['formula']
 
-
-
+        obo_dashboard_score_pc = round_float(float((obo_dashboard_score*100)))
         # Save to YAML file
         print('Saving results to {0}'.format(dashboard_yml))
         create_dashboard_qc_badge(color, ", ".join(badge_message), ontology_dir)
-        create_dashboard_score_badge("blue", obo_dashboard_score, ontology_dir)
+        create_dashboard_score_badge("blue", f"{obo_dashboard_score_pc} %", ontology_dir)
 
         with open(dashboard_yml, 'w+') as f:
             yaml.dump(data_yml, f)

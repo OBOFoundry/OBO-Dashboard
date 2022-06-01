@@ -11,6 +11,7 @@
                 <p class="lead"><b>Version</b>: {{ o.version }}</p>
                 <p class="lead" style="margin-top:-15px;"><b>Date run</b>: {{ o.date }}</p>
                 <p class="lead" style="margin-top:-15px;"><a href="dashboard.yml">View dashboard results as YAML</a></p>
+                <p class="lead" style="margin-top:-15px;"><a href="../index.html">Go back to Overview</a></p>
                 <h3>Error Breakdown</h3>
                 {% set summary = o.summary %}
                 {% if 'comment' in summary %}

@@ -450,7 +450,10 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                     # Only overwrite these metrics when we actually overwrite the dashboard..
                     ont_results['metrics']['Info: Which ontologies use it?'] = [use for use in uses if use != o]
                     ont_results['metrics']['Info: How many ontologies use it?'] = uses_count
-                    ont_results['metrics']['Info: Experimental OBO score'] = dashboard_score
+                    if 'Info: Experimental OBO score' in ont_results['metrics']:
+                        ont_results['metrics']['Info: Experimental OBO score'].update(dashboard_score)
+                    else:
+                        ont_results['metrics']['Info: Experimental OBO score'] = dashboard_score
                     save_yaml(ont_results, ont_results_path)
                     runcmd(f"make  {make_parameters} {dashboard_html}", config.get_dashboard_report_timeout_seconds())
                     ont_results.pop('last_ontology_dashboard_run_failed', None)
