@@ -50,42 +50,56 @@ def has_valid_definitions(report):
     # warn level violation
     missing = report.getViolationCount('missing_definition')
 
-    if duplicates > 0 and multiples > 0 and missing > 0:
-        return {'status': 'ERROR',
-                'comment': ' '.join([duplicate_msg.format(duplicates),
-                                     multiple_msg.format(multiples),
-                                     missing_msg.format(missing),
-                                     help_msg])}
-    elif duplicates > 0 and multiples > 0:
-        return {'status': 'ERROR',
-                'comment': ' '.join([duplicate_msg.format(duplicates),
-                                     multiple_msg.format(multiples),
-                                     help_msg])}
-    elif duplicates > 0 and missing > 0:
-        return {'status': 'ERROR',
-                'comment': ' '.join([duplicate_msg.format(duplicates),
-                                     missing_msg.format(missing),
-                                     help_msg])}
-    elif multiples > 0 and missing > 0:
-        return {'status': 'ERROR',
-                'comment': ' '.join([multiple_msg.format(multiples),
-                                     missing_msg.format(missing),
-                                     help_msg])}
-    elif duplicates > 0:
-        return {'status': 'ERROR',
-                'comment': ' '.join([duplicate_msg.format(duplicates),
-                                     help_msg])}
-    elif multiples > 0:
-        return {'status': 'ERROR',
-                'comment': ' '.join([multiple_msg.format(missing),
-                                     help_msg])}
+    if duplicates == 0 and multiples == 0 and missing == 0:
+      return {'status': 'PASS'}
     elif missing > 0:
-        return {'status': 'WARN',
-                'comment': ' '.join([missing_msg.format(missing),
-                                     help_msg])}
-    else:
-        # no violations found
-        return {'status': 'PASS'}
+      return {'status': 'WARN',
+              'comment': ' '.join([missing_msg, help_msg])}
+
+    comment = [f'{duplicate_msg.format(duplicates) if duplicates > 0 else ""}', 
+               f'{multiple_msg.format(multiples) if multiples > 0 else ""}',
+               f'{missing_msg.format(missing) if missing > 0 else ""}',
+               help_msg]
+
+    return {'status': 'ERROR',
+            'comment': ' '.join(comment).strip()}
+
+    # if duplicates > 0 and multiples > 0 and missing > 0:
+    #     return {'status': 'ERROR',
+    #             'comment': ' '.join([duplicate_msg.format(duplicates),
+    #                                  multiple_msg.format(multiples),
+    #                                  missing_msg.format(missing),
+    #                                  help_msg])}
+    # elif duplicates > 0 and multiples > 0:
+    #     return {'status': 'ERROR',
+    #             'comment': ' '.join([duplicate_msg.format(duplicates),
+    #                                  multiple_msg.format(multiples),
+    #                                  help_msg])}
+    # elif duplicates > 0 and missing > 0:
+    #     return {'status': 'ERROR',
+    #             'comment': ' '.join([duplicate_msg.format(duplicates),
+    #                                  missing_msg.format(missing),
+    #                                  help_msg])}
+    # elif multiples > 0 and missing > 0:
+    #     return {'status': 'ERROR',
+    #             'comment': ' '.join([multiple_msg.format(multiples),
+    #                                  missing_msg.format(missing),
+    #                                  help_msg])}
+    # elif duplicates > 0:
+    #     return {'status': 'ERROR',
+    #             'comment': ' '.join([duplicate_msg.format(duplicates),
+    #                                  help_msg])}
+    # elif multiples > 0:
+    #     return {'status': 'ERROR',
+    #             'comment': ' '.join([multiple_msg.format(missing),
+    #                                  help_msg])}
+    # elif missing > 0:
+    #     return {'status': 'WARN',
+    #             'comment': ' '.join([missing_msg.format(missing),
+    #                                  help_msg])}
+    # else:
+    #     # no violations found
+    #     return {'status': 'PASS'}
 
 
 # violation messages
