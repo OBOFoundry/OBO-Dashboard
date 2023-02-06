@@ -28,7 +28,8 @@
                 {% endif %}
                 <table class="table">
                     <tr>
-                        <th>Check</th>
+                        <th>Principle</th>
+                        <th>Automated Check</th>
                         <th>Status</th>
                         <th>Comment</th>
                         <th>Resources</th>
@@ -40,6 +41,7 @@
                         {% set checkname = c.strip().split(' ', 1)[1] %}
                         <tr>
                             <td><a href="{{ checklinks[checkid] }}">{{ checkname }}</a></td>
+                            <td><a href="{{ autochecklinks[checkid] }}">{{ checkname }} Automated Check</a></td>
                             {% if r.status == 'ERROR' %}
                                 {% set tableclass = 'danger' %}
                                 {% set icon = 'x' %}
@@ -68,7 +70,46 @@
                             {% endif %}
                         </tr>
                     {% endfor %}
-                    <tr>
+                </table>
+                <h3>ROBOT Report Summary</h3>
+                <table class="table">
+                  <tr>
+                      <th>Check</th>
+                      <th>Status</th>
+                      <th>Comment</th>
+                      <th>Resources</th>
+                  </tr>
+                  {% set res = o.results %}
+                  {% set r = res['ROBOT Report'] %}
+                  <tr>
+                      <td><a href="http://robot.obolibrary.org/report">ROBOT Report</td>
+                      {% if r.status == 'ERROR' %}
+                          {% set tableclass = 'danger' %}
+                          {% set icon = 'x' %}
+                      {% elif r.status == 'WARN' %}
+                          {% set tableclass = 'warning' %}
+                          {% set icon = 'warning' %}
+                      {% elif r.status == 'INFO' %}
+                          {% set tableclass = 'info' %}
+                          {% set icon = 'info' %}
+                      {% else %}
+                          {% set tableclass = 'success' %}
+                          {% set icon = 'check' %}
+                      {% endif %}
+                      <td class="table-{{ tableclass }}" style="text-align:center;">
+                          <img src="../assets/{{ icon }}.svg" height="15px">
+                      </td>
+                      {% if 'comment' in r %}
+                          <td>{{ r.comment }}</td>
+                      {% else %}
+                          <td></td>
+                      {% endif %}
+                      {% if 'file' in r %}
+                          <td><a href="{{ r.file }}.html">View Report</a></td>
+                      {% else %}
+                          <td></td>
+                      {% endif %}
+                  </tr>  
                 </table>
                 <h3>Ontology metrics</h3>
                 {% set metrics = o.metrics %}
