@@ -555,9 +555,10 @@ def create_badge(color: str, message: str, label:str, filepath: str):
 
 def url_exists(url: str) -> bool:
     # check the URL resolves, but don't download it in full
-    # inspired by https://stackoverflow.com/a/61404519/5775947
+    # inspired by https://stackoverflow.com/a/69016995/802504 
+    # more updated solution
     try:
-        with requests.get(url, stream=True) as res:
+        with requests.head(url, allow_redirects=True) as res:
             return (res.status_code == 200)
     except Exception as e:
         # Any errors with connection will be considered
