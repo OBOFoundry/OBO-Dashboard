@@ -160,6 +160,16 @@ def get_version_iri(ontology):
     else:
         return None
 
+def get_ontology_iri(ontology):
+    """
+    """
+    if ontology is None:
+        return None
+    ontology_iri = ontology.getOntologyID().getOntologyIRI().orNull()
+    if ontology_iri:
+        return ontology_iri.toString()
+    else:
+        return None
 
 def get_big_version_iri(file):
     """Get the version IRI from an RDF/XML ontology file.

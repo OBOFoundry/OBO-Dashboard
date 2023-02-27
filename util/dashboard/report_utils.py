@@ -21,7 +21,7 @@ def run_report(robot_gateway, io_helper, ontology, profile=None):
         return None
 
     report_options = robot_gateway.ReportOperation.getDefaultOptions()
-    report_options['labels'] = 'true'
+    report_options['labels'] = 'false'
 
     if profile:
         print(profile)

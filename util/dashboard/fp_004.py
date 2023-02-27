@@ -27,6 +27,7 @@ from urllib.parse import urlparse
 
 import dash_utils
 import re
+from lib import url_exists
 
 import requests
 
@@ -107,21 +108,6 @@ def big_has_versioning(file):
                 'comment': bad_format.format(version_iri)}
 
     return {'status': 'PASS'}
-
-
-def url_exists(url: str) -> bool:
-    # check the URL resolves, but don't download it in full
-    # inspired by https://stackoverflow.com/a/61404519/5775947
-    try:
-        with requests.get(url, stream=True) as res:
-            rv = res.status_code == 200
-    except Exception:
-        # Any errors with connection will be considered
-        # as the URL not existing
-        return False
-    else:
-        return rv
-
 
 def contains_semver(iri: str) -> bool:
     """Return if the IRI contains a semantic version substring.

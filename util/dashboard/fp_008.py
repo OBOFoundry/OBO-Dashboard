@@ -28,8 +28,8 @@
 ## ### Implementation
 ## The registry data is checked for 'homepage' and 'description' entries. If either is missing, this is an error. If the homepage is present, the URL is checked to see if it resolves (does not return an HTTP status of greater than 400). If the URL does not resolve, this is also an error.
 
-import requests
 
+from lib import url_exists
 
 def has_documentation(data):
     """Check fp 8 - documentation.
@@ -64,12 +64,8 @@ def has_documentation(data):
                 'comment': 'Missing description'}
 
     # check if URL resolves
-    try:
-        request = requests.get(home)
-    except Exception as e:
+    if not url_exists(home):
         return {'status': 'ERROR',
-                'comment': 'homepage URL ({0}) does not resolve'.format(home)}
-    if request.status_code > 400:
-        return {'status': 'ERROR',
-                'comment': 'homepage URL ({0}) does not resolve'.format(home)}
+                'comment': 'Homepage URL ({0}) does not resolve'.format(home)}
+
     return {'status': 'PASS'}

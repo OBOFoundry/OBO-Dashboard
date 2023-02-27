@@ -1,7 +1,7 @@
 MAKEFLAGS += --warn-undefined-variables
 ROBOT_JAR := build/robot.jar
 REPORT_LENGTH_LIMIT := 200
-ROBOT_URL := "https://github.com/ontodev/robot/releases/download/v1.7.1/robot.jar"
+ROBOT_URL := "https://github.com/ontodev/robot/releases/download/v1.8.3/robot.jar"
 DASHBOARD_RESULTS := "dashboard/dashboard-results.yml"
 
 # ----------------- #

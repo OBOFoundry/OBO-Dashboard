@@ -31,7 +31,7 @@ import re
 iri_pattern = r'http:\/\/purl\.obolibrary\.org\/obo\/%s_[0-9]{1,9}'
 owl_deprecated = 'http://www.w3.org/2002/07/owl#deprecated'
 
-error_msg = '{0} invalid IRIs'
+error_msg = '{} invalid IRIs. The Ontology IRI is {}valid.'
 warn_msg = '{0} warnings on IRIs'
 
 
@@ -85,7 +85,11 @@ def has_valid_uris(robot_gateway, namespace, ontology, ontology_dir):
         elif check == 'WARN':
             warn.append(iri)
 
-    return save_invalid_uris(error, warn, ontology_dir)
+    ontology_iri = dash_utils.get_ontology_iri(ontology)
+    
+    valid_iri = is_valid_ontology_iri(ontology_iri, namespace)
+
+    return save_invalid_uris(error, warn, ontology_dir, valid_iri)
 
 
 def big_has_valid_uris(namespace, file, ontology_dir):
@@ -170,6 +174,14 @@ def big_has_valid_uris(namespace, file, ontology_dir):
     return save_invalid_uris(error, warn, ontology_dir)
 
 
+def is_valid_ontology_iri(iri, namespace):
+    if iri:
+        if iri == 'http://purl.obolibrary.org/obo/{0}.owl'.format(namespace):
+            return True
+        if iri == 'http://purl.obolibrary.org/obo/{0}/{0}-base.owl'.format(namespace):
+            return True
+    return False
+
 def check_uri(namespace, iri):
     """Check if a given IRI is valid.
 
@@ -194,7 +206,7 @@ def check_uri(namespace, iri):
     return True
 
 
-def save_invalid_uris(error, warn, ontology_dir):
+def save_invalid_uris(error, warn, ontology_dir, valid_ontology_iri = True):
     """Save invalid (error or warning) IRIs to a report file
 
     Args:
@@ -215,15 +227,23 @@ def save_invalid_uris(error, warn, ontology_dir):
         for w in warn:
             f.write('WARN\t{0}\n'.format(w))
 
+    o_iri_msg=""
+    if not valid_ontology_iri:
+        o_iri_msg = "not "
+
     if len(error) > 0 and len(warn) > 0:
         return {'status': 'ERROR',
                 'file': 'fp3',
-                'comment': ' '.join([error_msg.format(len(error)),
+                'comment': ' '.join([error_msg.format(len(error), o_iri_msg),
                                      warn_msg.format(len(warn))])}
     elif len(error) > 0:
         return {'status': 'ERROR',
                 'file': 'fp3',
-                'comment': error_msg.format(len(error))}
+                'comment': error_msg.format(len(error), o_iri_msg)}
+    elif not valid_ontology_iri:
+        return {'status': 'ERROR',
+                'file': 'fp3',
+                'comment': error_msg.format(0, o_iri_msg)}
     elif len(warn) > 0:
         return {'status': 'ERROR',
                 'file': 'fp3',

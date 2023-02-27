@@ -5,11 +5,13 @@ import yaml
 import click
 import logging
 import urllib.request
+import json
 
 
 from lib import DashboardConfig, runcmd, sha256sum, save_yaml, \
     load_yaml, robot_prepare_ontology, get_hours_since, get_base_prefixes, \
-    compute_percentage_reused_entities, round_float
+    compute_percentage_reused_entities, round_float, create_dashboard_score_badge, \
+    create_dashboard_qc_badge
 
 logging.basicConfig(level=logging.INFO)
 
@@ -114,6 +116,7 @@ def compute_external_impact(number_uses):
     return 0
 
 
+
 def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters, config):
     ontologies_results = {}
 
@@ -140,6 +143,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 logging.exception(f'Corrupted results file for {o}: {ont_results_path}')
                 ont_results['failure'] = 'corrupted_results_file'
                 save_yaml(ont_results, ont_results_path)
+                create_dashboard_qc_badge("red", "Corrupted results file", ont_dashboard_dir)
+                create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
                 continue
 
         if config.is_skip_existing():
@@ -169,6 +174,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             logging.exception(f'Missing download url for {o} in registry..')
             ont_results['failure'] = 'missing_url'
             save_yaml(ont_results, ont_results_path)
+            create_dashboard_qc_badge("red", "Missing URL", ont_dashboard_dir)
+            create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
             continue
 
         # Get base namespaces
@@ -178,6 +185,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             logging.exception(f'Missing base namespaces for {o} in registry..')
             ont_results['failure'] = 'missing_base_namespaces'
             save_yaml(ont_results, ont_results_path)
+            create_dashboard_qc_badge("red", "Missing base namespaces", ont_dashboard_dir)
+            create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
             continue
 
         if download:
@@ -188,6 +197,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 logging.exception(f'Failed to download {o} from {ourl}')
                 ont_results['failure'] = 'failed_download'
                 save_yaml(ont_results, ont_results_path)
+                create_dashboard_qc_badge("red", "Failed to download", ont_dashboard_dir)
+                create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
                 continue
         else:
             logging.info(f"Downloading {o} skipped.")
@@ -220,6 +231,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             logging.exception(f'Failed to compute hashcode of {o}.')
             ont_results['failure'] = 'failed_sha256_hash'
             save_yaml(ont_results, ont_results_path)
+            create_dashboard_qc_badge("red", "Failed to compute hashcode", ont_dashboard_dir)
+            create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
             continue
 
 
@@ -231,6 +244,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             logging.exception(f'No hashcode for {ont_path}, aborting.')
             ont_results['failure'] = 'no_sha256_hash'
             save_yaml(ont_results, ont_results_path)
+            create_dashboard_qc_badge("red", "No hashcode for file", ont_dashboard_dir)
+            create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
             continue
 
         ont_results['base_generated'] = make_base
@@ -253,6 +268,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 logging.error(f'Failed to verify {o} as downloaded from {ourl}')
                 ont_results['failure'] = 'not_an_ontology'
                 save_yaml(ont_results, ont_results_path)
+                create_dashboard_qc_badge("red", "Not an ontology", ont_dashboard_dir)
+                create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
                 continue
 
             logging.info(f"Creating basefile for {o}...")
@@ -263,6 +280,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 logging.exception(f'Failed to compute base file for {o}.')
                 ont_results['failure'] = 'failed_robot_base'
                 save_yaml(ont_results, ont_results_path)
+                create_dashboard_qc_badge("red", "Failed to compute base", ont_dashboard_dir)
+                create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
                 continue
 
 
@@ -308,10 +327,14 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 logging.exception(f'Broken metrics file for {o}: {ont_metrics_path}')
                 ont_results['failure'] = 'broken_metrics_file'
                 save_yaml(ont_results, ont_results_path)
+                create_dashboard_qc_badge("red", "Failed metrics", ont_dashboard_dir)
+                create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
                 continue
         else:
             logging.exception(f'Missing metrics file for {o}: {ont_metrics_path}')
             ont_results['failure'] = 'missing_metrics_file'
+            create_dashboard_qc_badge("red", "Missing metrics", ont_dashboard_dir)
+            create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
             save_yaml(ont_results, ont_results_path)
             continue
 
@@ -320,6 +343,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             if ont_results['metrics']['Axioms: Number of axioms'] < 1:
                 logging.exception(f'Ontology has lass than one axiom: {o}')
                 ont_results['failure'] = 'empty_ontology'
+                create_dashboard_qc_badge("red", "Empty ontology", ont_dashboard_dir)
+                create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
                 save_yaml(ont_results, ont_results_path)
                 continue
 
@@ -327,11 +352,15 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 logging.exception(f'Ontology is inconsistent: {o}')
                 ont_results['failure'] = 'inconsistent_ontology'
                 save_yaml(ont_results, ont_results_path)
+                create_dashboard_qc_badge("red", "Inconsistent ontology", ont_dashboard_dir)
+                create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
                 continue
         except Exception:
             logging.exception(f'Metrics based checks failed for {o}: {ont_metrics_path}')
             ont_results['failure'] = 'metrics_check_failed'
             save_yaml(ont_results, ont_results_path)
+            create_dashboard_qc_badge("red", "Processing error: failed metrics", ont_dashboard_dir)
+            create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
             continue
 
         logging.info(f"{o}: preprocessing successful.")
@@ -419,20 +448,26 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 logging.info(f"Creating dashboard for {o}...")
                 try:
                     # Only overwrite these metrics when we actually overwrite the dashboard..
-                    ont_results['metrics']['Info: Which ontologies use it?'] = uses
+                    ont_results['metrics']['Info: Which ontologies use it?'] = [use for use in uses if use != o]
                     ont_results['metrics']['Info: How many ontologies use it?'] = uses_count
-                    ont_results['metrics']['Info: Experimental OBO score'] = dashboard_score
+                    if 'Info: Experimental OBO score' in ont_results['metrics']:
+                        ont_results['metrics']['Info: Experimental OBO score'].update(dashboard_score)
+                    else:
+                        ont_results['metrics']['Info: Experimental OBO score'] = dashboard_score
                     save_yaml(ont_results, ont_results_path)
                     runcmd(f"make  {make_parameters} {dashboard_html}", config.get_dashboard_report_timeout_seconds())
                     ont_results.pop('last_ontology_dashboard_run_failed', None)
+
                 except Exception:
                     logging.exception(f'Failed to build dashboard pages for {o}.')
                     ont_results['failure'] = 'failed_ontology_dashboard'
                     ont_results['last_ontology_dashboard_run_failed'] = True
                     save_yaml(ont_results, ont_results_path)
+                    create_dashboard_qc_badge("red", "Processing error: build dashboard", ont_dashboard_dir)
+                    create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
                     continue
             else:
-                logging.info(f"Not runnning dashboard for {o} because it has not changed ({ont_results['changed']}) "
+                logging.info(f"Not running dashboard for {o} because it has not changed ({ont_results['changed']}) "
                              f"nor forced ({force})..")
         else:
             logging.info(f"{o} has a results file, but no metrics were computed ({'metrics' not in ont_results}), "
