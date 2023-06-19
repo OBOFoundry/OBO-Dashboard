@@ -402,7 +402,7 @@ def run():
     try:
         gateway.close()
     except Exception:
-        pass
+        logging.exception("Error closing getway")
 
     sys.exit(0)
 
