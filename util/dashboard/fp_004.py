@@ -122,6 +122,10 @@ def contains_semver(iri: str) -> bool:
     False
     >>> contains_semver("https://example.org/2022-01-01/ontology.owl")
     False
+    >>> contains_semver("http://purl.obolibrary.org/obo/chebi/223/chebi.owl")
+    True
+    >>> contains_semver("http://purl.obolibrary.org/obo/pr/68.0/pr.owl")
+    True
     """
     return _match_any_part(iri, SEMVER_PATTERN)
 
@@ -139,6 +143,10 @@ def contains_date(iri: str) -> bool:
     False
     >>> contains_date("https://example.org/2022-01-01/ontology.owl")
     True
+    >>> contains_date("http://purl.obolibrary.org/obo/chebi/223/chebi.owl")
+    False
+    >>> contains_date("http://purl.obolibrary.org/obo/pr/68.0/pr.owl")
+    False
     """
     return _match_any_part(iri, DATE_PATTERN)
 
@@ -159,6 +167,10 @@ def get_iri_version_error_message(version_iri: str) -> Optional[str]:
     >>> get_iri_version_error_message("https://example.org/1.0.0/ontology.owl")
     None
     >>> get_iri_version_error_message("https://example.org/1.0/ontology.owl")
+    None
+    >>> get_iri_version_error_message("http://purl.obolibrary.org/obo/chebi/223/chebi.owl")
+    None
+    >>> get_iri_version_error_message("http://purl.obolibrary.org/obo/pr/68.0/pr.owl")
     None
     >>> get_iri_version_error_message("https://obofoundry.org")
     'Version IRI has neither a semantic version nor a date'
