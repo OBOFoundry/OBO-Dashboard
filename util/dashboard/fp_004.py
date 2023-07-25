@@ -22,17 +22,22 @@
 ## ### Implementation
 ## The version IRI is retrieved from the ontology using OWL API. For very large ontologies, the RDF/XML ontology header is parsed to find the owl:versionIRI declaration. If found, the IRI is compared to a regex pattern to determine if it is in date format. If it is not in date format, a warning is issued. If the version IRI is not present, this is an error.
 
+from typing import Optional
+from urllib.parse import urlparse
+
 import dash_utils
 import re
 from lib import url_exists
 
 import requests
 
-from dash_utils import format_msg
-
 # regex pattern to match dated version IRIs
 pat = r'http:\/\/purl\.obolibrary\.org/obo/.*/([0-9]{4}-[0-9]{2}-[0-9]{2})/.*'
 PATTERN = re.compile(pat)
+#: Official regex for semantic versions from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+SEMVER_PATTERN = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$")
+#: Regular expression for ISO 8601 compliant date in YYYY-MM-DD format
+DATE_PATTERN = re.compile(r"^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$")
 
 # descriptions of issues
 bad_format = 'Version IRI \'{0}\' is not in recommended format'
@@ -62,6 +67,10 @@ def has_versioning(ontology):
 
     if not url_exists(version_iri):
         return {"status": "ERROR", "comment": "Version IRI does not resolve"}
+
+    iri_version_error_message = get_iri_version_error_message(version_iri)
+    if iri_version_error_message is not None:
+        return {"status": "ERROR", "comment": iri_version_error_message}
 
     # compare version IRI to the regex pattern
     if not PATTERN.search(version_iri):
@@ -100,3 +109,79 @@ def big_has_versioning(file):
 
     return {'status': 'PASS'}
 
+def contains_semver(iri: str) -> bool:
+    """Return if the IRI contains a semantic version substring.
+
+    >>> contains_semver("https://example.org/1.0.0/ontology.owl")
+    True
+    >>> contains_semver("https://example.org/1.0/ontology.owl")
+    True
+    >>> contains_semver("https://example.org/2022-01-01/1.0.0/ontology.owl")
+    True
+    >>> contains_semver("https://example.org/ontology.owl")
+    False
+    >>> contains_semver("https://example.org/2022-01-01/ontology.owl")
+    False
+    >>> contains_semver("http://purl.obolibrary.org/obo/chebi/223/chebi.owl")
+    True
+    >>> contains_semver("http://purl.obolibrary.org/obo/pr/68.0/pr.owl")
+    True
+    """
+    return _match_any_part(iri, SEMVER_PATTERN)
+
+
+def contains_date(iri: str) -> bool:
+    """Return if the IRI contains a date substring.
+
+    >>> contains_date("https://example.org/1.0.0/ontology.owl")
+    False
+    >>> contains_date("https://example.org/1.0/ontology.owl")
+    False
+    >>> contains_date("https://example.org/2022-01-01/1.0.0/ontology.owl")
+    True
+    >>> contains_date("https://example.org/ontology.owl")
+    False
+    >>> contains_date("https://example.org/2022-01-01/ontology.owl")
+    True
+    >>> contains_date("http://purl.obolibrary.org/obo/chebi/223/chebi.owl")
+    False
+    >>> contains_date("http://purl.obolibrary.org/obo/pr/68.0/pr.owl")
+    False
+    """
+    return _match_any_part(iri, DATE_PATTERN)
+
+
+def _match_any_part(iri, pattern):
+    parse_result = urlparse(iri)
+    return any(
+        bool(pattern.match(part))
+        for part in parse_result.path.split("/")
+    )
+
+
+def get_iri_version_error_message(version_iri: str) -> Optional[str]:
+    """Check a version IRI has exactly one of a semantic version or ISO 8601 date (YYYY-MM-DD) in it.
+
+    >>> get_iri_version_error_message("https://example.org/2022-01-01/ontology.owl")
+    None
+    >>> get_iri_version_error_message("https://example.org/1.0.0/ontology.owl")
+    None
+    >>> get_iri_version_error_message("https://example.org/1.0/ontology.owl")
+    None
+    >>> get_iri_version_error_message("http://purl.obolibrary.org/obo/chebi/223/chebi.owl")
+    None
+    >>> get_iri_version_error_message("http://purl.obolibrary.org/obo/pr/68.0/pr.owl")
+    None
+    >>> get_iri_version_error_message("https://obofoundry.org")
+    'Version IRI has neither a semantic version nor a date'
+    >>> get_iri_version_error_message("https://example.org/2022-01-01/1.0.0/ontology.owl")
+    'Version IRI should not contain both a semantic version and date'
+    """
+    matches_semver = contains_semver(version_iri)
+    matches_date = contains_date(version_iri)
+    if matches_date and matches_semver:
+        return "Version IRI should not contain both a semantic version and date"
+    if not matches_date and not matches_semver:
+        return "Version IRI has neither a semantic version nor a date"
+    # None means it's all gucci
+    return None
