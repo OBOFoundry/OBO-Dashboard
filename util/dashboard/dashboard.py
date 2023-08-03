@@ -407,8 +407,8 @@ def run():
 
     sys.exit(0)
 
-#BIG_ONTS = []
-BIG_ONTS = ['bto', 'chebi', 'dron', 'gaz', 'ncbitaxon', 'ncit', 'pr', 'uberon']
+BIG_ONTS = []
+#BIG_ONTS = ['bto', 'chebi', 'dron', 'gaz', 'ncbitaxon', 'ncit', 'pr', 'uberon']
 OBO = 'http://purl.obolibrary.org/obo'
 
 PRINCIPLE_MAP = {
