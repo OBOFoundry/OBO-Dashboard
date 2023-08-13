@@ -63,6 +63,7 @@ def main(args):
             this_data = yaml.load(f, Loader=yaml.SafeLoader)
         ontologies.append(this_data)
 
+    ontologies = reorder_status(ontologies)
 
     # Load Jinja2 template
     template = Template(open('util/templates/index.html.jinja2').read())
@@ -101,6 +102,27 @@ def get_ontology_order(data):
     return order
 
 
+def reorder_status(data):
+    """
+    """
+    s_pass = []
+    s_info = []
+    s_warn = []
+    s_error = []
+    for ont in data:
+        if ont.get('summary'):
+            if ont['summary']['status'] == 'ERROR':
+                s_error.append(ont)
+            elif ont['summary']['status'] == 'WARN':
+                s_warn.append(ont)
+            elif ont['summary']['status'] == 'INFO':
+                s_info.append(ont)
+            elif ont['summay']['status'] == 'PASS':
+                s_pass.append(ont)
+        else:
+            s_error.append(ont)
+            
+    return s_pass + s_info + s_warn + s_error
 
 
 check_order = ['FP01 Open',
