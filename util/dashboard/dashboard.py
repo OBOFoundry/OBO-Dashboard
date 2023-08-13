@@ -397,12 +397,13 @@ def run():
 
         with open(dashboard_yml, 'w+') as f:
             yaml.dump(data_yml, f)
+        gateway.detach(robot_gateway)
     except Exception:
         logging.exception(f"Creating  dashboard for {ontology_file} failed")
     try:
         gateway.close()
     except Exception:
-        pass
+        logging.exception("Closing JavaGateway failed")
 
     sys.exit(0)
 
