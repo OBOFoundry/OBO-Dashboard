@@ -14,4 +14,4 @@ docker run -e ROBOT_JAVA_ARGS='-Xmx48G' -e JAVA_OPTS='-Xmx48G' \
   -v $PWD/dashboard-config.yml:/tools/OBO-Dashboard/dashboard-config.yml \
   -v $PWD/ontologies:/tools/OBO-Dashboard/build/ontologies \
   -v $PWD/sparql:/tools/OBO-Dashboard/sparql \
-  -w /work --rm -ti obolibrary/odkfull "$@"
+  -w /work --rm -ti obolibrary/odkfull:dev "$@"

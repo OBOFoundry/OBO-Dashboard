@@ -2,7 +2,7 @@
 
 import os
 from py4j.protocol import Py4JJavaError
-
+from py4j.finalizer import clear_finalizers
 
 def run_report(robot_gateway, io_helper, ontology, profile=None):
     """Run and return a ROBOT Report.
@@ -31,6 +31,7 @@ def run_report(robot_gateway, io_helper, ontology, profile=None):
     try:
         report = robot_gateway.ReportOperation.getReport(
             ontology, io_helper, report_options)
+        clear_finalizers(clear_all=True)
     except Py4JJavaError as err:
         msg = err.java_exception.getMessage()
         print('REPORT FAILED\n' + str(msg))

@@ -98,6 +98,7 @@ dashboard/assets/%.svg: | dashboard/assets
 # dashboard.py has several dependencies, and generates four files,
 .PRECIOUS: dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv
 dashboard/%/dashboard.yml dashboard/%/robot_report.tsv dashboard/%/fp3.tsv dashboard/%/fp7.tsv: util/dashboard/dashboard.py build/ontologies/%.owl build/ontologies/%-metrics.yml | build/robot.jar
+	echo "$(ROBOT_JAR) $(shell $(ROBOT))"
 	python3 $^ dependencies/ontologies.yml dependencies/registry_schema.json build/ro-properties.csv profile.txt dashboard-config.yml $(dir $@) $(ROBOT_JAR)
 
 # HTML output of ROBOT report
