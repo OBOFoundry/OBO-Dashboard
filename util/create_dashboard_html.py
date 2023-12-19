@@ -105,24 +105,11 @@ def get_ontology_order(data):
 def reorder_status(data):
     """
     """
-    s_pass = []
-    s_info = []
-    s_warn = []
-    s_error = []
-    for ont in data:
-        if ont.get('summary'):
-            if ont['summary']['status'] == 'ERROR':
-                s_error.append(ont)
-            elif ont['summary']['status'] == 'WARN':
-                s_warn.append(ont)
-            elif ont['summary']['status'] == 'INFO':
-                s_info.append(ont)
-            elif ont['summay']['status'] == 'PASS':
-                s_pass.append(ont)
-        else:
-            s_error.append(ont)
-            
-    return s_pass + s_info + s_warn + s_error
+    ORDERING = {"ERROR": 1, "WARN": 0, "INFO": 0, "PASS": 0}
+    return sorted(
+        data,
+        key=lambda ont: ORDERING[ont['summary']['status']] if 'summary' in ont else 2  
+    )
 
 
 check_order = ['FP01 Open',
