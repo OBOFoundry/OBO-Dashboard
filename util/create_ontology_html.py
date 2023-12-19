@@ -32,6 +32,7 @@ def main(args):
     # Generate the HTML output
     res = template.render(checkorder=check_order,
                           checklinks=link_map,
+                          autochecklinks=automated_map,
                           o=data)
 
     args.output.write(res)
@@ -49,8 +50,7 @@ check_order = ['FP01 Open',
                'FP11 Locus of Authority',
                'FP12 Naming Conventions',
                'FP16 Maintenance',
-               'FP20 Responsiveness',
-               'ROBOT Report']
+               'FP20 Responsiveness']
 
 link_map = {
     'FP01': 'http://obofoundry.org/principles/fp-001-open.html',
@@ -65,8 +65,23 @@ link_map = {
     'FP11': 'http://obofoundry.org/principles/fp-011-locus-of-authority.html',
     'FP12': 'http://obofoundry.org/principles/fp-012-naming-conventions.html',
     'FP16': 'http://obofoundry.org/principles/fp-016-maintenance.html',
-    'FP20': 'http://obofoundry.org/principles/fp-020-responsiveness.html',
-    'ROBOT Report': 'http://robot.obolibrary.org/report'
+    'FP20': 'http://obofoundry.org/principles/fp-020-responsiveness.html'
+}
+
+automated_map = {
+    'FP01': 'https://obofoundry.org/principles/checks/fp_001',
+    'FP02': 'https://obofoundry.org/principles/checks/fp_002',
+    'FP03': 'https://obofoundry.org/principles/checks/fp_003',
+    'FP04': 'https://obofoundry.org/principles/checks/fp_004',
+    'FP05': 'https://obofoundry.org/principles/checks/fp_005',
+    'FP06': 'https://obofoundry.org/principles/checks/fp_006',
+    'FP07': 'https://obofoundry.org/principles/checks/fp_007',
+    'FP08': 'https://obofoundry.org/principles/checks/fp_008',
+    'FP09': 'https://obofoundry.org/principles/checks/fp_009',
+    'FP11': 'https://obofoundry.org/principles/checks/fp_011',
+    'FP12': 'https://obofoundry.org/principles/checks/fp_012',
+    'FP16': 'https://obofoundry.org/principles/checks/fp_016',
+    'FP20': 'https://obofoundry.org/principles/checks/fp_020'
 }
 
 if __name__ == '__main__':
