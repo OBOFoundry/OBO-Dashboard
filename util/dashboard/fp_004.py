@@ -35,7 +35,7 @@ pat = r'http:\/\/purl\.obolibrary\.org/obo/.*/.*/.*'
 PATTERN = re.compile(pat)
 #: Official regex for semantic versions from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 # Simplify semantic versions to accept only numbers with or without point, .eg 1.1 or 11
-SEMVER_PATTERN = re.compile(r"^(0|[1-9]\d*)(\.)?(0|[1-9]\d*)((\.)?(0|[1-9]\d*))?$")
+SEMVER_PATTERN = re.compile(r"^(0|[1-9]\d*)(\.)?(0|[1-9]\d*)?((\.)?(0|[1-9]\d*))?$")
 #: Regular expression for ISO 8601 compliant date in YYYY-MM-DD format
 DATE_PATTERN = re.compile(r"^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$")
 
