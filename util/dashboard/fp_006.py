@@ -56,11 +56,11 @@ def has_valid_definitions(report):
     # warn level violation
     missing = report.getViolationCount('missing_definition')
 
-    if not duplicates == 0 and not multiples == 0 and not missing == 0:
+    if not duplicates > 0 and not multiples > 0 and not missing > 0:
         return {'status': 'PASS'}
-    if missing > 0:
+    if not missing == 0 and not duplicates > 0 and not multiples > 0:
         return {'status': 'WARN',
-                'comment': ' '.join([MISSING_MSG, HELP_MSG])}
+                'comment': ' '.join([MISSING_MSG.format(missing), HELP_MSG])}
 
     comment = [f'{DUPLICATE_MSG.format(duplicates) if duplicates > 0 else ""}',
                f'{MULTIPLE_MSG.format(multiples) if multiples > 0 else ""}',
