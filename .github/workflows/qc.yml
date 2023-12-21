@@ -1,0 +1,24 @@
+name: QC
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  qc:
+    name: QC
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: |
+            pip install -r requirements.txt
+      - name: Run dashboard
+        run:
+            python ./util/dashboard_config.py rundashboard -C dashboard-config.yml
