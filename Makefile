@@ -2,6 +2,7 @@ MAKEFLAGS += --warn-undefined-variables
 ROBOT_JAR := build/robot.jar
 REPORT_LENGTH_LIMIT := 200
 ROBOT_URL := "https://github.com/ontodev/robot/releases/download/v1.9.5/robot.jar"
+ROBOT_SCRIPT := "https://raw.githubusercontent.com/ontodev/robot/v1.9.5/bin/robot"
 DASHBOARD_RESULTS := "dashboard/dashboard-results.yml"
 
 # ----------------- #
@@ -41,6 +42,9 @@ ROBOT := java -Xmx10G -jar build/robot.jar
 
 build/robot.jar: | build
 	curl -o $@ -Lk $(ROBOT_URL)
+
+build/robot:
+	curl -o $@ -Lk $(ROBOT_SCRIPT)
 
 # ------------------------- #
 ### EXTERNAL DEPENDENCIES ###
