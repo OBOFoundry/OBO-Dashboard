@@ -24,6 +24,7 @@ jobs:
             make build/robot.jar
             make build/robot
             chmod +x build/robot
+            echo "$PWD/build" >> $GITHUB_PATH
       - name: Run dashboard
         run:
             python ./util/dashboard_config.py rundashboard -C dashboard-config.yml
