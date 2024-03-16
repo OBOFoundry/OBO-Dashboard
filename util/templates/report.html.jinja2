@@ -23,43 +23,25 @@
       {% endfor %}
       </table></div>
       <p style="text-align:center; margin-top:-15px;">
-        <small>Click on any term to direct to the term page.</small>
+        <small>Click on any term to redirect to the term page.</small>
       </p>
       <table class="table">
         <tr>
           <th><b>Row</b></th>
-          {% for h in contents.headers %}
+          {% for h in contents.columns %}
             <th><b>{{ h }}</b></th>
           {% endfor %}
         </tr>
-        {% for row in contents.rows %}
-          {% set status = row[0] %}
-          {% if status == 'ERROR' %}
-            {% set tableclass = 'danger' %}
-          {% elif status == 'WARN' %}
-            {% set tableclass = 'warning' %}
-          {% elif status == 'INFO' %}
-            {% set tableclass = 'info' %}
-          {% else %}
-            {% set tableclass = 'active' %}
-          {% endif %}
-          <tr class="table-{{ tableclass }}">
-            <td>{{ loop.index }}</td>
-            {% for cell in row %}
-              <td>
-              {% if docmap is defined %}
-              {% if cell in docmap %}
-                <a href="{{ docmap[cell] }}">{{ cell }}</a>
-              {% else %}
-                {{ maybe_get_link(cell, context) }}
-              {% endif %}
-              {% else %}
-                {{ maybe_get_link(cell, context) }}
-              {% endif %}
-              </td>
-            {% endfor %}
+        {%- for row_index, row in contents.iterrows() -%}
+          <tr class={{ class_map[row['Level']]|default('table-active') }}>
+            <td>{{ row_index }}</td>
+            <td>{{ row['Level'] }}
+            <td>{{ maybe_get_link(row['Rule Name'], context) }}</td>
+            <td>{{ maybe_get_link(row['Subject'], context) }}</td>
+            <td>{{ maybe_get_link(row['Property'], context) }}</td>
+            <td>{{ maybe_get_link(row['Value']|replace("nan", ""), context) }}</td>
           </tr>
-        {% endfor %}
+        {% endfor -%}
       </table>
     </div>
   </div>
