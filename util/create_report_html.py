@@ -87,7 +87,7 @@ def maybe_get_link(cell, context):
             prefix = curie.group(1)
             local_id = curie.group(2)
             if prefix in context:
-                namespace = context[prefix]
+                namespace = context[prefix]["@id"]
                 url = namespace + local_id
             elif prefix in other_prefixes:
                 namespace = other_prefixes[prefix]

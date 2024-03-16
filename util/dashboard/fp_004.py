@@ -29,13 +29,13 @@ import dash_utils
 import re
 from lib import url_exists
 
-import requests
 
-# regex pattern to match dated version IRIs
-pat = r'http:\/\/purl\.obolibrary\.org/obo/.*/([0-9]{4}-[0-9]{2}-[0-9]{2})/.*'
+# regex pattern to match purl obolibrary url
+pat = r'http:\/\/purl\.obolibrary\.org/obo/.*/.*/.*'
 PATTERN = re.compile(pat)
 #: Official regex for semantic versions from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-SEMVER_PATTERN = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$")
+# Simplify semantic versions to accept only numbers with or without point, .eg 1.1 or 11
+SEMVER_PATTERN = re.compile(r"^(0|[1-9]\d*)(\.)?(0|[1-9]\d*)?((\.)?(0|[1-9]\d*))?$")
 #: Regular expression for ISO 8601 compliant date in YYYY-MM-DD format
 DATE_PATTERN = re.compile(r"^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$")
 
