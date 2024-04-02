@@ -101,7 +101,7 @@ class_map = {
 }
 
 other_prefixes = {
-    'dcterms': 'http://purl.org/dc/terms/',
+    'terms': 'http://purl.org/dc/terms/',
     'dc': 'http://purl.org/dc/elements/1.1/',
     'oboInOwl': 'http://www.geneontology.org/formats/oboInOwl#',
     'owl': 'http://www.w3.org/2002/07/owl#',
