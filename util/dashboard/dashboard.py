@@ -354,10 +354,12 @@ def run():
             summary = 'INFO'
             color = 'green'
             summary_comment = '{0} info messages'.format(info)
+            badge_message.append(f"INFO {info}")
         else:
             summary = 'PASS'
             summary_comment = ''
             color = 'green'
+            badge_message.append("PASS")
 
         if warn > 0:
             badge_message.append(f"WARN {warn}")

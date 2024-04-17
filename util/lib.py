@@ -533,7 +533,7 @@ def compute_percentage_reused_entities(entity_use_map, internal_ns):
     return float(score_string)
 
 def create_dashboard_qc_badge(color: str, message: str, outdir: str):
-    create_badge(color, message, "OBO Dashboard QC", f"{outdir}/dashboard-qc-badge.json")
+    create_badge(color, message, "QC", f"{outdir}/dashboard-qc-badge.json")
 
 
 def create_dashboard_score_badge(color: str, message: str, outdir: str):
