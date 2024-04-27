@@ -342,35 +342,35 @@ def load_yaml(filepath):
 
 def robot_prepare_ontology(o_path, o_out_path, o_metrics_path, base_iris, make_base, robot_prefixes={}, robot_opts="-v"):
     logging.info(f"Preparing {o_path} for dashboard.")
-    
+
     callstring = ['robot', 'merge', '-i', o_path]
-    
+
     if robot_opts:
         callstring.append(f"{robot_opts}")
-    
+
     ### Measure stuff
     callstring.extend(['measure'])
     for prefix in robot_prefixes:
         callstring.extend(['--prefix', f"{prefix}: {robot_prefixes[prefix]}"])
     callstring.extend(['--metrics', 'extended-reasoner','-f','yaml','-o',o_metrics_path])
-    
+
     ## Extract base
     if make_base:
         callstring.extend(['remove'])
         for s in base_iris:
             callstring.extend(['--base-iri',s])
         callstring.extend(["--axioms", "external", "--trim", "false", "-p", "false"])
-    
+
     ### Measure stuff on base
     callstring.extend(['measure'])
     for prefix in robot_prefixes:
         callstring.extend(['--prefix', f"{prefix}: {robot_prefixes[prefix]}"])
     callstring.extend(['--metrics', 'extended-reasoner','-f','yaml','-o',f"{o_metrics_path}.base.yml"])
-    
+
     ## Output
     callstring.extend(['merge', '--output', o_out_path])
     logging.info(callstring)
-    
+
     try:
         check_call(callstring)
     except Exception as e:
@@ -387,6 +387,15 @@ def save_yaml(dictionary, file_path):
     with open(file_path, 'w') as file:
         yaml.dump(dictionary, file)
 
+
+def save_json(dictionary, file_path):
+    def _datetime_serializer(object):
+        if isinstance(object, datetime):
+            return object.isoformat()
+        raise TypeError("Type not serializable")
+
+    with open(file_path, 'w') as file:
+        json.dump(dictionary, file, default=_datetime_serializer, indent=2)
 
 
 def get_hours_since(timestamp):
@@ -555,7 +564,7 @@ def create_badge(color: str, message: str, label:str, filepath: str):
 
 def url_exists(url: str) -> bool:
     # check the URL resolves, but don't download it in full
-    # inspired by https://stackoverflow.com/a/69016995/802504 
+    # inspired by https://stackoverflow.com/a/69016995/802504
     # more updated solution
     try:
         with requests.head(url, allow_redirects=True) as res:
