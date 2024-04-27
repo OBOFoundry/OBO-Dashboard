@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
 import datetime
 import os
 import sys
@@ -8,7 +7,7 @@ import yaml
 
 from argparse import ArgumentParser
 from jinja2 import Template
-from lib import DashboardConfig, count_up, save_yaml, save_json, round_float, compute_dashboard_score, compute_obo_score
+from lib import DashboardConfig, count_up, save_yaml, round_float, compute_dashboard_score, compute_obo_score
 
 
 def main(args):
@@ -91,8 +90,6 @@ def main(args):
     dashboard_score_data['oboscore']['dashboard_score_weights'] = oboscore_weights
     dashboard_score_data['oboscore']['dashboard_score_max_impact'] = oboscore_maximpacts
     save_yaml(dashboard_score_data, dashboard_score_data_file)
-    dashboard_score_data_json_file = Path(dashboard_score_data_file).parent / f"{dashboard_score_data_file.stem}.json"
-    save_json(dashboard_score_data, dashboard_score_data_json_file)
 
 
 def get_ontology_order(data):
@@ -111,7 +108,7 @@ def reorder_status(data):
     ORDERING = {"ERROR": 1, "WARN": 0, "INFO": 0, "PASS": 0}
     return sorted(
         data,
-        key=lambda ont: ORDERING[ont['summary']['status']] if 'summary' in ont else 2
+        key=lambda ont: ORDERING[ont['summary']['status']] if 'summary' in ont else 2  
     )
 
 
