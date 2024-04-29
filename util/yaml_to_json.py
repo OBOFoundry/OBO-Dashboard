@@ -14,9 +14,8 @@ def datetime_serializer(o):
     raise TypeError("Type not serializable")
 
 def main(args=None):
-    d = 'description'
-    parser = argparse.ArgumentParser(description=d)
-    parser.add_argument('yamlfile', type=str, help='File(s) to convert.')
+    parser = argparse.ArgumentParser(description='Convert YAML to JSON')
+    parser.add_argument('yamlfile', type=str, help='File to convert.')
     args = parser.parse_args(args)
 
     yamlfile = Path(args.yamlfile)
