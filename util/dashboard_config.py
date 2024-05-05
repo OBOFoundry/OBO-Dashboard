@@ -398,7 +398,11 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
         ont_results_path = os.path.join(ont_dashboard_dir, "dashboard.yml")
         ont_results = ontologies_results[o]
 
-        if os.path.exists(ont_results_path) and config.is_skip_existing():
+        if config.is_skip_existing():
+            continue
+        
+        if ont_results.get('changed') is False and os.path.exists(ont_results_path):
+            logging.info("Skipping %s because it has not changed since last run.", o)
             continue
 
         logging.info(f"Computing final metrics for {o}")
@@ -423,7 +427,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             dashboard_score['_impact_external'] = compute_external_impact(ont_results['metrics']['Info: How many externally documented uses?'])
             dashboard_score['_impact'] = round_float(float(uses_count)/len(ontologies))
             dashboard_score['_reuse'] = round_float(float(ont_results['metrics']['Entities: % of entities reused'])/100)
-
+            
             dashboard_html = os.path.join(ont_dashboard_dir, "dashboard.html")
 
             # Metrics should be completely computed for this the dashboard to be executed.
