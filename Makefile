@@ -144,7 +144,6 @@ dashboard/index.html: util/create_dashboard_html.py dependencies/ontologies.yml 
 dashboard/about.html: docs/about.md util/templates/about.html.jinja2
 	python3 util/md_to_html.py $< -t $(word 2,$^) -o $@
 
-
 # ------------- #
 ### PACKAGING ###
 # ------------- #
@@ -159,6 +158,6 @@ test:
 
 tr: util/create_report_html.py dashboard/bfo/robot_report.tsv dependencies/obo_context.jsonld util/templates/report.html.jinja2
 	python3 $^ "ROBOT Report - bfo" dashboard/bfo/robot_report.html $(REPORT_LENGTH_LIMIT)
-
+ 
 dashboard/analysis.html:
 	jupyter nbconvert dashboard_analysis.ipynb  --no-input --execute --to html --output $@
