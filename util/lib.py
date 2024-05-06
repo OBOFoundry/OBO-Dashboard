@@ -388,6 +388,15 @@ def save_yaml(dictionary, file_path):
         yaml.dump(dictionary, file)
 
 
+def save_json(dictionary, file_path):
+    def datetime_serializer(o):
+        if isinstance(o, datetime):
+            return o.isoformat()
+        raise TypeError("Type not serializable")
+
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(dictionary, file, default=datetime_serializer, indent=2)
+
 
 def get_hours_since(timestamp):
     modified_date = datetime.fromtimestamp(timestamp)
