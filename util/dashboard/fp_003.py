@@ -56,7 +56,7 @@ def has_valid_uris(robot_gateway, namespace, ontology, ontology_dir):
         otherwise.
     """
     if not ontology:
-        dash_utils.write_empty(os.path.join(ontology_dir, 'fp3.tsv'), ["Status, Issue"])
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp3.tsv'), ["Status", "Issue"])
         return {'status': 'ERROR', 'comment': 'Unable to load ontology'}
 
     entities = robot_gateway.OntologyHelper.getEntities(ontology)
