@@ -55,12 +55,12 @@ def has_valid_relations(namespace, ontology, ro_props, ontology_dir):
         PASS or violation level with optional help message
     """
     if ontology is None:
-        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'), ["IRI", "Label", "Issue"])
         return {'status': 'ERROR', 'comment': 'Unable to load ontology'}
 
     # ignore RO
     if namespace == 'ro':
-        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'), ["IRI", "Label", "Issue"])
         return {'status': 'PASS'}
 
     props = get_properties(ontology)
@@ -170,12 +170,12 @@ def big_has_valid_relations(namespace, file, ro_props, ontology_dir):
         PASS or violation level with optional help message
     """
     if not os.path.isfile(file):
-        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'), ["IRI","Label","Issue"])
         return {'status': 'ERROR', 'comment': 'Unable to find ontology file'}
 
     # ignore RO
     if namespace == 'ro':
-        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'), ["IRI","Label","Issue"])
         return {'status': 'PASS'}
 
     props = big_get_properties(file)

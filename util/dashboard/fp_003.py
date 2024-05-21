@@ -56,7 +56,7 @@ def has_valid_uris(robot_gateway, namespace, ontology, ontology_dir):
         otherwise.
     """
     if not ontology:
-        dash_utils.write_empty(os.path.join(ontology_dir, 'fp3.tsv'))
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp3.tsv'), ["Status", "Issue"])
         return {'status': 'ERROR', 'comment': 'Unable to load ontology'}
 
     entities = robot_gateway.OntologyHelper.getEntities(ontology)
@@ -129,7 +129,7 @@ def big_has_valid_uris(namespace, file, ontology_dir):
             if 'Ontology' and 'about' in line:
                 if not owl and not rdf:
                     # did not find OWL and RDF - end now
-                    dash_utils.write_empty(os.path.join(ontology_dir, 'fp3.tsv'))
+                    dash_utils.write_empty(os.path.join(ontology_dir, 'fp3.tsv'), ["Status", "Issue"])
                     return {'status': 'ERROR',
                             'comment': 'Unable to parse ontology'}
 
@@ -167,7 +167,7 @@ def big_has_valid_uris(namespace, file, ontology_dir):
 
     if not valid:
         # not valid ontology
-        dash_utils.write_empty(os.path.join(ontology_dir, 'fp3.tsv'))
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp3.tsv'), ["Status", "Issue"])
         return {'status': 'ERROR',
                 'comment': 'Unable to parse ontology'}
 
