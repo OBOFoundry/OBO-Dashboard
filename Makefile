@@ -158,6 +158,8 @@ test:
 
 tr: util/create_report_html.py dashboard/bfo/robot_report.tsv dependencies/obo_context.jsonld util/templates/report.html.jinja2
 	python3 $^ "ROBOT Report - bfo" dashboard/bfo/robot_report.html $(REPORT_LENGTH_LIMIT)
-	
-dashboard/analysis.html:
-	jupyter nbconvert dashboard_analysis.ipynb  --no-input --execute --to html --output $@
+
+.PRECIOUS: dashboard/analysis.html
+dashboard/analysis.html: util/dashboard_analysis_html.py util/templates/analysis.html.jinja2
+	python3 $< --dashboard-results $(DASHBOARD_RESULTS) --template util/templates/analysis.html.jinja2 --output $@
+
