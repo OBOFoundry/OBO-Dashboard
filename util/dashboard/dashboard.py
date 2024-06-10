@@ -350,6 +350,7 @@ def run():
             summary = 'WARN'
             color = "yellow"
             summary_comment = '{0} warnings'.format(warn)
+            badge_message.append(f"WARN {warn}")
         elif info > 0:
             summary = 'INFO'
             color = 'green'
@@ -360,9 +361,6 @@ def run():
             summary_comment = ''
             color = 'green'
             badge_message.append("PASS")
-
-        if warn > 0:
-            badge_message.append(f"WARN {warn}")
 
         summary_count = dict()
         summary_count['ERROR'] = err
