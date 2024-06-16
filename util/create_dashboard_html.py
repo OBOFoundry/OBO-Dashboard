@@ -3,11 +3,11 @@
 import datetime
 import os
 import sys
-import yaml
-
 from argparse import ArgumentParser
+
+import yaml
 from jinja2 import Template
-from lib import DashboardConfig, count_up, save_yaml, round_float, compute_dashboard_score, compute_obo_score
+from lib import DashboardConfig, save_json, save_yaml
 
 
 def main(args):
@@ -90,6 +90,7 @@ def main(args):
     dashboard_score_data['oboscore']['dashboard_score_weights'] = oboscore_weights
     dashboard_score_data['oboscore']['dashboard_score_max_impact'] = oboscore_maximpacts
     save_yaml(dashboard_score_data, dashboard_score_data_file)
+    save_json(dashboard_score_data, dashboard_score_data_file.replace('.yml', '.json'))
 
 
 def get_ontology_order(data):
