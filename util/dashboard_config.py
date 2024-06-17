@@ -147,11 +147,11 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
                 continue
 
-        if config.is_skip_existing():
-            ontologies_results[o] = ont_results
-            logging.warning(
-                f"Config is set to skipping, and {ont_results_path} exists, so dashboard HTML generation is entirely skipped for {o}")
-            continue
+            if not ont_results.get("changed") and config.is_skip_existing():
+                ontologies_results[o] = ont_results
+                logging.warning(
+                    f"Config is set to skipping, and {ont_results_path} exists, so dashboard HTML generation is entirely skipped for {o}")
+                continue
 
         ont_results['namespace'] = o
 
@@ -398,10 +398,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
         ont_results_path = os.path.join(ont_dashboard_dir, "dashboard.yml")
         ont_results = ontologies_results[o]
 
-        if config.is_skip_existing():
-            continue
-        
-        if ont_results.get('changed') is False and os.path.exists(ont_results_path):
+        if not ont_results.get("changed") and config.is_skip_existing():
             logging.info("Skipping %s because it has not changed since last run.", o)
             continue
 
