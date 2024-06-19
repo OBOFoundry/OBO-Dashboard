@@ -147,11 +147,11 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
                 create_dashboard_score_badge("lightgrey", "NA", ont_dashboard_dir)
                 continue
 
-        if config.is_skip_existing():
-            ontologies_results[o] = ont_results
-            logging.warning(
-                f"Config is set to skipping, and {ont_results_path} exists, so dashboard HTML generation is entirely skipped for {o}")
-            continue
+            if not ont_results.get("changed") and config.is_skip_existing():
+                ontologies_results[o] = ont_results
+                logging.warning(
+                    f"Config is set to skipping, and {ont_results_path} exists, so dashboard HTML generation is entirely skipped for {o}")
+                continue
 
         ont_results['namespace'] = o
 
@@ -398,7 +398,8 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
         ont_results_path = os.path.join(ont_dashboard_dir, "dashboard.yml")
         ont_results = ontologies_results[o]
 
-        if os.path.exists(ont_results_path) and config.is_skip_existing():
+        if not ont_results.get("changed") and config.is_skip_existing():
+            logging.info("Skipping %s because it has not changed since last run.", o)
             continue
 
         logging.info(f"Computing final metrics for {o}")
@@ -423,7 +424,7 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             dashboard_score['_impact_external'] = compute_external_impact(ont_results['metrics']['Info: How many externally documented uses?'])
             dashboard_score['_impact'] = round_float(float(uses_count)/len(ontologies))
             dashboard_score['_reuse'] = round_float(float(ont_results['metrics']['Entities: % of entities reused'])/100)
-
+            
             dashboard_html = os.path.join(ont_dashboard_dir, "dashboard.html")
 
             # Metrics should be completely computed for this the dashboard to be executed.
