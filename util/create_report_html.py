@@ -31,7 +31,7 @@ def main(args):
                         help='Output report HTML file')
     parser.add_argument('limitlines',
                         type=int,
-                        help='Parameter to limit lines', nargs='?', default=0)
+                        help='Parameter to limit lines', nargs='?', default=50)
     args = parser.parse_args()
 
     context = json.load(args.context)['@context']
@@ -41,8 +41,9 @@ def main(args):
 
     try:
         report = pd.read_csv(args.report, sep="\t")
-        error_count_level = report["Level"].value_counts()
-        error_count_rule = report["Rule Name"].value_counts()
+        if "Level" in report.columns and "Rule Name" in report.columns:
+            error_count_level = report["Level"].value_counts()
+            error_count_rule = report["Rule Name"].value_counts()
     except Exception:
         print("No report")
 
