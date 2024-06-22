@@ -66,6 +66,15 @@ def main(args):
 
 def maybe_get_link(cell, context):
     """
+    Returns an HTML link for the given cell value if it matches certain patterns.
+
+    Args:
+        cell (str): The cell value to check for link patterns.
+        context (dict): A dictionary containing prefix-context mappings.
+
+    Returns:
+        str: An HTML link if a matching pattern is found, otherwise the original cell value.
+
     """
     url = None
     if cell in report_doc_map:
@@ -73,7 +82,7 @@ def maybe_get_link(cell, context):
         url = report_doc_map[cell]
     else:
         # Otherwise try to parse as CURIE or IRI
-        curie = re.search(r'([A-Za-z0-9]+):([A-Za-z0-9-]+)', cell)
+        curie = re.search(r'([A-Za-z0-9_]+):([A-Za-z0-9-]+)', cell)
         if curie:
             # This is a CURIE
             prefix = curie.group(1)
