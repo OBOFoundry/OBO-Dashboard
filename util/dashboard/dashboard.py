@@ -401,7 +401,7 @@ def run():
         logging.exception(f"Creating  dashboard for {ontology_file} failed")
     finally:
         try:
-            gateway.shutdown()
+            gateway.shutdown(raise_exception=True)
         except Exception as e:
             logging.exception("Failed to shut down the gateway: %s", e)
 
