@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
-import yaml
+import hashlib
 import json
 import logging
 import subprocess
 import threading
 import urllib.request
-import hashlib
-from subprocess import check_call
-import requests
 from datetime import datetime
+from subprocess import check_call
+
+import requests
+import yaml
+from requests.exceptions import ChunkedEncodingError
 
 obo_purl = "http://purl.obolibrary.org/obo/"
 
@@ -574,3 +576,26 @@ def url_exists(url: str) -> bool:
         # as the URL not existing
         logging.error(e, exc_info=True)
     return False
+
+
+def download_file(url, dest_path, retries=3):
+    """
+    Download the ontology from the URL to a local path. Retries on ChunkedEncodingError.
+    """
+    attempt = 0
+    while attempt < retries:
+        try:
+            response = requests.get(url, stream=True, timeout=1000000)
+            response.raise_for_status()
+
+            with open(dest_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=32768):
+                    if chunk:  # filter out keep-alive new chunks
+                        f.write(chunk)
+            logging.info("Downloaded %s to %s", url, dest_path)
+            return  # Exit the function if download is successful
+        except ChunkedEncodingError as e:
+            attempt += 1
+            logging.warning("ChunkedEncodingError encountered: %s. Retrying %s/%s...", e, attempt, retries)
+        except Exception as e:
+            logging.exception("Failed to download %s: %s", url, e)

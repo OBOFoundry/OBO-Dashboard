@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
-import os
-import yaml
-import click
-import logging
-import urllib.request
 import json
+import logging
+import os
 
-
-from lib import DashboardConfig, runcmd, sha256sum, save_yaml, \
-    load_yaml, robot_prepare_ontology, get_hours_since, get_base_prefixes, \
-    compute_percentage_reused_entities, round_float, create_dashboard_score_badge, \
-    create_dashboard_qc_badge
+import click
+import requests
+import yaml
+from lib import (DashboardConfig, compute_percentage_reused_entities,
+                 create_dashboard_qc_badge, create_dashboard_score_badge,
+                 download_file, get_base_prefixes, get_hours_since, load_yaml,
+                 robot_prepare_ontology, round_float, runcmd, save_yaml,
+                 sha256sum)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -190,11 +190,11 @@ def prepare_ontologies(ontologies, ontology_dir, dashboard_dir, make_parameters,
             continue
 
         if download:
-            logging.info(f"Downloading {o}...")
+            logging.info("Downloading %s...", o)
             try:
-                urllib.request.urlretrieve(ourl, ont_path)
+                download_file(ourl, ont_path)
             except Exception:
-                logging.exception(f'Failed to download {o} from {ourl}')
+                logging.exception("Failed to download %s from %s", o, ourl)
                 ont_results['failure'] = 'failed_download'
                 save_yaml(ont_results, ont_results_path)
                 create_dashboard_qc_badge("red", "Failed to download", ont_dashboard_dir)
