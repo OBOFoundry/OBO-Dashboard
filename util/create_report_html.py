@@ -38,20 +38,48 @@ def main(args):
 
     error_count_rule = {}
     error_count_level = {}
+    report_filtered = pd.DataFrame()
 
     try:
         report = pd.read_csv(args.report, sep="\t")
+
+        # Get sample of each level only for ROBOT report
         if "Level" in report.columns and "Rule Name" in report.columns:
             error_count_level = report["Level"].value_counts()
             error_count_rule = report["Rule Name"].value_counts()
-    except Exception:
-        print("No report")
+
+            if error_count_level["ERROR"] < args.limitlines:
+                rest = args.limitlines - error_count_level["ERROR"]
+
+                # Calculate the sample number for each level based on group size
+                def calculate_sample_size(group, rest):
+                    if group["Level"].iloc[0] == "ERROR":
+                        return group.shape[0]
+
+                    return min(group.shape[0], rest)
+
+                # Get a sample of each Level type
+                report_filtered = report.groupby(by="Level")[
+                    ["Level", "Rule Name", "Subject", "Property", "Value"]
+                ].apply(
+                    lambda x: x.sample(calculate_sample_size(x, rest))
+                ).reset_index(drop=True)
+            else:
+                report_filtered = report.head(args.limitlines)
+        else:
+            report_filtered = report.head(args.limitlines)
+
+        if len(report_filtered) > args.limitlines:
+            report_filtered.to_csv(args.report, sep="\t", index=False)
+
+    except Exception as e:
+        print(e)
 
     # Load Jinja2 template
     template = Template(args.template.read())
 
     # Generate the HTML output
-    res = template.render(contents=report.head(args.limitlines),
+    res = template.render(contents=report_filtered.reset_index(drop=True),
                           maybe_get_link=maybe_get_link,
                           context=context,
                           title=args.title,
