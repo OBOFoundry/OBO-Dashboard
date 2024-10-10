@@ -75,8 +75,8 @@ def rundashboard(configfile, clean):
     prepare_ontologies(ontologies['ontologies'], ontology_dir, dashboard_dir, make_parameters, config)
     logging.info("Building the dashboard")
     runcmd(f"make dashboard {make_parameters} -B", config.get_dashboard_report_timeout_seconds())
-    logging.info("Postprocess files for github")
-    runcmd(f"make truncate_reports_for_github {make_parameters} -B", config.get_dashboard_report_timeout_seconds())
+    # logging.info("Postprocess files for github")
+    # runcmd(f"make truncate_reports_for_github {make_parameters} -B", config.get_dashboard_report_timeout_seconds())
 
 info_usage_namespace = 'Info: Usage of namespaces in axioms'
 
