@@ -8,6 +8,7 @@ import threading
 import urllib.request
 from datetime import datetime
 from subprocess import check_call
+from typing import Dict, List, Optional
 
 import requests
 import yaml
@@ -343,16 +344,31 @@ def load_yaml(filepath):
 
 
 def robot_prepare_ontology(
-    o_path,
-    o_out_path,
-    o_metrics_path,
-    base_iris,
-    make_base,
-    robot_prefixes=None,
+    o_path: str,
+    o_out_path: str,
+    o_metrics_path: str,
+    base_iris: List[str],
+    make_base: bool,
+    robot_prefixes: Optional[Dict[str, str]] = None,
     robot_opts="-v",
-):
+) -> None:
     """
-    Run ROBOT mesure on the base, but generate it first if not available
+    Prepare an ontology for the dashboard by running ROBOT commands.  
+
+    This function merges the input ontology, optionally extracts a base version,
+    measures metrics, and outputs the prepared ontology.
+
+    Args:
+        o_path (str): Path to the input ontology file.
+        o_out_path (str): Path to save the output ontology file.
+        o_metrics_path (str): Path to save the metrics file.
+        base_iris (List[str]): List of base IRIs to use for extraction.
+        make_base (bool): Whether to extract a base version of the ontology.
+        robot_prefixes (Optional[Dict[str, str]]): Dictionary of prefix mappings for ROBOT.
+        robot_opts (str): Additional ROBOT options.
+
+    Returns:
+        None
     """
     logging.info("Preparing %s for dashboard.", o_path)
 
