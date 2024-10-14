@@ -348,6 +348,7 @@ def robot_prepare_ontology(
     o_out_path: str,
     o_metrics_path: str,
     base_iris: List[str],
+    *,
     make_base: bool,
     robot_prefixes: Optional[Dict[str, str]] = None,
     robot_opts="-v",
