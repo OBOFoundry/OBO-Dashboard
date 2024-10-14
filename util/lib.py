@@ -349,7 +349,7 @@ def robot_prepare_ontology(
     base_iris,
     make_base,
     robot_prefixes=None,
-    robot_opts="-v"
+    robot_opts="-v",
 ):
     """
     Run ROBOT mesure on the base, but generate it first if not available
@@ -370,7 +370,7 @@ def robot_prepare_ontology(
         for s in base_iris:
             callstring.extend(["--base-iri", s])
         callstring.extend(
-            ["--axioms", "external", "--trim", "false", "-p", "false"]
+            ["--axioms", "external", "--trim", "false", "-p", "false",]
         )
 
     # Measure stuff
@@ -378,7 +378,7 @@ def robot_prepare_ontology(
     for prefix in robot_prefixes:
         callstring.extend(["--prefix", f"{prefix}: {robot_prefixes[prefix]}"])
     callstring.extend(
-        ["--metrics", "extended-reasoner", "-f", "yaml", "-o", o_metrics_path]
+        ["--metrics", "extended-reasoner", "-f", "yaml", "-o", o_metrics_path,]
     )
 
     # Output
