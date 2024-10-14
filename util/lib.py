@@ -405,8 +405,7 @@ def robot_prepare_ontology(
     try:
         check_call(callstring)
     except subprocess.CalledProcessError as e:
-        logging.error("Preparing %s for dashboard failed: %s", o_path, str(e))
-
+        logging.exception("Preparing %s for dashboard failed: %s", o_path, str(e))
 
 def count_up(dictionary, value):
     if value not in dictionary:
