@@ -387,8 +387,8 @@ def robot_prepare_ontology(
 
     try:
         check_call(callstring)
-    except Exception:
-        logging.error("Preparing %s for dashboard failed...", o_path)
+    except Exception as e:
+        logging.error("Preparing %s for dashboard failed: %s", o_path, str(e))
 
 
 def count_up(dictionary, value):
