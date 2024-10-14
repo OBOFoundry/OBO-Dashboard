@@ -403,7 +403,7 @@ def robot_prepare_ontology(
 
     try:
         check_call(callstring)
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
         logging.error("Preparing %s for dashboard failed: %s", o_path, str(e))
 
 
