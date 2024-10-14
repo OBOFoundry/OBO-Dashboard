@@ -351,7 +351,7 @@ def robot_prepare_ontology(
     *,
     make_base: bool,
     robot_prefixes: Optional[Dict[str, str]] = None,
-    robot_opts="-v",
+    robot_opts: str = "-v",
 ) -> None:
     """
     Prepare an ontology for the dashboard by running ROBOT commands.  
