@@ -6,7 +6,7 @@
 ##
 ## ### Requirements
 ## 1. The ontology **must not** duplicate existing RO properties.
-## 2. The ontology *should* use existing RO properties, rather than creating new propeties.
+## 2. The ontology *should* use existing RO properties, rather than creating new properties.
 ##
 ## ### Fixes
 ##
@@ -22,11 +22,11 @@
 ## The object and data properties from the ontology are compared to existing RO properties. If any labels match existing RO properties, but do not use the correct RO IRI, this is an error. Any non-RO properties (no label match and do not use an RO IRI) will be listed as INFO messages.
 
 import csv
-import dash_utils
 import os
 import unicodedata
-
 from io import TextIOWrapper
+
+import dash_utils
 
 owl_deprecated = 'http://www.w3.org/2002/07/owl#deprecated'
 
