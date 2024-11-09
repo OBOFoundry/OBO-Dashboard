@@ -40,7 +40,7 @@
 ##
 ## ### Implementation
 ##
-## The registry data is checked for 'tracker' and 'usage' entries. If either is missing, this is an error.
+## The registry data is checked for 'tracker' and 'usage' entries. If either is missing, this is an error.  The tracker should be a valid URL to an issue tracking system, and usages should contain at least one user with a valid URL and description.
 
 import dash_utils
 from dash_utils import format_msg
