@@ -36,7 +36,7 @@
 ##      description: Human genes and mouse homology associated with nail diseases (description of specific example)
 ## ```
 ##
-## You may have multiple exampels for each user, and mulitple users under the `usages` tag.
+## You may have multiple examples for each user, and multiple users under the `usages` tag.
 ##
 ## ### Implementation
 ##
