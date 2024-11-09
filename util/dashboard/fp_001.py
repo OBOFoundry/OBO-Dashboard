@@ -6,7 +6,7 @@
 ##
 ##### Requirements
 ## 1. The ontology **must** have a license both in the registry data and in the ontology file.
-## 2. The licenese **must** be the same in both files.
+## 2. The license **must** be the same in both files.
 ## 3. The license *should* be one of the CC0 or CC-BY licenses.
 ##
 ## ### Fixes
@@ -28,8 +28,8 @@
 ## ### Implementation
 ## The registry data entry is validated with JSON schema using the [license schema](https://raw.githubusercontent.com/OBOFoundry/OBOFoundry.github.io/master/util/schema/license.json). The license schema ensures that a license entry is present and that the entry has a `url` and `label`. The license schema also checks that the license is one of the CC0 or CC-BY licenses. OWL API is then used to check the ontology as an `OWLOntology` object. Annotations on the ontology are retrieved and the `dcterms:license` property is found. The python script ensures that the correct `dcterms:license` property is used. The script compares this license to the registry license to ensure that they are the same.
 
-import jsonschema
 import dash_utils
+import jsonschema
 
 
 def is_open(ontology, data, schema):
@@ -293,7 +293,7 @@ def compare_licenses(registry_license, ontology_license):
         ontology_license (str): license URL from the ontology
 
     Return:
-        True if registry license matches ontology licences;
+        True if registry license matches ontology license;
         False if the licenses do not match;
         None if one or both licenses are missing.
     """
@@ -369,7 +369,7 @@ def process_results(registry_license,
         level = 'ERROR'
         issues.append(missing_ontology_license)
 
-    # matches_ontology = None if missing ontology licenese
+    # matches_ontology = None if missing ontology license
     if matches_ontology is False:
         level = 'ERROR'
         issues.append(no_match.format(ontology_license, registry_license))
