@@ -29,6 +29,7 @@
 ## ### Implementation
 ##
 ## [ROBOT report](http://robot.obolibrary.org/report) is run over the ontology. A count of violations for each of the following checks is retrieved from the report object: [duplicate definition](http://robot.obolibrary.org/report_queries/duplicate_definition), [multiple definitions](http://robot.obolibrary.org/report_queries/multiple_definitions), and [missing definition](http://robot.obolibrary.org/report_queries/missing_definition). If there are any duplicate or multiple definitions, it is an error. If there are missing definitions, it is a warning.
+## Note: Even a single duplicate or multiple definition will result in an error status, while missing definitions will only trigger a warning status regardless of count.
 
 import dash_utils
 from dash_utils import format_msg
