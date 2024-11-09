@@ -41,6 +41,6 @@ def is_responsive(data):
         tracker = None
 
     if tracker is None:
-        return {'status': 'ERROR', 'comment': 'Missing tracker and usages'}
+        return {'status': 'ERROR', 'comment': 'Missing tracker'}
 
     return {'status': 'PASS'}
