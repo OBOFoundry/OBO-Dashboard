@@ -24,7 +24,7 @@
 ##
 ## Add an [`IAO:0000115` (definition)](http://purl.obolibrary.org/obo/IAO_0000115) annotation to each term that is missing a definition. For help writing good definitions, see [Textual Definitions Recommendations](http://obofoundry.org/principles/fp-006-textual-definitions.html#recommendation).
 ##
-## For adding defintions in bulk, check out [ROBOT template](http://robot.obolibrary.org/template).
+## For adding definitions in bulk, check out [ROBOT template](http://robot.obolibrary.org/template).
 ##
 ## ### Implementation
 ##
