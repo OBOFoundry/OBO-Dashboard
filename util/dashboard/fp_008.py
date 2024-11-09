@@ -34,7 +34,7 @@
 ##
 ## ### Implementation
 ##
-## The registry data is checked for 'homepage' and 'description' entries. If either is missing, this is an error. If the homepage is present, the URL is checked to see if it resolves (does not return an HTTP status of greater than 400). If the URL does not resolve, this is also an error.
+## The registry data is checked for 'homepage' and 'description' entries. If either is missing, this is an error. If the homepage is present, the URL is checked to see if it returns a successful HTTP status code (200-299) rather than an error code (400+). If the URL does not resolve, this is also an error.
 
 
 from lib import url_exists
