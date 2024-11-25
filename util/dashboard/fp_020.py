@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-## ## [Responsivess](http://obofoundry.org/principles/fp-020-responsiveness.html) Automated Check
+## ## [Responsiveness](http://obofoundry.org/principles/fp-020-responsiveness.html) Automated Check
 ##
 ## Discussion on this check can be [found here](https://github.com/OBOFoundry/OBOFoundry.github.io/issues/959).
 ##
