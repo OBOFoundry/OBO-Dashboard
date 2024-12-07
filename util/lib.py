@@ -11,7 +11,8 @@ from subprocess import check_call
 
 import requests
 import yaml
-from requests.exceptions import ChunkedEncodingError
+from requests.exceptions import (ChunkedEncodingError, HTTPError,
+                                 RequestException)
 
 obo_purl = "http://purl.obolibrary.org/obo/"
 
@@ -594,8 +595,18 @@ def download_file(url, dest_path, retries=3):
                         f.write(chunk)
             logging.info("Downloaded %s to %s", url, dest_path)
             return  # Exit the function if download is successful
-        except ChunkedEncodingError as e:
-            attempt += 1
-            logging.warning("ChunkedEncodingError encountered: %s. Retrying %s/%s...", e, attempt, retries)
-        except Exception as e:
+        except HTTPError as e:
             logging.exception("Failed to download %s: %s", url, e)
+            # Exit the function if the URL does not exist
+            return
+        except ChunkedEncodingError as e:
+            logging.warning(
+                "ChunkedEncodingError encountered: %s. Retrying %s/%s...",
+                e, attempt + 1, retries
+            )
+        except RequestException as e:
+            logging.warning(
+                "Failed to download %s: %s (%s). Retrying %s/%s...",
+                url, e, type(e).__name__, attempt + 1, retries
+            )
+        attempt += 1
