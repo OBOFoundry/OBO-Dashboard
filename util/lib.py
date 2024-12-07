@@ -597,8 +597,7 @@ def download_file(url, dest_path, retries=3):
             return  # Exit the function if download is successful
         except HTTPError as e:
             logging.exception("Failed to download %s: %s", url, e)
-            # Exit the function if the URL does not exist
-            return
+            return False
         except ChunkedEncodingError as e:
             logging.warning(
                 "ChunkedEncodingError encountered: %s. Retrying %s/%s...",
