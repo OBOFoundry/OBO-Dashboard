@@ -1,24 +1,29 @@
 #!/usr/bin/env python3
 
-## ## [Responsivess](http://obofoundry.org/principles/fp-020-responsiveness.html) Automated Check
+## ## [Responsiveness](http://obofoundry.org/principles/fp-020-responsiveness.html) Automated Check
 ##
 ## Discussion on this check can be [found here](https://github.com/OBOFoundry/OBOFoundry.github.io/issues/959).
 ##
 ## ### Requirements
+##
 ## 1. The ontology **must** have a tracker.
 ##
 ## ### Fixes
+##
 ## First, read the [FAQ](http://obofoundry.github.io/faq/how-do-i-edit-metadata.html) on how to edit the metadata for your ontology.
 ##
 ## #### Adding a Tracker
+##
 ## If you do not already have a version control repository that has an [Issues Tracker](https://help.github.com/en/github/managing-your-work-on-github/about-issues), create one. We recommend creating a [GitHub Repository](https://help.github.com/en/github/getting-started-with-github/create-a-repo). To do this, you will need to [create a GitHub account](https://github.com/join) if you do not already have one.
 ##
 ## Once you have a version control repository, add the following to your [metadata file](https://github.com/OBOFoundry/OBOFoundry.github.io/tree/master/ontology) (replacing with the link to your repository's issue tracker):
+##
 ## ```
 ## tracker: https://github.com/DiseaseOntology/HumanDiseaseOntology/issues
 ## ```
 ##
 ## ### Implementation
+##
 ## The registry data is checked for 'tracker' entry. If it is missing, this is an error.
 
 import dash_utils
@@ -41,6 +46,6 @@ def is_responsive(data):
         tracker = None
 
     if tracker is None:
-        return {'status': 'ERROR', 'comment': 'Missing tracker and usages'}
+        return {'status': 'ERROR', 'comment': 'Missing tracker'}
 
     return {'status': 'PASS'}
