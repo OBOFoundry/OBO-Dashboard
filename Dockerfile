@@ -14,6 +14,6 @@ RUN apt-get update && \
 
 
 # Copy the OBO Dashboard source code
-COPY . .
+COPY requirements.txt .
 RUN python3 -m pip install -r requirements.txt --break-system-packages
-
+COPY . .
