@@ -18,4 +18,5 @@
 
 # This is a wrapper for the OBO Dashboard Dockerfile.
 docker run -e ROBOT_JAVA_ARGS='-Xmx48G' -e JAVA_OPTS='-Xmx48G' \
+  -v $PWD/dashboard-config.yml:/tools/OBO-Dashboard/dashboard-config.yml \
   -w /tools --rm -ti docker.io/library/obo-dashboard "$@"
