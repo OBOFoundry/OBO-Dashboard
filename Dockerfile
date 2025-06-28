@@ -19,4 +19,8 @@ RUN apt-get update && \
 COPY requirements.txt .
 # The flag 'break-system-packages' is needed to allow installing packages outside the virtual environment in some recent pip versions
 RUN python3 -m pip install -r requirements.txt --break-system-packages
+
+# Copy the OBO Dashboard source code
 COPY . .
+
+RUN chmod +x obodash

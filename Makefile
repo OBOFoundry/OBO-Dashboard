@@ -163,3 +163,10 @@ tr: util/create_report_html.py dashboard/bfo/robot_report.tsv dependencies/obo_c
 dashboard/analysis.html: util/dashboard_analysis_html.py util/templates/analysis.html.jinja2
 	python3 $< --dashboard-results $(DASHBOARD_RESULTS) --template util/templates/analysis.html.jinja2 --output $@
 
+# When building docker image for the first time, create  builder for multi-arch builds
+# This is a one-time command to create the builder.
+# docker buildx create --name obo-dashboard-builder --use
+build-docker-v%:
+	docker buildx use obo-dashboard-builder
+	docker buildx build --platform linux/amd64,linux/arm64 -t anitacaron/obo-dashboard:v$* --push .
+
