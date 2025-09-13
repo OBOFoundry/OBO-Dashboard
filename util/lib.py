@@ -570,7 +570,7 @@ def url_exists(url: str) -> bool:
     # inspired by https://stackoverflow.com/a/69016995/802504 
     # more updated solution
     try:
-        with requests.head(url, allow_redirects=True) as res:
+        with requests.head(url, allow_redirects=True, headers={"User-Agent": "OBO Dashboard"}) as res:
             return (res.status_code == 200)
     except Exception as e:
         # Any errors with connection will be considered
