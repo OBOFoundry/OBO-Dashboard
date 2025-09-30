@@ -8,6 +8,7 @@ import threading
 import urllib.request
 from datetime import datetime
 from subprocess import check_call
+from typing import Dict, List, Optional
 
 import requests
 import yaml
@@ -343,41 +344,69 @@ def load_yaml(filepath):
     return data
 
 
-def robot_prepare_ontology(o_path, o_out_path, o_metrics_path, base_iris, make_base, robot_prefixes={}, robot_opts="-v"):
-    logging.info(f"Preparing {o_path} for dashboard.")
-    
-    callstring = ['robot', 'merge', '-i', o_path]
-    
+def robot_prepare_ontology(
+    o_path: str,
+    o_out_path: str,
+    o_metrics_path: str,
+    base_iris: List[str],
+    *,
+    make_base: bool,
+    robot_prefixes: Optional[Dict[str, str]] = None,
+    robot_opts: str = "-v",
+) -> None:
+    """
+    Prepare an ontology for the dashboard by running ROBOT commands.  
+
+    This function merges the input ontology, optionally extracts a base version,
+    measures metrics, and outputs the prepared ontology.
+
+    Args:
+        o_path (str): Path to the input ontology file.
+        o_out_path (str): Path to save the output ontology file.
+        o_metrics_path (str): Path to save the metrics file.
+        base_iris (List[str]): List of base IRIs to use for extraction.
+        make_base (bool): Whether to extract a base version of the ontology.
+        robot_prefixes (Optional[Dict[str, str]]): Dictionary of prefix mappings for ROBOT.
+        robot_opts (str): Additional ROBOT options.
+
+    Returns:
+        None
+    """
+    logging.info("Preparing %s for dashboard.", o_path)
+
+    callstring = ["robot", "merge", "-i", o_path]
+
     if robot_opts:
         callstring.append(f"{robot_opts}")
-    
-    ### Measure stuff
-    callstring.extend(['measure'])
-    for prefix in robot_prefixes:
-        callstring.extend(['--prefix', f"{prefix}: {robot_prefixes[prefix]}"])
-    callstring.extend(['--metrics', 'extended-reasoner','-f','yaml','-o',o_metrics_path])
-    
-    ## Extract base
+
+    if robot_prefixes is None:
+        robot_prefixes = {}
+
+    # Extract base if not available
     if make_base:
-        callstring.extend(['remove'])
+        callstring.extend(["remove"])
         for s in base_iris:
-            callstring.extend(['--base-iri',s])
-        callstring.extend(["--axioms", "external", "--trim", "false", "-p", "false"])
-    
-    ### Measure stuff on base
-    callstring.extend(['measure'])
+            callstring.extend(["--base-iri", s])
+        callstring.extend(
+            ["--axioms", "external", "--trim", "false", "-p", "false",]
+        )
+
+    # Measure stuff
+    callstring.extend(["measure"])
     for prefix in robot_prefixes:
-        callstring.extend(['--prefix', f"{prefix}: {robot_prefixes[prefix]}"])
-    callstring.extend(['--metrics', 'extended-reasoner','-f','yaml','-o',f"{o_metrics_path}.base.yml"])
-    
-    ## Output
-    callstring.extend(['merge', '--output', o_out_path])
+        callstring.extend(["--prefix", f"{prefix}: {robot_prefixes[prefix]}"])
+    callstring.extend(
+        ["--metrics", "extended-reasoner", "-f", "yaml", "-o", o_metrics_path,]
+    )
+
+    # Output
+    callstring.extend(["merge", "--output", o_out_path])
     logging.info(callstring)
-    
+
     try:
         check_call(callstring)
-    except Exception as e:
-        raise Exception(f"Preparing {o_path} for dashboard failed...", e)
+    except subprocess.CalledProcessError as e:
+        logging.exception("Preparing %s for dashboard failed", o_path)
 
 def count_up(dictionary, value):
     if value not in dictionary:
