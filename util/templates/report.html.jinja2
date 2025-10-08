@@ -8,6 +8,7 @@
     <div class="col-md-12">
       <h1>{{ title }}</h1>
       <p class="lead"><a href="{{ file }}">Download TSV</a></p>
+      {% if error_count_level.items() %}
       <h3>Types of errors</h3>
       <div class="report_summary"><table class="table">
       <tr><th><b>Level</b></th><th><b>Number of errors</b></th></tr>
@@ -23,43 +24,24 @@
       {% endfor %}
       </table></div>
       <p style="text-align:center; margin-top:-15px;">
-        <small>Click on any term to direct to the term page.</small>
+        <small>Click on any term to redirect to the term page.</small>
       </p>
+      {% endif %}
       <table class="table">
         <tr>
           <th><b>Row</b></th>
-          {% for h in contents.headers %}
+          {% for h in contents.columns %}
             <th><b>{{ h }}</b></th>
           {% endfor %}
         </tr>
-        {% for row in contents.rows %}
-          {% set status = row[0] %}
-          {% if status == 'ERROR' %}
-            {% set tableclass = 'danger' %}
-          {% elif status == 'WARN' %}
-            {% set tableclass = 'warning' %}
-          {% elif status == 'INFO' %}
-            {% set tableclass = 'info' %}
-          {% else %}
-            {% set tableclass = 'active' %}
-          {% endif %}
-          <tr class="table-{{ tableclass }}">
-            <td>{{ loop.index }}</td>
-            {% for cell in row %}
-              <td>
-              {% if docmap is defined %}
-              {% if cell in docmap %}
-                <a href="{{ docmap[cell] }}">{{ cell }}</a>
-              {% else %}
-                {{ maybe_get_link(cell, context) }}
-              {% endif %}
-              {% else %}
-                {{ maybe_get_link(cell, context) }}
-              {% endif %}
-              </td>
-            {% endfor %}
+        {%- for row_index, row in contents.iterrows() -%}
+          <tr{% if error_count_level.items() %} class={{ class_map[row['Level']]|default('table-active') }}{% endif %}>
+            <td>{{ row_index }}</td>
+            {%- for col in row %}
+            <td>{{ maybe_get_link(col|replace("nan", ""), context) }}</td>
+            {%- endfor %}
           </tr>
-        {% endfor %}
+        {% endfor -%}
       </table>
     </div>
   </div>

@@ -135,6 +135,6 @@ def process_report(robot_gateway, report, ontology_dir):
         return {'status': 'INFO',
                 'file': 'robot_report',
                 'results': summary,
-                'comment': '{0} info messages.'}
+                'comment': '{0} info messages.'.format(info)}
     else:
         return {'status': 'PASS'}

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
+import argparse
 import json
 import os
 import re
 import sys
-import argparse
 
+import pandas as pd
 from jinja2 import Template
-from lib import count_up
+
 
 def main(args):
     """
@@ -30,43 +31,34 @@ def main(args):
                         help='Output report HTML file')
     parser.add_argument('limitlines',
                         type=int,
-                        help='Parameter to limit lines' , nargs='?', default=0)
+                        help='Parameter to limit lines', nargs='?', default=50)
     args = parser.parse_args()
 
     context = json.load(args.context)['@context']
 
-    headers = []
-    rows = []
-    error_count_rule = dict()
-    error_count_level = dict()
-    limitlines = args.limitlines
-    i = 0
+    error_count_rule = {}
+    error_count_level = {}
 
     try:
-        headers = next(args.report).split('\t')
-        for s in args.report:
-            row = s.split('\t')
-            error_count_level = count_up(error_count_level, row[0])
-            error_count_rule = count_up(error_count_rule, row[1])
-            if (limitlines == 0) or (i < limitlines):
-                rows.append(row)
-                i = i+1
+        report = pd.read_csv(args.report, sep="\t")
+        if "Level" in report.columns and "Rule Name" in report.columns:
+            error_count_level = report["Level"].value_counts()
+            error_count_rule = report["Rule Name"].value_counts()
     except Exception:
-        pass
+        print("No report")
 
-    contents = {'headers': headers, 'rows': rows}
-    
     # Load Jinja2 template
     template = Template(args.template.read())
 
     # Generate the HTML output
-    res = template.render(contents=contents,
+    res = template.render(contents=report.head(args.limitlines),
                           maybe_get_link=maybe_get_link,
                           context=context,
                           title=args.title,
                           file=os.path.basename(args.report.name),
                           error_count_rule=error_count_rule,
-                          error_count_level=error_count_level
+                          error_count_level=error_count_level,
+                          class_map=class_map
                           )
 
     args.outfile.write(res)
@@ -74,30 +66,39 @@ def main(args):
 
 def maybe_get_link(cell, context):
     """
+    Returns an HTML link for the given cell value if it matches certain patterns.
+
+    Args:
+        cell (str): The cell value to check for link patterns.
+        context (dict): A dictionary containing prefix-context mappings.
+
+    Returns:
+        str: An HTML link if a matching pattern is found, otherwise the original cell value.
+
     """
     url = None
-    if cell in report_doc_map.keys():
+    if cell in report_doc_map:
         # First check if it is a ROBOT report link
         url = report_doc_map[cell]
     else:
         # Otherwise try to parse as CURIE or IRI
-        curie = re.search(r'([A-Za-z0-9]+):([A-Za-z0-9-]+)', cell)
+        curie = re.search(r'([A-Za-z0-9_]+):([A-Za-z0-9-]+)', cell)
         if curie:
             # This is a CURIE
             prefix = curie.group(1)
             local_id = curie.group(2)
             if prefix in context:
-                namespace = context[prefix]
+                namespace = context[prefix]["@id"]
                 url = namespace + local_id
             elif prefix in other_prefixes:
                 namespace = other_prefixes[prefix]
                 url = namespace + local_id
         # IRIs might be in angle brackets
-        iri = re.search(r'((http|https|ftp)://[^ <>]+)', cell)
+        iri = re.search(r'(http://purl.obolibrary.org/obo/[^ <>]+)', cell)
         if iri:
             url = iri.group(1)
     if url:
-        return '<a href="{0}">{1}</a>'.format(url, cell)
+        return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{cell}</a>'
     return cell
 
 
@@ -110,9 +111,8 @@ class_map = {
 }
 
 other_prefixes = {
-    'dc': 'http://purl.org/dc/terms/',
-    'dcterms': 'http://purl.org/dc/terms/',
-    'dc11': 'http://purl.org/dc/elements/1.1/',
+    'terms': 'http://purl.org/dc/terms/',
+    'dc': 'http://purl.org/dc/elements/1.1/',
     'oboInOwl': 'http://www.geneontology.org/formats/oboInOwl#',
     'owl': 'http://www.w3.org/2002/07/owl#',
     'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
@@ -138,8 +138,12 @@ report_doc_map = {
         'http://robot.obolibrary.org/report_queries/duplicate_label',
     'duplicate_scoped_synonym':
         'http://robot.obolibrary.org/report_queries/duplicate_scoped_synonym',
+    'equivalent_class_axiom_no_genus':
+        'https://robot.obolibrary.org/report_queries/equivalent_class_axiom_no_genus',
     'equivalent_pair':
         'http://robot.obolibrary.org/report_queries/equivalent_pair',
+    'illegal_use_of_built_in_vocabulary':
+        'https://robot.obolibrary.org/report_queries/illegal_use_of_built_in_vocabulary',
     'invalid_xref':
         'http://robot.obolibrary.org/report_queries/invalid_xref',
     'label_formatting':
@@ -160,14 +164,20 @@ report_doc_map = {
         'http://robot.obolibrary.org/report_queries/missing_ontology_license',
     'missing_ontology_title':
         'http://robot.obolibrary.org/report_queries/missing_ontology_title',
+    'missing_subset_declaration':
+        'https://robot.obolibrary.org/report_queries/missing_subset_declaration',
     'missing_superclass':
         'http://robot.obolibrary.org/report_queries/missing_superclass',
     'misused_obsolete_label':
         'http://robot.obolibrary.org/report_queries/misused_obsolete_label',
+    'misused_replaced_by':
+        'https://robot.obolibrary.org/report_queries/misused_replaced_by',
     'multiple_definitions':
         'http://robot.obolibrary.org/report_queries/multiple_definitions',
     'multiple_equivalent_classes':
         'http://robot.obolibrary.org/report_queries/multiple_equivalent_classes',
+    'multiple_equivalent_class_definitions':
+        'https://robot.obolibrary.org/report_queries/multiple_equivalent_class_definitions',
     'multiple_labels':
         'http://robot.obolibrary.org/report_queries/multiple_labels',
 }

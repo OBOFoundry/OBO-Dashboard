@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 
-import yaml
+import hashlib
 import json
 import logging
 import subprocess
 import threading
 import urllib.request
-import hashlib
-from subprocess import check_call
-import requests
 from datetime import datetime
+from subprocess import check_call
+
+import requests
+import yaml
+from requests.exceptions import (ChunkedEncodingError, HTTPError,
+                                 RequestException)
 
 obo_purl = "http://purl.obolibrary.org/obo/"
 
@@ -388,6 +391,15 @@ def save_yaml(dictionary, file_path):
         yaml.dump(dictionary, file)
 
 
+def save_json(dictionary, file_path):
+    def datetime_serializer(o):
+        if isinstance(o, datetime):
+            return o.isoformat()
+        raise TypeError("Type not serializable")
+
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(dictionary, file, default=datetime_serializer, indent=2)
+
 
 def get_hours_since(timestamp):
     modified_date = datetime.fromtimestamp(timestamp)
@@ -533,7 +545,7 @@ def compute_percentage_reused_entities(entity_use_map, internal_ns):
     return float(score_string)
 
 def create_dashboard_qc_badge(color: str, message: str, outdir: str):
-    create_badge(color, message, "OBO Dashboard QC", f"{outdir}/dashboard-qc-badge.json")
+    create_badge(color, message, "QC", f"{outdir}/dashboard-qc-badge.json")
 
 
 def create_dashboard_score_badge(color: str, message: str, outdir: str):
@@ -558,10 +570,42 @@ def url_exists(url: str) -> bool:
     # inspired by https://stackoverflow.com/a/69016995/802504 
     # more updated solution
     try:
-        with requests.head(url, allow_redirects=True) as res:
+        with requests.head(url, allow_redirects=True, headers={"User-Agent": "OBO Dashboard"}) as res:
             return (res.status_code == 200)
     except Exception as e:
         # Any errors with connection will be considered
         # as the URL not existing
         logging.error(e, exc_info=True)
     return False
+
+
+def download_file(url, dest_path, retries=3):
+    """
+    Download the ontology from the URL to a local path. Retries on ChunkedEncodingError.
+    """
+    attempt = 0
+    while attempt < retries:
+        try:
+            response = requests.get(url, stream=True, timeout=1000000)
+            response.raise_for_status()
+
+            with open(dest_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=32768):
+                    if chunk:  # filter out keep-alive new chunks
+                        f.write(chunk)
+            logging.info("Downloaded %s to %s", url, dest_path)
+            return  # Exit the function if download is successful
+        except HTTPError as e:
+            logging.exception("Failed to download %s: %s", url, e)
+            return False
+        except ChunkedEncodingError as e:
+            logging.warning(
+                "ChunkedEncodingError encountered: %s. Retrying %s/%s...",
+                e, attempt + 1, retries
+            )
+        except RequestException as e:
+            logging.warning(
+                "Failed to download %s: %s (%s). Retrying %s/%s...",
+                url, e, type(e).__name__, attempt + 1, retries
+            )
+        attempt += 1

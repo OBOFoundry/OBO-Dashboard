@@ -5,28 +5,32 @@
 ## Discussion on this check can be [found here](https://github.com/OBOFoundry/OBOFoundry.github.io/issues/981).
 ##
 ## ### Requirements
+##
 ## 1. The ontology **must not** duplicate existing RO properties.
-## 2. The ontology *should* use existing RO properties, rather than creating new propeties.
+## 2. The ontology _should_ use existing RO properties, rather than creating new properties.
 ##
 ## ### Fixes
 ##
 ## #### Duplicated Properties
+##
 ## 1. Add an `owl:deprecated` annotation with a boolean value of `true` to the problematic property in your ontology
 ## 2. Add `obsolete` to the beginning of the property's label
 ## 3. Replace all usages of that property with the duplicated RO property
 ##
 ## #### Non-RO Properties
+##
 ## Review your non-RO properties to see if any can be replaced with an RO property using the steps above. Often, a corresponding property will not exist in RO and that is OK.
 ##
 ## ### Implementation
+##
 ## The object and data properties from the ontology are compared to existing RO properties. If any labels match existing RO properties, but do not use the correct RO IRI, this is an error. Any non-RO properties (no label match and do not use an RO IRI) will be listed as INFO messages.
 
 import csv
-import dash_utils
 import os
 import unicodedata
-
 from io import TextIOWrapper
+
+import dash_utils
 
 owl_deprecated = 'http://www.w3.org/2002/07/owl#deprecated'
 
@@ -55,12 +59,12 @@ def has_valid_relations(namespace, ontology, ro_props, ontology_dir):
         PASS or violation level with optional help message
     """
     if ontology is None:
-        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'), ["IRI", "Label", "Issue"])
         return {'status': 'ERROR', 'comment': 'Unable to load ontology'}
 
     # ignore RO
     if namespace == 'ro':
-        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'), ["IRI", "Label", "Issue"])
         return {'status': 'PASS'}
 
     props = get_properties(ontology)
@@ -170,12 +174,12 @@ def big_has_valid_relations(namespace, file, ro_props, ontology_dir):
         PASS or violation level with optional help message
     """
     if not os.path.isfile(file):
-        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'), ["IRI","Label","Issue"])
         return {'status': 'ERROR', 'comment': 'Unable to find ontology file'}
 
     # ignore RO
     if namespace == 'ro':
-        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'))
+        dash_utils.write_empty(os.path.join(ontology_dir, 'fp7.tsv'), ["IRI","Label","Issue"])
         return {'status': 'PASS'}
 
     props = big_get_properties(file)

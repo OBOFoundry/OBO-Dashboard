@@ -1,7 +1,8 @@
 MAKEFLAGS += --warn-undefined-variables
 ROBOT_JAR := build/robot.jar
 REPORT_LENGTH_LIMIT := 200
-ROBOT_URL := "https://github.com/ontodev/robot/releases/download/v1.8.3/robot.jar"
+ROBOT_URL := "https://github.com/ontodev/robot/releases/download/v1.9.5/robot.jar"
+ROBOT_SCRIPT := "https://raw.githubusercontent.com/ontodev/robot/v1.9.5/bin/robot"
 DASHBOARD_RESULTS := "dashboard/dashboard-results.yml"
 
 # ----------------- #
@@ -41,6 +42,9 @@ ROBOT := java -Xmx10G -jar build/robot.jar
 
 build/robot.jar: | build
 	curl -o $@ -Lk $(ROBOT_URL)
+
+build/robot:
+	curl -o $@ -Lk $(ROBOT_SCRIPT)
 
 # ------------------------- #
 ### EXTERNAL DEPENDENCIES ###
@@ -154,6 +158,15 @@ test:
 
 tr: util/create_report_html.py dashboard/bfo/robot_report.tsv dependencies/obo_context.jsonld util/templates/report.html.jinja2
 	python3 $^ "ROBOT Report - bfo" dashboard/bfo/robot_report.html $(REPORT_LENGTH_LIMIT)
-	
-dashboard/analysis.html:
-	jupyter nbconvert dashboard_analysis.ipynb  --no-input --execute --to html --output $@
+
+.PRECIOUS: dashboard/analysis.html
+dashboard/analysis.html: util/dashboard_analysis_html.py util/templates/analysis.html.jinja2
+	python3 $< --dashboard-results $(DASHBOARD_RESULTS) --template util/templates/analysis.html.jinja2 --output $@
+
+# When building docker image for the first time, create  builder for multi-arch builds
+# This is a one-time command to create the builder.
+# docker buildx create --name obo-dashboard-builder --use
+build-docker-v%:
+	docker buildx use obo-dashboard-builder
+	docker buildx build --platform linux/amd64,linux/arm64 -t anitacaron/obo-dashboard:v$* --push .
+

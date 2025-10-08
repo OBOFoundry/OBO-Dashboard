@@ -350,17 +350,17 @@ def run():
             summary = 'WARN'
             color = "yellow"
             summary_comment = '{0} warnings'.format(warn)
+            badge_message.append(f"WARN {warn}")
         elif info > 0:
             summary = 'INFO'
             color = 'green'
             summary_comment = '{0} info messages'.format(info)
+            badge_message.append(f"INFO {info}")
         else:
             summary = 'PASS'
             summary_comment = ''
             color = 'green'
-
-        if warn > 0:
-            badge_message.append(f"WARN {warn}")
+            badge_message.append("PASS")
 
         summary_count = dict()
         summary_count['ERROR'] = err
@@ -399,10 +399,11 @@ def run():
             yaml.dump(data_yml, f)
     except Exception:
         logging.exception(f"Creating  dashboard for {ontology_file} failed")
-    try:
-        gateway.close()
-    except Exception:
-        pass
+    finally:
+        try:
+            gateway.shutdown(raise_exception=True)
+        except Exception as e:
+            logging.exception("Failed to shut down the gateway: %s", e)
 
     sys.exit(0)
 

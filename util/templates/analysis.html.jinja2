@@ -1,0 +1,42 @@
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <div class="container py-5">
+        <a href="index.html">Back to dashboard main page</a>
+        <h1>{{ title }}</h1>
+        <p>{{ description }}</p>
+
+        <h3 class="mt-5">OBO Principles by status</h3>
+        <div class="my-4">{{ plot_ontologies_status | safe }}</div>
+
+        <h3 class="mt-5">Ontologies by number of axioms</h3>
+        <div class="my-4">{{ plot_ontologies_by_axioms | safe }}</div>
+
+        <h3 class="mt-5">Ontologies by number of classes</h3>
+        <div class="my-4">{{ plot_ontologies_by_classes | safe }}</div>
+
+        <h3 class="mt-5">Ontologies by how many ontologies use it</h3>
+        <div class="my-4">{{ plot_ontologies_by_usage | safe }}</div>
+
+        <h3 class="mt-5">Different serialisations used</h3>
+        <div class="table-responsive my-4">{{ table_serialisations | safe }}</div>
+
+        <h3 class="mt-5">Breakdown of used Axiom Types</h3>
+        <div class="table-responsive my-4">{{ table_axiom_types | safe }}</div>
+
+        <h3 class="mt-5">Breakdown of used OWL Class Expression constructs</h3>
+        <div class="table-responsive my-4">{{ table_class_expressions | safe }}</div>
+
+        <h3 class="mt-5">OBO Score (Experimental)</h3>
+        <div class="table-responsive my-4">{{ table_obo_score | safe }}</div>
+
+        <h3 class="mt-5">OBO Score Summary</h3>
+        <div class="table-responsive my-4">{{ table_obo_score_summary | safe }}</div>
+
+        <h3 class="mt-5">OBO dependency graph</h3>
+        <div class="my-4">{{ plot_obo_dependency_graph | safe }}</div>
+    </div>
+
+</body>

@@ -5,12 +5,15 @@
 ## Discussion on this check can be [found here](https://github.com/OBOFoundry/OBOFoundry.github.io/issues/1020).
 ##
 ## ### Requirements
-## 1. The ontology *should* be regularly updated.
+##
+## 1. The ontology _should_ be regularly updated.
 ##
 ## ### Fixes
+##
 ## Make sure all content in your ontology is up-to-date with scientific literature. If you make regular changes, make sure to have regular releases.
 ##
 ## ### Implementation
+##
 ## A version IRI is retrieved from the ontology, either using OWL API or parsing RDF/XML for large ontologies. This version IRI is checked against a regex pattern to determine if it is in date format. If so, the date is retrieved. If the last version IRI date is older than three years, this is an error. If it is older than two years, this is a warning. If it is older than one year, this will be an info message.
 
 import datetime
@@ -95,12 +98,8 @@ def check_version_iri(version_iri):
         version_date = datetime.datetime(
             int(splits[0]), int(splits[1]), int(splits[2]))
 
-        # check 3 years (error)
-        three_years_ago = datetime.datetime.now() \
-            - datetime.timedelta(days=3*365)
-        if version_date < three_years_ago:
-            return {'status': 'ERROR',
-                    'comment': old_version_msg.format(date, 'three')}
+        # Dropping the severity to 2 years old as WARN decided on the 2023-07-25 OFOC call
+        # Check issue https://github.com/OBOFoundry/OBO-Dashboard/issues/94
 
         # check 2 years (warn)
         two_years_ago = datetime.datetime.now() \

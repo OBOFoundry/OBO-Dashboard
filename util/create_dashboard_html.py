@@ -3,11 +3,11 @@
 import datetime
 import os
 import sys
-import yaml
-
 from argparse import ArgumentParser
+
+import yaml
 from jinja2 import Template
-from lib import DashboardConfig, count_up, save_yaml, round_float, compute_dashboard_score, compute_obo_score
+from lib import DashboardConfig, save_json, save_yaml
 
 
 def main(args):
@@ -63,6 +63,7 @@ def main(args):
             this_data = yaml.load(f, Loader=yaml.SafeLoader)
         ontologies.append(this_data)
 
+    ontologies = reorder_status(ontologies)
 
     # Load Jinja2 template
     template = Template(open('util/templates/index.html.jinja2').read())
@@ -89,6 +90,7 @@ def main(args):
     dashboard_score_data['oboscore']['dashboard_score_weights'] = oboscore_weights
     dashboard_score_data['oboscore']['dashboard_score_max_impact'] = oboscore_maximpacts
     save_yaml(dashboard_score_data, dashboard_score_data_file)
+    save_json(dashboard_score_data, dashboard_score_data_file.replace('.yml', '.json'))
 
 
 def get_ontology_order(data):
@@ -101,6 +103,14 @@ def get_ontology_order(data):
     return order
 
 
+def reorder_status(data):
+    """
+    """
+    ORDERING = {"ERROR": 1, "WARN": 0, "INFO": 0, "PASS": 0}
+    return sorted(
+        data,
+        key=lambda ont: ORDERING[ont['summary']['status']] if 'summary' in ont else 2  
+    )
 
 
 check_order = ['FP01 Open',

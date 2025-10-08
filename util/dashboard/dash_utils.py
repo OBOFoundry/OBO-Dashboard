@@ -262,12 +262,12 @@ def whitespace_only(file):
     return re.search(r'^\s*$', content)
 
 
-def write_empty(file):
-    """Write an empty FP3 report.
+def write_empty(file, columns):
+    """Write an empty report.
 
     Args:
         ontology_dir (str):
     """
     file = os.path.join(file)
-    with open(file, 'w+') as f:
-        f.write('')
+    with open(file, 'w+', encoding='utf-8') as f:
+        f.write('\t'.join(columns))
