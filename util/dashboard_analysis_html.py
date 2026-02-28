@@ -300,9 +300,11 @@ def plot_graph_dependency(
             "size": node_sizes,
             "colorbar": {
                 "thickness": 15,
-                "title": "Node Connections",
+                "title": {
+                    "text": "Node Connections",
+                    "side": "right",
+                },
                 "xanchor": "left",
-                "titleside": "right"
             },
             "line_width": 2
         }

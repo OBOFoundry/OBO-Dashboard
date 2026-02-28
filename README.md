@@ -71,21 +71,18 @@ make obi
 
 This will retrieve OBI and create a base version of it in `build/ontologies`. If you wish to use an existing ontology, you can place that in the `build/ontologies` directory (e.g., `build/ontologies/obi.owl`). This must have the same name as the ontology ID.
 
-### OBO Dashboard ODK Development workflow
+### OBO Dashboard Development workflow
 
-This is the recommended workflow to test the OBO Dashboard using the ODK:
+This is the recommended workflow to test the OBO Dashboard locally:
 
-Preparation (do once):
+Preparation:
 
-1. Clone ODK, create a branch, run `make build`
-2. Clone OBO-Dashboard, create a branch `my-dev-branch`, make an edit, publish branch
-3. Back in ODK repo, edit `Dockerfile`. 
-   - Change row `git clone --depth 1 https://github.com/OBOFoundry/OBO-Dashboard.git && \` to `git clone -b my-dev-branch --depth 1 https://github.com/OBOFoundry/OBO-Dashboard.git && \`. This makes sure OBO Dashboard is build from your branch rather than the `main` branch.
- 
-Development workflow: 
+1. Install python venv: `python -m venv .venv`
+2. Install requirements in venv: `source .venv/bin/activate` `pip install -r requirements.txt`
+3. Update the code
+4. Run `make test`
 
-1. Back in ODK repo, edit `Dockerfile`. In this row `echo "	echo 'skipped ROBOT jar download.....' && touch \$@" >> Makefile && \` add a `.` after the `download...`. This will tell `docker` to rebuild this part of the Makefile, even though Docker thinks "nothing has changed".
-1. Run `make build` again to rebuild ODK.
-1. Test changes on obo-dash.github.io or similar
-1. Make change to OBO-Dashboard on branch, push
-1. Rinse repeat (start from the beginning of development workflow) 
+Before building updated docker image:
+
+1. Clean up repository: remove all ignored folders (dashboard, dependencies, ontologies, etc.)
+2. Run `make build-docker-V` where `V` is the docker image version

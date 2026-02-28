@@ -12,7 +12,8 @@ from typing import Dict, List, Optional
 
 import requests
 import yaml
-from requests.exceptions import ChunkedEncodingError
+from requests.exceptions import (ChunkedEncodingError, HTTPError,
+                                 RequestException)
 
 obo_purl = "http://purl.obolibrary.org/obo/"
 
@@ -598,7 +599,7 @@ def url_exists(url: str) -> bool:
     # inspired by https://stackoverflow.com/a/69016995/802504 
     # more updated solution
     try:
-        with requests.head(url, allow_redirects=True) as res:
+        with requests.head(url, allow_redirects=True, headers={"User-Agent": "OBO Dashboard"}) as res:
             return (res.status_code == 200)
     except Exception as e:
         # Any errors with connection will be considered
@@ -623,8 +624,17 @@ def download_file(url, dest_path, retries=3):
                         f.write(chunk)
             logging.info("Downloaded %s to %s", url, dest_path)
             return  # Exit the function if download is successful
-        except ChunkedEncodingError as e:
-            attempt += 1
-            logging.warning("ChunkedEncodingError encountered: %s. Retrying %s/%s...", e, attempt, retries)
-        except Exception as e:
+        except HTTPError as e:
             logging.exception("Failed to download %s: %s", url, e)
+            return False
+        except ChunkedEncodingError as e:
+            logging.warning(
+                "ChunkedEncodingError encountered: %s. Retrying %s/%s...",
+                e, attempt + 1, retries
+            )
+        except RequestException as e:
+            logging.warning(
+                "Failed to download %s: %s (%s). Retrying %s/%s...",
+                url, e, type(e).__name__, attempt + 1, retries
+            )
+        attempt += 1
