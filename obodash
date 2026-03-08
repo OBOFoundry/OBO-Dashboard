@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+
+cd /tools
+python ./util/dashboard_config.py rundashboard "$@"
