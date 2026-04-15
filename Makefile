@@ -168,5 +168,5 @@ dashboard/analysis.html: util/dashboard_analysis_html.py util/templates/analysis
 # docker buildx create --name obo-dashboard-builder --use
 build-docker-v%:
 	docker buildx use obo-dashboard-builder
-	docker buildx build --platform linux/amd64,linux/arm64 -t anitacaron/obo-dashboard:v$* --push .
+	docker buildx build --platform linux/amd64,linux/arm64 -t anitacaron/obo-dashboard:v$* -t anitacaron/obo-dashboard:latest --push .
 
