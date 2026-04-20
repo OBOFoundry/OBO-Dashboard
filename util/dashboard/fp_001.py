@@ -348,7 +348,7 @@ def process_results(registry_license,
     missing_registry_license = 'Missing registry license.'
     missing_ontology_license = 'Missing ontology license.'
     load_err = 'Unable to load ontology.'
-    not_open = 'Registry license \'{0}\' is not a valid open license.'
+    not_open = 'Registry license \'{0}\' is not one of the two open licenses approved by the OBO Foundry in Principle 1: CC0 and CC-BY.'
     wrong_prop = 'License should use property \'{0}\'.'.format(license_prop)
     no_match = 'Ontology license \'{0}\' does not match registry license\
  \'{1}\'.'
