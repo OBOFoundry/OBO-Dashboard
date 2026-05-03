@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import logging
 import os
 import re
 import sys
@@ -9,13 +10,15 @@ import sys
 import pandas as pd
 from jinja2 import Template
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def main(args):
     """
     """
     parser = argparse.ArgumentParser(description='Create a report HTML page')
     parser.add_argument('report',
-                        type=argparse.FileType('r'),
+                        type=argparse.FileType('r+'),
                         help='TSV report to convert to HTML')
     parser.add_argument('context',
                         type=argparse.FileType('r'),
@@ -38,20 +41,58 @@ def main(args):
 
     error_count_rule = {}
     error_count_level = {}
+    report_filtered = pd.DataFrame()
 
     try:
         report = pd.read_csv(args.report, sep="\t")
+
+        # Get sample of each level only for ROBOT report
         if "Level" in report.columns and "Rule Name" in report.columns:
             error_count_level = report["Level"].value_counts()
             error_count_rule = report["Rule Name"].value_counts()
-    except Exception:
-        print("No report")
+
+            error_count_error = error_count_level.get("ERROR", 0)
+            if error_count_error < args.limitlines:
+                rest = args.limitlines - error_count_level["ERROR"]
+
+                # Calculate the sample number for each level based on group size
+                def calculate_sample_size(group, rest):
+                    if group["Level"].iloc[0] == "ERROR":
+                        return group.shape[0]
+
+                    return min(group.shape[0], rest)
+
+                required_columns = ["Level", "Rule Name", "Subject", "Property", "Value"]
+                missing_columns = [col for col in required_columns if col not in report.columns]
+                if missing_columns:
+                    raise KeyError(f"Missing columns in report: {missing_columns}")
+
+                # Get a sample of each Level type
+                report_filtered = report.groupby(by=["Level","Rule Name","Subject"])[
+                    ["Level", "Rule Name", "Subject", "Property", "Value"]
+                ].apply(
+                    lambda x: x.sample(calculate_sample_size(x, rest))
+                ).reset_index(drop=True)
+            else:
+                report_filtered = report.head(args.limitlines)
+        else:
+            report_filtered = report.head(args.limitlines)
+
+        if len(report_filtered) > args.limitlines:
+            report_filtered.to_csv(args.report, sep="\t", index=False)
+
+    except pd.errors.EmptyDataError as e:
+        logging.error("Empty data error: %s", e)
+    except FileNotFoundError as e:
+        logging.error("File not found: %s", e)
+    except Exception as e:
+        logging.error("An unexpected error occurred: %s", e)
 
     # Load Jinja2 template
     template = Template(args.template.read())
 
     # Generate the HTML output
-    res = template.render(contents=report.head(args.limitlines),
+    res = template.render(contents=report_filtered.reset_index(drop=True),
                           maybe_get_link=maybe_get_link,
                           context=context,
                           title=args.title,
